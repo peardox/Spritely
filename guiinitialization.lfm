@@ -1,0 +1,24 @@
+object CastleForm: TCastleForm
+  Left = 919
+  Height = 240
+  Top = 768
+  Width = 320
+  Caption = 'CastleApp'
+  ClientHeight = 240
+  ClientWidth = 320
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poDefault
+  LCLVersion = '2.0.8.0'
+  object Window: TCastleControlBase
+    Left = 0
+    Height = 240
+    Top = 0
+    Width = 320
+    Align = alClient
+    Options = []
+    TabOrder = 0
+    OnOpen = WindowOpen
+    OnClose = WindowClose
+  end
+end
