@@ -11,11 +11,11 @@ uses
 
 procedure ApplicationInitialize;
 
-implementation
-
 var
   Window: TCastleWindowBase;
-  
+
+implementation
+
 { One-time initialization of resources. }
 procedure ApplicationInitialize;
 begin

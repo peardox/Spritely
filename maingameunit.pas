@@ -16,7 +16,7 @@ uses
   CastleSceneCore, CastleScene, CastleTransform,
   CastleViewport, CastleCameras, CastleProjection,
   X3DNodes, X3DFields, X3DTIme,
-  CastleImages, CastleGLImages,
+  CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage,
   CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse;
 
@@ -53,6 +53,7 @@ type
     procedure LoadViewport;
     procedure LoadScene(filename: String);
     procedure ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
+    function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isTransparent: Boolean = False): TCastleImage;
   end;
 
 var
@@ -245,6 +246,85 @@ end;
 function TCastleApp.Release(const Event: TInputPressRelease): Boolean;
 begin
   Result := inherited;
+end;
+
+procedure ShowAppMessage(const AMsg: String);
+begin
+{$ifdef cgeapp}
+  WriteLnLog(AMsg);
+{$else}
+  ShowMessage(AMsg);
+{$endif}
+end;
+
+function TCastleApp.CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isTransparent: Boolean = False): TCastleImage;
+var
+  SourceViewport: TCastleViewport;
+  GrabScene: TCastleScene;
+  ViewportRect: TRectangle;
+  Image: TDrawableImage;
+begin
+  SourceViewport := nil;
+
+  if not(Scene = nil) and (TextureWidth > 0) and (TextureHeight > 0) then
+    begin
+      try
+        try
+          Image := TDrawableImage.Create(TRGBAlphaImage.Create(TextureWidth, TextureHeight), true, true);
+          Image.RenderToImageBegin;
+
+          GrabScene := SourceScene.Clone(nil);
+
+          SourceViewport := TCastleViewport.Create(nil);
+          SourceViewport.Width := TextureWidth;
+          SourceViewport.Height := TextureHeight;
+          if isTransparent then
+            SourceViewport.Transparent := True
+          else
+            SourceViewport.BackgroundColor := Vector4(1,1,1,1);
+
+          SourceViewport.Setup2D;
+          SourceViewport.Camera.ProjectionType := ptOrthographic;
+          SourceViewport.Camera.Orthographic.Origin := Viewport.Camera.Orthographic.Origin;
+          SourceViewport.Camera.Up := Viewport.Camera.Up;
+          SourceViewport.Camera.Direction := Viewport.Camera.Direction;
+          SourceViewport.Camera.Position  := Viewport.Camera.Position;
+          SourceViewport.Camera.Orthographic.Scale := Min(
+            Viewport.Camera.Orthographic.EffectiveWidth / TextureWidth,
+            Viewport.Camera.Orthographic.EffectiveHeight / TextureHeight);
+
+          WriteLnLog('Scale : ' + FloatToStr(SourceViewport.Camera.Orthographic.Scale));
+
+          SourceViewport.Items := ViewPort.Items;
+          ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);
+            {$ifndef cgeapp}CastleForm.{$endif}Window.Container.RenderControl(SourceViewport,ViewportRect);
+
+          Image.RenderToImageEnd;
+
+          if not False { Application.OpenGLES } then
+          begin
+            try
+              Result := Image.GetContents(TRGBAlphaImage);
+            except
+              on E : Exception do
+                begin
+                  ShowAppMessage(E.ClassName + LineEnding + E.Message);
+                end;
+            end;
+          end;
+
+        except
+          on E : Exception do
+            begin
+              ShowAppMessage(E.ClassName + LineEnding + E.Message);
+            end;
+        end;
+      finally
+        FreeAndNil(GrabScene);
+        FreeAndNil(SourceViewport);
+        FreeAndNil(Image);
+      end;
+    end;
 end;
 
 end.

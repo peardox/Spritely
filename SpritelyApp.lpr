@@ -14,7 +14,7 @@ uses
     {$ifdef UNIX} CThreads, {$endif}
   {$endif}
   CastleApplicationProperties, CastleLog, CastleWindow, AppInitialization,
-  MainGameUnit;
+  MainGameUnit, multimodel;
 
 begin
   { Optionally you can specify here your application version.

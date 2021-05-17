@@ -36,7 +36,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="5">
       <Unit0>
         <Filename Value="SpritelyLaz.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -54,6 +54,15 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="MainGameUnit"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="staging.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Staging"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="multimodel.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
