@@ -17,17 +17,11 @@ uses
   CastleViewport, CastleCameras, CastleProjection,
   X3DNodes, X3DFields, X3DTIme,
   CastleImages, CastleGLImages, CastleRectangles,
-  CastleTextureImages, CastleCompositeImage,
-  CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse;
+  CastleTextureImages, CastleCompositeImage, CastleLog,
+  CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
+  multimodel;
 
 type
-  { TCastleSceneHelper }
-
-  TCastleSceneHelper = class helper for TCastleScene
-  public
-     procedure Normalize;
-  end;
-
   { TCastleApp }
 
   TCastleApp = class(TUIState)
@@ -40,7 +34,7 @@ type
     function  Release(const Event: TInputPressRelease): Boolean; override; // TUIState
   private
     Viewport: TCastleViewport;
-    Scene: TCastleScene;
+    TestModel: TCastleModel;
     LabelFPS: TCastleLabel;
     LabelRender: TCastleLabel;
     LabelSpare: TCastleLabel;
@@ -69,29 +63,6 @@ uses AppInitialization;
 uses GUIInitialization;
 {$endif}
 
-{ TCastleSceneHelper }
-
-{ Normalize - Center the model in a 1x1x1 cube }
-procedure TCastleSceneHelper.Normalize;
-begin
-  if not(RootNode = nil) then
-    begin
-    if not BoundingBox.IsEmptyOrZero then
-      begin
-        if BoundingBox.MaxSize > 0 then
-          begin
-            Center := Vector3(Min(BoundingBox.Data[0].X, BoundingBox.Data[1].X) + (BoundingBox.SizeX / 2),
-                              Min(BoundingBox.Data[0].Y, BoundingBox.Data[1].Y) + (BoundingBox.SizeY / 2),
-                              Min(BoundingBox.Data[0].Z, BoundingBox.Data[1].Z) + (BoundingBox.SizeZ / 2));
-            Scale := Vector3(1 / BoundingBox.MaxSize,
-                             1 / BoundingBox.MaxSize,
-                             1 / BoundingBox.MaxSize);
-            Translation := -Center;
-          end;
-      end;
-    end;
-end;
-
 { TCastleApp }
 
 procedure TCastleApp.BootStrap;
@@ -99,9 +70,8 @@ var
   ProcTimer: Int64;
 begin
   ProcTimer := CastleGetTickCount64;
-//  LoadScene('castle-data:/up.glb');
-  LoadScene('castle-data:/alpha_wolf/scene.gltf');
-  Scene.Normalize;
+  LoadScene('castle-data:/up.glb');
+//  LoadScene('castle-data:/alpha_wolf/scene.gltf');
   ProcTimer := CastleGetTickCount64 - ProcTimer;
   WriteLnLog('ProcTimer (LoadScene) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
 end;
@@ -172,15 +142,15 @@ end;
 procedure TCastleApp.LoadScene(filename: String);
 begin
   try
-    Scene := TCastleScene.Create(Application);
-    Scene.Spatial := [ssDynamicCollisions, ssRendering];
-    Scene.Load(filename);
-    Scene.Normalize;
-    Scene.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
+    TestModel := TCastleModel.Create(Application);
+    TestModel.Spatial := [ssDynamicCollisions, ssRendering];
+    TestModel.Load(filename);
+    TestModel.Normalize;
+    TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
-    Viewport.Items.Add(Scene);
-    Viewport.Items.MainScene := Scene;
+    Viewport.Items.Add(TestModel.Scene);
+    Viewport.Items.MainScene := TestModel.Scene;
   except
     on E : Exception do
       begin
@@ -194,7 +164,7 @@ begin
   inherited;
   LogTextureCache := True;
   WriteLnLog('Start : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
-  Scene := nil;
+  TestModel := nil;
   LoadViewport;
   PrepDone := True;
 end;
@@ -268,7 +238,7 @@ var
 begin
   SourceViewport := nil;
 
-  if not(Scene = nil) and (TextureWidth > 0) and (TextureHeight > 0) then
+  if not(SourceScene = nil) and (TextureWidth > 0) and (TextureHeight > 0) then
     begin
       try
         try
