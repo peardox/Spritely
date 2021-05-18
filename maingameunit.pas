@@ -99,7 +99,9 @@ var
   ProcTimer: Int64;
 begin
   ProcTimer := CastleGetTickCount64;
-  LoadScene('castle-data:/up.glb');
+//  LoadScene('castle-data:/up.glb');
+  LoadScene('castle-data:/alpha_wolf/scene.gltf');
+  Scene.Normalize;
   ProcTimer := CastleGetTickCount64 - ProcTimer;
   WriteLnLog('ProcTimer (LoadScene) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
 end;
