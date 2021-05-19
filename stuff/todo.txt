@@ -1,3 +1,10 @@
-Colour Palettes
+Convert "Take 001" to separate animations
+Oblique perspective (@michalis)
+Transparent ground (@michalis)
+Build sheets using internal sheet code (@kagamma)
+Lighting + Camera positioning (@michalis)
+User-defined Color Palettes
 Command line
+Recolor skin
+Skin swapping
 

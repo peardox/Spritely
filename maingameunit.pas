@@ -33,12 +33,12 @@ type
     function  Press(const Event: TInputPressRelease): Boolean; override; // TUIState
     function  Release(const Event: TInputPressRelease): Boolean; override; // TUIState
   private
-    Viewport: TCastleViewport;
-    TestModel: TCastleModel;
     LabelFPS: TCastleLabel;
     LabelRender: TCastleLabel;
     LabelSpare: TCastleLabel;
   public
+    Viewport: TCastleViewport;
+    TestModel: TCastleModel;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
     procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
@@ -70,8 +70,10 @@ var
   ProcTimer: Int64;
 begin
   ProcTimer := CastleGetTickCount64;
-  LoadScene('castle-data:/up.glb');
-//  LoadScene('castle-data:/alpha_wolf/scene.gltf');
+//  LoadScene('castle-data:/up.glb');
+//  LoadScene('castle-data:/tavern/scene.gltf');
+  LoadScene('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
+//  LoadScene('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
   ProcTimer := CastleGetTickCount64 - ProcTimer;
   WriteLnLog('ProcTimer (LoadScene) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
 end;
@@ -151,6 +153,8 @@ begin
         Viewport.PrepareParams);
     Viewport.Items.Add(TestModel.Scene);
     Viewport.Items.MainScene := TestModel.Scene;
+    TestModel.Start('Run');
+//    TestModel.Start('dirt_bike_milkshape.ms3d.act');
   except
     on E : Exception do
       begin

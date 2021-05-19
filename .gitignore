@@ -13,6 +13,7 @@
 *.or
 *.a
 *.obj
+grab_*
 AndroidSigningProperties.txt
 *Copy*
 
