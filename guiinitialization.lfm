@@ -1,30 +1,30 @@
 object CastleForm: TCastleForm
   Left = 694
-  Height = 240
+  Height = 438
   Top = 383
-  Width = 320
+  Width = 700
   Caption = 'CastleApp'
-  ClientHeight = 240
-  ClientWidth = 320
+  ClientHeight = 438
+  ClientWidth = 700
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel
     Left = 170
-    Height = 240
+    Height = 438
     Top = 0
-    Width = 150
+    Width = 530
     Align = alClient
     Caption = 'Panel1'
-    ClientHeight = 240
-    ClientWidth = 150
+    ClientHeight = 438
+    ClientWidth = 530
     TabOrder = 0
     object Window: TCastleControlBase
       Left = 1
-      Height = 238
+      Height = 436
       Top = 1
-      Width = 148
+      Width = 528
       Align = alClient
       Options = []
       TabOrder = 0
@@ -34,37 +34,47 @@ object CastleForm: TCastleForm
   end
   object Panel2: TPanel
     Left = 0
-    Height = 240
+    Height = 438
     Top = 0
     Width = 170
     Align = alLeft
     Caption = 'Panel2'
-    ClientHeight = 240
+    ClientHeight = 438
     ClientWidth = 170
     TabOrder = 1
     object Panel3: TPanel
       Left = 1
-      Height = 188
+      Height = 386
       Top = 1
       Width = 168
       Align = alClient
-      ClientHeight = 188
+      ClientHeight = 386
       ClientWidth = 168
       TabOrder = 0
       object ListView1: TListView
         Left = 1
-        Height = 186
-        Top = 1
+        Height = 55
+        Top = 330
         Width = 166
         Align = alClient
         Columns = <>
         TabOrder = 0
       end
+      object TreeView1: TTreeView
+        Left = 1
+        Height = 329
+        Top = 1
+        Width = 166
+        Align = alTop
+        ScrollBars = ssAutoBoth
+        TabOrder = 1
+        OnClick = TreeView1Click
+      end
     end
     object Panel4: TPanel
       Left = 1
       Height = 50
-      Top = 189
+      Top = 387
       Width = 168
       Align = alBottom
       ClientHeight = 50

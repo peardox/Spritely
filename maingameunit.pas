@@ -45,7 +45,8 @@ type
     procedure Start; override; // TUIState
     procedure Stop; override; // TUIState
     procedure LoadViewport;
-    procedure LoadScene(filename: String);
+    procedure LoadModel(filename: String);
+    procedure ShowModel(AModel: TCastleModel);
     procedure ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
     function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isTransparent: Boolean = False): TCastleImage;
   end;
@@ -70,12 +71,12 @@ var
   ProcTimer: Int64;
 begin
   ProcTimer := CastleGetTickCount64;
-//  LoadScene('castle-data:/up.glb');
-//  LoadScene('castle-data:/tavern/scene.gltf');
-  LoadScene('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
-//  LoadScene('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
+//  LoadModel('castle-data:/up.glb');
+//  LoadModel('castle-data:/tavern/scene.gltf');
+  LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
+//  LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
   ProcTimer := CastleGetTickCount64 - ProcTimer;
-  WriteLnLog('ProcTimer (LoadScene) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
+  WriteLnLog('ProcTimer (LoadModel) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
 end;
 
 procedure TCastleApp.CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
@@ -141,7 +142,13 @@ begin
   ViewFromRadius(2, Vector3(-1, -1, -1));
 end;
 
-procedure TCastleApp.LoadScene(filename: String);
+procedure TCastleApp.ShowModel(AModel: TCastleModel);
+begin
+  Viewport.Items.Add(AModel.Scene);
+  Viewport.Items.MainScene := AModel.Scene;
+end;
+
+procedure TCastleApp.LoadModel(filename: String);
 begin
   try
     TestModel := TCastleModel.Create(Application);
@@ -151,9 +158,6 @@ begin
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
-    Viewport.Items.Add(TestModel.Scene);
-    Viewport.Items.MainScene := TestModel.Scene;
-    TestModel.Start('Run');
 //    TestModel.Start('dirt_bike_milkshape.ms3d.act');
   except
     on E : Exception do
@@ -194,7 +198,11 @@ begin
   if PrepDone and GLInitialized and RenderReady then
     begin
       PrepDone := False;
+      {$ifdef cgeapp}
       BootStrap;
+      {$else}
+      CastleForm.GuiBootStrap;
+      {$endif}
     end;
   RenderReady := True;
 end;
@@ -206,6 +214,16 @@ end;
 
 procedure TCastleApp.Update(const SecondsPassed: Single; var HandleInput: boolean);
 begin
+  if not(TestModel = nil) then
+    begin
+      if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
+        begin
+          if TestModel.IsPaused then
+            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' (Paused)'
+          else
+            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame);
+        end;
+    end;
   inherited;
 end;
 

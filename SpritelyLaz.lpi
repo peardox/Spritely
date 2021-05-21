@@ -36,7 +36,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="SpritelyLaz.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -67,6 +67,11 @@
         <Filename Value="jsontools.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="miscfunctions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MiscFunctions"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
