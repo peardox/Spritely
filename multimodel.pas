@@ -33,7 +33,7 @@ type
       procedure ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
     public
       constructor Create(AOwner: TComponent); override;
-      constructor Create(AOwner: TComponent; ASensor: TTimeSensorNode);
+      constructor Create(AOwner: TComponent; ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
       destructor Destroy; override;
   end;
   PAnimationInfo = ^TAnimationInfo;
@@ -44,6 +44,8 @@ type
   private
     fActions: TStringList;
     fCurrentAnimation: Integer;
+    fHasAnimations: Boolean;
+    fIsCombination: Boolean;
     fIsNormalized: Boolean;
     fModelName: String;
     fRootNode: TX3DRootNode;
@@ -55,16 +57,22 @@ type
 
     function  GetSpatial: TSceneSpatialStructures;
     procedure SetSpatial(const Value: TSceneSpatialStructures);
+    function GetIsLooped: Boolean;
+    procedure SetIsLooped(const Value: Boolean);
 
     property  Actions: TStringList read fActions write fActions;
     procedure AddAllAnimations;
     procedure FreeAllAnimations;
     property  CurrentAnimation: Integer read fCurrentAnimation write fCurrentAnimation;
+    property  HasAnimations: Boolean read fHasAnimations write fHasAnimations;
+    property  IsCombination: Boolean read fIsCombination write fIsCombination;
+    property  IsNormalized: Boolean read fIsNormalized write fIsNormalized;
     property  ModelName: String read fModelName write fModelName;
     property  RootNode: TX3DRootNode read fRootNode write fRootNode;
     property  Scene: TCastleScene read fScene write fScene;
     property  Transform: TTransformNode read fTransform write fTransform;
     property  Spatial: TSceneSpatialStructures read GetSpatial write SetSpatial default [];
+    property  IsLooped: Boolean read GetIsLooped write SetIsLooped default True;
 
     procedure ResetAnimationState(const IgnoreAffectedBy: TTimeSensorNode = nil);
     procedure PrepareResources(const Options: TPrepareResourcesOptions;
@@ -98,7 +106,7 @@ begin
   inherited Create(AOwner);
 end;
 
-constructor TAnimationInfo.Create(AOwner: TComponent; ASensor: TTimeSensorNode);
+constructor TAnimationInfo.Create(AOwner: TComponent; ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
 begin
   Create(AOwner);
   AnimNode := ASensor;
@@ -107,10 +115,9 @@ begin
   AnimLow := 0;
   AnimHigh := ASensor.CycleInterval;
   AnimLast := 0;
-  IsLooped := False;
+  IsLooped := IsLooped;
   IsHidden := False;
   IsPaused := False;
-  IsPlaying := False;
   AnimNode.EventIsActive.AddNotification(@ReceivedIsActive);
   AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
 end;
@@ -174,12 +181,37 @@ begin
   fScene.Spatial := Value;
 end;
 
+function  TCastleModel.GetIsLooped: Boolean;
+var
+  ANode: TAnimationInfo;
+begin
+  if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
+    begin
+      ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
+      Result := ANode.IsLooped;
+    end;
+end;
+
+procedure TCastleModel.SetIsLooped(const Value: Boolean);
+var
+  ANode: TAnimationInfo;
+begin
+  if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
+    begin
+      ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
+      ANode.IsLooped := Value;
+    end;
+end;
+
 procedure TCastleModel.ResetAnimationState(const IgnoreAffectedBy: TTimeSensorNode = nil);
+var
+  ANode: TAnimationInfo;
 begin
   if not(fCurrentAnimation = -1) then
     begin
-      Stop;
+      Stop; // Also resets IsPaused
     end;
+
   fCurrentAnimation := -1;
 
   fScene.ResetAnimationState(IgnoreAffectedBy);
@@ -195,7 +227,7 @@ procedure TCastleModel.Load(const ARootNode: TX3DRootNode; const AOwnsRootNode: 
   const AOptions: TSceneLoadOptions);
 begin
   fScene.Load(ARootNode, AOwnsRootNode, AOptions);
-  AddAllAnimations;
+//  AddAllAnimations;
 // Self.Normalize;
 end;
 
@@ -216,6 +248,7 @@ begin
   if(fScene.AnimationsList.Count > 0) then
     begin
       fScene.ProcessEvents := True;
+      fHasAnimations := True;
       fActions := TStringList.Create;
       fActions.Sorted := True;
       fActions.Duplicates := dupError;
@@ -223,7 +256,9 @@ begin
         begin
           AddAnimation(fScene.AnimationsList[I], fScene.AnimationTimeSensor(fScene.AnimationsList[I]));
         end;
-    end;
+    end
+  else
+    fHasAnimations := False;
 end;
 
 procedure TCastleModel.FreeAllAnimations;
@@ -231,12 +266,15 @@ var
   I: Integer;
   obj: TAnimationInfo;
 begin
-  if(fActions.Count > 0) then
+  if fHasAnimations then
     begin
-      for I := 0 to fActions.Count - 1 do
+      if(fActions.Count > 0) then
         begin
-          obj := TAnimationInfo(fActions.Objects[I]);
-          FreeAndNil(obj);
+          for I := 0 to fActions.Count - 1 do
+            begin
+              obj := TAnimationInfo(fActions.Objects[I]);
+              FreeAndNil(obj);
+            end;
         end;
     end;
 end;
@@ -245,7 +283,7 @@ procedure TCastleModel.AddAnimation(const AAction: String; const ASensor: TTimeS
 var
   ainfo: TAnimationInfo;
 begin
-  ainfo := TAnimationInfo.Create(Self, ASensor);
+  ainfo := TAnimationInfo.Create(Self, ASensor, IsLooped);
   fActions.AddObject(AAction, ainfo);
 end;
 
@@ -274,7 +312,9 @@ begin
   inherited;
   fActions := nil;
   fCurrentAnimation := -1;
+  fHasAnimations := False;
   fIsNormalized := False;
+  fIsCombination := True;
   fModelName := EmptyStr;
   fRootNode := nil;
   fTransform := nil;
@@ -415,8 +455,7 @@ begin
     begin
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
       ANode.AnimLast := AFrame;
-      ANode.AnimNode.FakeTime(fScene.Time + ANode.AnimLast, False, True);
-//      fScene.ForceAnimationPose(ANode.AnimNode.X3DName, ANode.AnimLast, False, True)
+      ANode.AnimNode.FakeTime(ANode.AnimLast, False, True, fScene.NextEventTime);
     end;
 end;
 
@@ -424,25 +463,46 @@ procedure TCastleModel.SelectAnimation(const AName: String);
 var
  ANode: TAnimationInfo;
  I: Integer;
+ PrevAnimWasRunning: Boolean;
+ PrevAnimWasTPose: Boolean;
 begin
+  PrevAnimWasTPose := False;
+  PrevAnimWasRunning := False;
   if fActions.Find(AName, I) then
     begin
-      if not(fCurrentAnimation = I) then
+      if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
         begin
-          Stop;
-        end;
+          if not(fCurrentAnimation = I) then
+            begin
+              ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
+              if not(ANode.IsPaused) then
+                begin
+                  Stop;
+                  PrevAnimWasRunning := True;
+                end;
+            end;
+        end
+      else
+        PrevAnimWasTPose := True;
       WriteLnLog('TCastleModel.SelectAnimation - ' + AName + ' (' + IntToStr(I) + ')');
       fCurrentAnimation := I;
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
       GotoFrame(ANode.AnimStart);
-      Stop;
+      if PrevAnimWasRunning then
+        Start
+      else
+        begin
+          if PrevAnimWasTPose then
+            Start
+          else
+            Stop;
+        end;
     end;
 end;
 
 function  TCastleModel.CurrentFrame: TFloatTime;
 var
  ANode: TAnimationInfo;
- I: Integer;
 begin
   Result := -1;
 
@@ -456,7 +516,6 @@ end;
 function  TCastleModel.IsPaused: Boolean;
 var
  ANode: TAnimationInfo;
- I: Integer;
 begin
   Result := False;
 

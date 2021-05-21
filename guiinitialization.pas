@@ -88,21 +88,24 @@ var
 begin
   with CastleApp do
     begin
-      LoadModel('C:\src\Spritely\data\Quaternius\RPGCharacters\Wizard.glb');
+      // LoadModel('castle-data:/up.glb');
+      // LoadModel('castle-data:/tavern/scene.gltf');
+      LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
+      // LoadModel('C:\src\Spritely\data\Quaternius\RPGCharacters\Wizard.glb');
       // LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
       if not(TestModel = nil) then
         begin
           model := Treeview1.Items.Add(nil, StripExtension(ExtractURIName(TestModel.ModelName)));
-          for I := 0 to TestModel.Actions.Count - 1 do
+          if TestModel.HasAnimations then
             begin
-              Treeview1.Items.AddChild(model, TestModel.Actions[I]);
+            for I := 0 to TestModel.Actions.Count - 1 do
+              begin
+                Treeview1.Items.AddChild(model, TestModel.Actions[I]);
+              end;
+            model.Expand(False);
             end;
           ShowModel(TestModel);
-//          TestModel.SelectAnimation('Run');
-//          TestModel.Start('Run');
           TestModel.ResetAnimationState;
-
-          model.Expand(False);
         end;
     end;
 end;
