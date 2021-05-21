@@ -90,9 +90,9 @@ begin
     begin
       // LoadModel('castle-data:/up.glb');
       // LoadModel('castle-data:/tavern/scene.gltf');
-      LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
+      // LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
       // LoadModel('C:\src\Spritely\data\Quaternius\RPGCharacters\Wizard.glb');
-      // LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
+      LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
       if not(TestModel = nil) then
         begin
           model := Treeview1.Items.Add(nil, StripExtension(ExtractURIName(TestModel.ModelName)));
@@ -104,6 +104,7 @@ begin
               end;
             model.Expand(False);
             end;
+          model.Selected := True;
           ShowModel(TestModel);
           TestModel.ResetAnimationState;
         end;
