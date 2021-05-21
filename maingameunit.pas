@@ -77,6 +77,9 @@ begin
 //  LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
   ProcTimer := CastleGetTickCount64 - ProcTimer;
   WriteLnLog('ProcTimer (LoadModel) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
+  ShowModel(TestModel);
+  if TestModel.HasAnimations then
+    TestModel.SelectAnimation(TestModel.Actions[0]);
 end;
 
 procedure TCastleApp.CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
