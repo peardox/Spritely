@@ -71,10 +71,7 @@ var
   ProcTimer: Int64;
 begin
   ProcTimer := CastleGetTickCount64;
-//  LoadModel('castle-data:/up.glb');
-//  LoadModel('castle-data:/tavern/scene.gltf');
   LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
-//  LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
   ProcTimer := CastleGetTickCount64 - ProcTimer;
   WriteLnLog('ProcTimer (LoadModel) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
   ShowModel(TestModel);
