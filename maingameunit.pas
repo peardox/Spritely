@@ -128,6 +128,7 @@ begin
   Viewport.FullSize := True;
   Viewport.AutoCamera := False;
   Viewport.Setup2D;
+  Viewport.BackgroundColor := Vector4(1, 1, 1, 1);
   Viewport.NavigationType := ntNone;
   Viewport.AssignDefaultCamera;
   Viewport.Camera.Orthographic.Width := 2;
@@ -222,9 +223,9 @@ begin
       if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
         begin
           if TestModel.IsPaused then
-            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' (Paused)'
+            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames) + ' (Paused)'
           else
-            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame);
+            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames);
         end;
     end;
   inherited;

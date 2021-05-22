@@ -39,6 +39,10 @@ type
 var
   CastleForm: TCastleForm;
 
+const
+  MapFile: String = 'C:\Assets\3drt\paid\Elf-Males\elfrangers-aniamtions-list.txt';
+  ModelFile: String = 'C:\Assets\3drt\paid\Elf-Males\FBX 2013\Elf-03.glb';
+
 implementation
 {$R *.lfm}
 
@@ -85,6 +89,7 @@ procedure TCastleForm.GuiBootStrap;
 var
   I: Integer;
   model: TTreeNode;
+  anim: TTreeNode;
 begin
   with CastleApp do
     begin
@@ -92,15 +97,18 @@ begin
       // LoadModel('castle-data:/tavern/scene.gltf');
       // LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
       // LoadModel('C:\src\Spritely\data\Quaternius\RPGCharacters\Wizard.glb');
-      LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
+      // LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
+      LoadModel(ModelFile);
       if not(TestModel = nil) then
         begin
-          model := Treeview1.Items.Add(nil, StripExtension(ExtractURIName(TestModel.ModelName)));
+          model := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(TestModel.ModelName)), TestModel);
           if TestModel.HasAnimations then
             begin
             for I := 0 to TestModel.Actions.Count - 1 do
               begin
-                Treeview1.Items.AddChild(model, TestModel.Actions[I]);
+                anim := Treeview1.Items.AddChild(model, TestModel.Actions[I]);
+//                if I = 0 then
+//                  anim.Visible := False;
               end;
             model.Expand(False);
             end;

@@ -20,6 +20,7 @@ type
   TAnimationInfo = Class(TComponent)
     private
       AnimNode: TTimeSensorNode;
+      AnimName: String;
       AnimStart: TFloatTime; // Time the animation starts, may be after AnimLow
       AnimStop: TFloatTime; // Time the animation ends, may be before AnimHigh
       AnimLow: TFloatTime; // Always Zero
@@ -33,7 +34,7 @@ type
       procedure ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
     public
       constructor Create(AOwner: TComponent); override;
-      constructor Create(AOwner: TComponent; ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
+      constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
       destructor Destroy; override;
   end;
   PAnimationInfo = ^TAnimationInfo;
@@ -57,10 +58,12 @@ type
 
     function  GetSpatial: TSceneSpatialStructures;
     procedure SetSpatial(const Value: TSceneSpatialStructures);
-    function GetIsLooped: Boolean;
+    function  GetIsLooped: Boolean;
     procedure SetIsLooped(const Value: Boolean);
+    function  GetAnimation(I: Cardinal): TAnimationInfo;
 
     property  Actions: TStringList read fActions write fActions;
+    property  Animations[I: Cardinal]: TAnimationInfo read GetAnimation;
     procedure AddAllAnimations;
     procedure FreeAllAnimations;
     property  CurrentAnimation: Integer read fCurrentAnimation write fCurrentAnimation;
@@ -83,6 +86,7 @@ type
 
     procedure AddAnimation(const AAction: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
     function  CurrentFrame: TFloatTime;
+    function  TotalFrames: TFloatTime;
     procedure GoToFrame(const AFrame: TFloatTime);
     procedure GoToFrame(const AName: String; const AFrame: TFloatTime);
     function  IsPaused: Boolean;
@@ -106,10 +110,11 @@ begin
   inherited Create(AOwner);
 end;
 
-constructor TAnimationInfo.Create(AOwner: TComponent; ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
+constructor TAnimationInfo.Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
 begin
   Create(AOwner);
   AnimNode := ASensor;
+  AnimName := AName;
   AnimStart := 0;
   AnimStop := ASensor.CycleInterval;
   AnimLow := 0;
@@ -179,6 +184,14 @@ end;
 procedure TCastleModel.SetSpatial(const Value: TSceneSpatialStructures);
 begin
   fScene.Spatial := Value;
+end;
+
+function  TCastleModel.GetAnimation(I: Cardinal): TAnimationInfo;
+begin
+  if(I >= 0) and (I < fActions.Count) then
+    Result := TAnimationInfo(fActions.Objects[I])
+  else
+    raise Exception.Create('Animation index out of bounds');
 end;
 
 function  TCastleModel.GetIsLooped: Boolean;
@@ -283,7 +296,7 @@ procedure TCastleModel.AddAnimation(const AAction: String; const ASensor: TTimeS
 var
   ainfo: TAnimationInfo;
 begin
-  ainfo := TAnimationInfo.Create(Self, ASensor, IsLooped);
+  ainfo := TAnimationInfo.Create(Self, AAction, ASensor, IsLooped);
   fActions.AddObject(AAction, ainfo);
 end;
 
@@ -500,7 +513,7 @@ begin
     end;
 end;
 
-function  TCastleModel.CurrentFrame: TFloatTime;
+function TCastleModel.CurrentFrame: TFloatTime;
 var
  ANode: TAnimationInfo;
 begin
@@ -510,6 +523,19 @@ begin
     begin
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
       Result := ANode.AnimNode.ElapsedTimeInCycle;
+    end;
+end;
+
+function TCastleModel.TotalFrames: TFloatTime;
+var
+ ANode: TAnimationInfo;
+begin
+  Result := -1;
+
+  if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
+    begin
+      ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
+      Result := ANode.AnimHigh;
     end;
 end;
 

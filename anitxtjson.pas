@@ -227,8 +227,8 @@ begin
               Break;
             end;
           JObject := Json.Add('NewRec', nkObject);
-          JObject.Add('FromNode', L.FromFrame);
-          JObject.Add('ToNode', L.ToFrame);
+          JObject.Add('FromFrame', L.FromFrame);
+          JObject.Add('ToFrame', L.ToFrame);
           JObject.Add('Action', L.Action);
         end;
     except

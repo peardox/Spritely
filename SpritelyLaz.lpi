@@ -36,7 +36,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="9">
       <Unit0>
         <Filename Value="SpritelyLaz.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -72,6 +72,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="MiscFunctions"/>
       </Unit6>
+      <Unit7>
+        <Filename Value="anitxtjson.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AniTxtJson"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="anitakeutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AniTakeUtils"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
