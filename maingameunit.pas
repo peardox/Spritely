@@ -227,6 +227,11 @@ begin
           else
             LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames);
         end;
+      {$ifdef cgeapp}
+// Todo : UpdateInfoPanel for App
+      {$else}
+      CastleForm.UpdateInfoPanel;
+      {$endif}
     end;
   inherited;
 end;

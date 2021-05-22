@@ -23,25 +23,45 @@ type
     Panel2: TPanel;
     Panel3: TPanel;
     Panel4: TPanel;
+    Splitter1: TSplitter;
     TrackBar1: TTrackBar;
     TreeView1: TTreeView;
     Window: TCastleControlBase;
     procedure Button1Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure TrackBar1Change(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure WindowClose(Sender: TObject);
     procedure WindowOpen(Sender: TObject);
+  private
+    Tracking: Boolean;
   public
     procedure GuiBootStrap;
+    procedure AddInfo(const AName: String; const AValue: Integer);
+    procedure AddInfo(const AName: String; const AValue: Single);
+    procedure AddInfo(const AName: String; const AValue: String);
+    procedure UpdateInfo(const AName: String; const AValue: Integer);
+    procedure UpdateInfo(const AName: String; const AValue: Single);
+    procedure UpdateInfo(const AName: String; const AValue: String);
+    procedure AddInfoPanel;
+    procedure UpdateInfoPanel;
   end;
 
 var
   CastleForm: TCastleForm;
+  gYAngle: Single;
 
 const
-  MapFile: String = 'C:\Assets\3drt\paid\Elf-Males\elfrangers-aniamtions-list.txt';
-  ModelFile: String = 'C:\Assets\3drt\paid\Elf-Males\FBX 2013\Elf-03.glb';
+  InfoFloatFormat: String = '###0.0000';
+//  MapFile: String = 'C:\Assets\3drt\paid\Elf-Males\elfrangers-aniamtions-list.txt';
+//  ModelFile: String = 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile: String = 'castle-data:/up.glb';
+//  ModelFile: String = 'castle-data:/tavern/scene.gltf';
+//  ModelFile: String = 'C:\Assets\3drt\paid\Elf-Males\FBX 2013\Elf-03.glb';
+//  ModelFile: String = 'C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf';
+//  ModelFile: String = 'C:\src\Spritely\data\Quaternius\RPGCharacters\Wizard.glb';
+  ModelFile: String = 'C:\Assets\TurboSquid\Wyvern\GreenDragon.glb';
 
 implementation
 {$R *.lfm}
@@ -55,7 +75,21 @@ begin
   {$endif}
   AppTime := CastleGetTickCount64;
   PrepDone := False;
+  gYAngle := 2;
   Caption := 'Spritely GUI';
+  Tracking := False;
+  Trackbar1.Max := 30000;
+end;
+
+procedure TCastleForm.TrackBar1Change(Sender: TObject);
+var
+  NewScale: Single;
+begin
+  if Tracking then
+    begin
+      NewScale := Trackbar1.Position / 10000;
+      CastleApp.TestModel.Scene.Scale := Vector3(NewScale, NewScale, NewScale);
+    end;
 end;
 
 procedure TCastleForm.FormDestroy(Sender: TObject);
@@ -93,11 +127,6 @@ var
 begin
   with CastleApp do
     begin
-      // LoadModel('castle-data:/up.glb');
-      // LoadModel('castle-data:/tavern/scene.gltf');
-      // LoadModel('C:\Assets\3drt\paid\chibii-racers-dirt-bikes\gitf\dirt_bike01.gltf');
-      // LoadModel('C:\src\Spritely\data\Quaternius\RPGCharacters\Wizard.glb');
-      // LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
       LoadModel(ModelFile);
       if not(TestModel = nil) then
         begin
@@ -116,7 +145,10 @@ begin
           ShowModel(TestModel);
           TestModel.ResetAnimationState;
         end;
+      Trackbar1.Position := Trunc(TestModel.Scene.Scale.X * 10000);
+      Tracking := True;
     end;
+  AddInfoPanel;
 end;
 
 procedure TCastleForm.Button1Click(Sender: TObject);
@@ -161,6 +193,87 @@ end;
 procedure TCastleForm.WindowClose(Sender: TObject);
 begin
   WriteLnLog('WindowClose : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
+end;
+
+procedure TCastleForm.AddInfo(const AName: String; const AValue: Integer);
+begin
+  AddInfo(AName, IntToStr(AValue));
+end;
+
+procedure TCastleForm.AddInfo(const AName: String; const AValue: Single);
+begin
+  AddInfo(AName, FormatFloat(InfoFloatFormat, AValue));
+end;
+
+procedure TCastleForm.AddInfo(const AName: String; const AValue: String);
+var
+  vNewItem: TListItem;
+begin
+  vNewItem := ListView1.Items.Add;
+  vNewItem.Caption := AName;
+  vNewItem.SubItems.Add(AValue);
+end;
+
+procedure TCastleForm.UpdateInfo(const AName: String; const AValue: Integer);
+begin
+  UpdateInfo(AName, IntToStr(AValue));
+end;
+
+procedure TCastleForm.UpdateInfo(const AName: String; const AValue: Single);
+begin
+  UpdateInfo(AName, FormatFloat(InfoFloatFormat, AValue));
+end;
+
+procedure TCastleForm.UpdateInfo(const AName: String; const AValue: String);
+var
+  idx: Integer;
+begin
+  for idx := 0 to ListView1.Items.Count -1 do
+    begin
+      if ListView1.Items[idx].Caption = AName then
+        ListView1.Items[idx].SubItems[0] := AValue;
+    end;
+end;
+
+procedure TCastleForm.AddInfoPanel;
+begin
+  with CastleApp do
+    begin
+      AddInfo('Window Width', Window.Width);
+      AddInfo('Window Height', Window.Height);
+      AddInfo('Projection (Y Axis)', gYAngle);
+      AddInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
+      AddInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
+      AddInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
+      AddInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
+      AddInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
+      AddInfo('BBox 0', TestModel.Scene.BoundingBox.Data[0].ToString);
+      AddInfo('BBox 1', TestModel.Scene.BoundingBox.Data[1].ToString);
+      AddInfo('Translation', TestModel.Scene.Translation.ToString);
+      AddInfo('Center', TestModel.Scene.Center.ToString);
+      AddInfo('Rotation', TestModel.Scene.Rotation.ToString);
+      AddInfo('3D Scale', TestModel.Scene.Scale.ToString);
+    end;
+end;
+
+procedure TCastleForm.UpdateInfoPanel;
+begin
+  with CastleApp do
+    begin
+      UpdateInfo('Window Width', Window.Width);
+      UpdateInfo('Window Height', Window.Height);
+      UpdateInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
+      UpdateInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
+      UpdateInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
+      UpdateInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
+      UpdateInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
+      UpdateInfo('BBox 0', TestModel.Scene.BoundingBox.Data[0].ToString);
+      UpdateInfo('BBox 1', TestModel.Scene.BoundingBox.Data[1].ToString);
+      UpdateInfo('Translation', TestModel.Scene.Translation.ToString);
+      UpdateInfo('Center', TestModel.Scene.Center.ToString);
+      UpdateInfo('Rotation', TestModel.Scene.Rotation.ToString);
+      UpdateInfo('3D Scale', TestModel.Scene.Scale.ToString);
+      end;
 end;
 
 end.
