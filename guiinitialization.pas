@@ -62,6 +62,7 @@ const
   {$if defined(darwin)}
   FSPrefix: String = 'file:/Users/simon';
   {$endif}
+  ModelFile: String = 'Assets/TurboSquid/Wyvern/GreenDragon.glb';
 
   InfoFloatFormat: String = '###0.0000';
 //  MapFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
@@ -70,7 +71,6 @@ const
 //  ModelFile: String = 'castle-data:/tavern/scene.gltf';
 //  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
 //  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
-  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 
 implementation
 {$R *.lfm}
@@ -139,7 +139,7 @@ var
 begin
   with CastleApp do
     begin
-      LoadModel(ModelFile);
+      LoadModel(FSPrefix + PathDelim + ModelFile);
       if not(TestModel = nil) then
         begin
           model := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(TestModel.ModelName)), TestModel);
