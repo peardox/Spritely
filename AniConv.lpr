@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, CustApp, AniTxtJson, castle_base
+  Classes, SysUtils, CustApp, JsonTools, AniTxtJson, castle_base
   { you can add units after this };
 
 type
@@ -26,23 +26,9 @@ type
 
 procedure AniList.DoRun;
 var
+  FileName: String;
   ErrorMsg: String;
-  I: Integer;
-{ Bad lists
-}
-const AList: Array[0..11] of String = (
-  'C:\Assets\3drt\paid\chibii-racers-dirt-bikes\_bike_animations.txt',
-  'C:\Assets\3drt\paid\Crazy-Rabbits\crazy-rabbits-animations-list.txt',
-  'C:\Assets\3drt\paid\Elf-Females\souldblade-elfrangers-aniamtions-list.txt',
-  'C:\Assets\3drt\paid\Elf-Males\elfrangers-aniamtions-list.txt',
-  'C:\Assets\3drt\paid\Ghouls\animations-list-ghouls.txt',
-  'C:\Assets\3drt\paid\Goblins-Undead\goblin_anim.txt',
-  'C:\Assets\3drt\paid\Spiders\spider_anim.txt',
-  'C:\Assets\3drt\paid\Thief\Thief-animations-list.txt',
-  'C:\Assets\3drt\paid\Dragon\dragon_animation_list.txt',
-  'C:\Assets\3drt\paid\Dragon-boss\dragonboss_animation_list.txt',
-  'C:\Assets\3drt\paid\Elongata\Elong_anim.txt',
-  'C:\Assets\3drt\paid\Female-Ninja\Animations.txt');
+  Json: TJsonNode;
 begin
   // quick check parameters
   ErrorMsg:=CheckOptions('h', 'help');
@@ -60,9 +46,18 @@ begin
   end;
 
   { add your program here }
-  for I := 0 to Length(Alist) - 1 do
-    AniTxtToJson(Alist[I]);
-//  AniTxtToJson('C:\Assets\3drt\paid\Elf-Males\elfrangers-aniamtions-list.txt');
+  FileName := 'C:\Assets\3drt\paid\Elf-Males\elfrangers-aniamtions-list.txt';
+  WriteLn('Parsing ' + FileName);
+  Json := AniTxtToJson(FileName);
+  if not(Json = nil) then
+    begin
+      WriteLn('Saving to ' + FileName + '.json');
+      Json.SaveToFile(FileName + '.json', True);
+      JSon.Free;
+    end
+  else
+    WriteLn('Errors encountered converting file.');
+
   // stop program loop
   Terminate;
 end;

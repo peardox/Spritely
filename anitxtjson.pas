@@ -15,7 +15,7 @@ type
     Action: String;
   end;
 
-procedure AniTxtToJson(const InFile: String);
+function AniTxtToJson(const InFile: String): TJsonNode;
 function ParseText(const S: String): TAniLine;
 function ParseText_FormatA(const S: String): TAniLine;
 function ParseText_FormatB(const S: String): TAniLine;
@@ -190,22 +190,25 @@ begin
     end;
 end;
 
-procedure AniTxtToJson(const InFile: String);
+function AniTxtToJson(const InFile: String): TJsonNode;
 var
   F: TTextReader;
   I: Integer;
   S: string;
   L: TAniLine;
-  OK: Boolean;
   Json: TJsonNode;
   JObject: TJsonNode;
 begin
+  if not(FileExists(InFile)) then
+    begin
+      if IsConsole then
+        WriteLn('File not found');
+      Exit(nil);
+    end;
   Json := TJsonNode.Create;
   Json := Json.Add('Animations', nkArray);
-  OK := False;
   I := 0;
   F := nil;
-  WriteLn('Parsing ' + InFile);
   try
     F := TTextReader.Create(InFile);
     try
@@ -219,6 +222,8 @@ begin
           L := ParseText(S);
           if not(L.Success) then
             begin
+              JSon.Free;
+              JSon := nil;
               Break;
             end;
           JObject := Json.Add('NewRec', nkObject);
@@ -226,26 +231,19 @@ begin
           JObject.Add('ToNode', L.ToFrame);
           JObject.Add('Action', L.Action);
         end;
-      if L.Success then
-        OK := True;
     except
       on E : Exception do
         begin
-        WriteLn('Error (' + E.ClassName + ') : ' + E.Message);
+          if IsConsole then
+            WriteLn('Error (' + E.ClassName + ') : ' + E.Message);
         end;
     end;
   finally
     if F <> nil then
       F.Free;
   end;
-  if OK then
-    begin
-      WriteLn('Saving to ' + InFile + '.json');
-      Json.SaveToFile(InFile + '.json', True);
-    end
-  else
-    WriteLn('Errors encountered converting file.');
-  Json.Free;
+
+  Result := Json;
 end;
 
 end.
