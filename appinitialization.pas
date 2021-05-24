@@ -5,7 +5,7 @@ unit AppInitialization;
 interface
 
 uses
-  SysUtils, // For FreeAndNil
+  SysUtils, CastleGLUtils,
   CastleWindow, CastleScene, CastleControls, CastleLog, CastleUIState,
   CastleTimeUtils, CastleApplicationProperties, CastleUIControls, MainGameUnit;
 
@@ -21,6 +21,7 @@ procedure ApplicationInitialize;
 begin
   if not IsLibrary then
     InitializeLog;
+  MaxVP := GLFeatures.MaxViewportDimensions;
   RenderReady := False;
   PrepDone := False;
   CastleApp := TCastleApp.Create(Application);

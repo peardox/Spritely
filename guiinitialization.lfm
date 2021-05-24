@@ -61,8 +61,8 @@ object CastleForm: TCastleForm
       TabOrder = 0
       object ListView1: TListView
         Left = 0
-        Height = 59
-        Top = 329
+        Height = 54
+        Top = 334
         Width = 300
         Align = alClient
         AutoSort = False
@@ -88,6 +88,15 @@ object CastleForm: TCastleForm
         ScrollBars = ssAutoBoth
         TabOrder = 1
         OnClick = TreeView1Click
+      end
+      object Splitter2: TSplitter
+        Cursor = crVSplit
+        Left = 0
+        Height = 5
+        Top = 329
+        Width = 300
+        Align = alTop
+        ResizeAnchor = akTop
       end
     end
     object Panel4: TPanel

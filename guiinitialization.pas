@@ -10,7 +10,7 @@ uses
   CastleColors, CastleUIControls, CastleTriangles, CastleShapes, CastleVectors,
   CastleSceneCore, CastleScene, CastleTransform, CastleViewport, CastleCameras,
   X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages, CastleFilesUtils,
-  CastleURIUtils, MiscFunctions,
+  CastleURIUtils, MiscFunctions, CastleGLUtils,
   CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse;
 
 type
@@ -24,6 +24,7 @@ type
     Panel3: TPanel;
     Panel4: TPanel;
     Splitter1: TSplitter;
+    Splitter2: TSplitter;
     TrackBar1: TTrackBar;
     TreeView1: TTreeView;
     Window: TCastleControlBase;
@@ -34,16 +35,18 @@ type
     procedure TreeView1Click(Sender: TObject);
     procedure WindowClose(Sender: TObject);
     procedure WindowOpen(Sender: TObject);
-  private
-    Tracking: Boolean;
-  public
-    procedure GuiBootStrap;
+
     procedure AddInfo(const AName: String; const AValue: Integer);
     procedure AddInfo(const AName: String; const AValue: Single);
     procedure AddInfo(const AName: String; const AValue: String);
     procedure UpdateInfo(const AName: String; const AValue: Integer);
     procedure UpdateInfo(const AName: String; const AValue: Single);
     procedure UpdateInfo(const AName: String; const AValue: String);
+  private
+    Tracking: Boolean;
+  public
+    procedure GuiBootStrap;
+    function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
     procedure AddInfoPanel;
     procedure UpdateInfoPanel;
   end;
@@ -54,23 +57,23 @@ var
 
 const
   {$if defined(windows)}
-  FSPrefix: String = 'C:';
+  FSPrefix = 'C:';
   {$endif}
   {$if defined(linux)}
-  FSPrefix: String = 'file:/home/simon';
+  FSPrefix = 'file:/home/simon';
   {$endif}
   {$if defined(darwin)}
-  FSPrefix: String = 'file:/Users/simon';
+  FSPrefix = 'file:/Users/simon';
   {$endif}
-  ModelFile: String = 'Assets/TurboSquid/Wyvern/GreenDragon.glb';
 
   InfoFloatFormat: String = '###0.0000';
 //  MapFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
 //  ModelFile: String = 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
-//  ModelFile: String = 'castle-data:/up.glb';
+  ModelFile: String = 'castle-data:/up.glb';
 //  ModelFile: String = 'castle-data:/tavern/scene.gltf';
 //  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
 //  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
+//  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 
 implementation
 {$R *.lfm}
@@ -139,7 +142,7 @@ var
 begin
   with CastleApp do
     begin
-      LoadModel(FSPrefix + PathDelim + ModelFile);
+      LoadModel(ModelFile);
       if not(TestModel = nil) then
         begin
           model := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(TestModel.ModelName)), TestModel);
@@ -168,20 +171,16 @@ var
   Sprite: TCastleImage;
   SName: String;
 begin
+{
   if not(CastleApp.TestModel.CurrentAnimation = -1) then
     begin
-{
-      if CastleApp.TestModel.IsPaused then
-        CastleApp.TestModel.Start
-      else
-}
       CastleApp.TestModel.Pause;
     end;
   Exit;
-
+}
   if not (CastleApp.TestModel.Scene = nil) then
     begin
-      Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 1024, 1024);
+      Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 16384, 16384);
       if not(Sprite = nil) then
         begin
           SName := FileNameAutoInc('grab_%4.4d.jpg');
@@ -196,6 +195,7 @@ procedure TCastleForm.WindowOpen(Sender: TObject);
 begin
   WriteLnLog('WindowOpen : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
   RenderReady := False;
+  MaxVP := GLFeatures.MaxViewportDimensions;
   TCastleControlBase.MainControl := Window;
   CastleApp := TCastleApp.Create(Application);
   TUIState.Current := CastleApp;
@@ -247,6 +247,20 @@ begin
     end;
 end;
 
+function TCastleForm.Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
+var
+  res: String;
+  PlanePosition: TVector3;
+begin
+  res := 'Unknown';
+  if CastleApp.Viewport.PositionToCameraPlane(Vector2(AXpos, AYpos), True, 0, PlanePosition) then
+    begin
+      res := PlanePosition.ToString;
+    end;
+
+  Result := res;
+end;
+
 procedure TCastleForm.AddInfoPanel;
 begin
   with CastleApp do
@@ -265,6 +279,9 @@ begin
       AddInfo('Center', TestModel.Scene.Center.ToString);
       AddInfo('Rotation', TestModel.Scene.Rotation.ToString);
       AddInfo('3D Scale', TestModel.Scene.Scale.ToString);
+      AddInfo('Pos A', '');
+      AddInfo('Pos B', '');
+      AddInfo('Max Viewport', MaxVP.ToString);
     end;
 end;
 
@@ -285,6 +302,8 @@ begin
       UpdateInfo('Center', TestModel.Scene.Center.ToString);
       UpdateInfo('Rotation', TestModel.Scene.Rotation.ToString);
       UpdateInfo('3D Scale', TestModel.Scene.Scale.ToString);
+      UpdateInfo('Pos A', Pos2DTo3D(0, 0));
+      UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
       end;
 end;
 

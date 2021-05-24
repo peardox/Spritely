@@ -56,6 +56,11 @@ var
   PrepDone: Boolean;
   RenderReady: Boolean;
   CastleApp: TCastleApp;
+  MaxVP: TVector2Integer;
+
+  const
+    SpriteWidth = 64;
+    SpriteHeight = 96;
 
 implementation
 {$ifdef cgeapp}
@@ -128,10 +133,10 @@ begin
   Viewport.BackgroundColor := Vector4(1, 1, 1, 1);
   Viewport.NavigationType := ntNone;
   Viewport.AssignDefaultCamera;
-  Viewport.Camera.Orthographic.Width := 2;
-  Viewport.Camera.Orthographic.Height := 2;
+  Viewport.Camera.Orthographic.Width := SpriteWidth;
+  Viewport.Camera.Orthographic.Height := SpriteHeight;
   Viewport.Camera.Orthographic.Origin := Vector2(0.5, 0.5);
-  Viewport.Camera.Orthographic.Scale := 1;
+  Viewport.Camera.Orthographic.Scale := (SpriteHeight / SpriteWidth) / Min(SpriteWidth, SpriteHeight);
   Viewport.Camera.ProjectionType := ptOrthographic;
 
   InsertFront(Viewport);
@@ -140,7 +145,7 @@ begin
   CreateLabel(LabelFPS, 1);
   CreateLabel(LabelRender, 0);
 
-  ViewFromRadius(2, Vector3(-1, -1, -1));
+  ViewFromRadius(2, Vector3(-1, -2, -1));
 end;
 
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
@@ -159,7 +164,6 @@ begin
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
-//    TestModel.Start('dirt_bike_milkshape.ms3d.act');
   except
     on E : Exception do
       begin
