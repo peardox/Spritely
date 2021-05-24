@@ -180,7 +180,7 @@ begin
 }
   if not (CastleApp.TestModel.Scene = nil) then
     begin
-      Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 16384, 16384);
+      Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 1536, 1536);
       if not(Sprite = nil) then
         begin
           SName := FileNameAutoInc('grab_%4.4d.jpg');
