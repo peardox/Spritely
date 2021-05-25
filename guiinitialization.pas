@@ -55,35 +55,39 @@ type
 var
   CastleForm: TCastleForm;
   gYAngle: Single;
+  FSPrefix: String;
+  ModelFile: String;
+//  MapFile: String;
 
 const
-  {$if defined(windows)}
-  FSPrefix = 'C:\';
-  {$endif}
-  {$if defined(linux)}
-  FSPrefix = HomePath;
-  {$endif}
-  {$if defined(darwin)}
-  FSPrefix = HomePath;
-  {$endif}
-
   InfoFloatFormat: String = '###0.0000';
-//  MapFile: String = FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
-//  ModelFile: String = 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
-//  ModelFile: String = 'castle-data:/up.glb';
-//  ModelFile: String = 'castle-data:/up311.glb';
-//  ModelFile: String = 'castle-data:/up131.glb';
-//  ModelFile: String = 'castle-data:/up113.glb';
-//  ModelFile: String = 'castle-data:/tavern/scene.gltf';
-  ModelFile: String = FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
-//  ModelFile: String = FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
-//  ModelFile: String = FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 
 implementation
 {$R *.lfm}
 
 procedure TCastleForm.FormCreate(Sender: TObject);
 begin
+  {$if defined(windows)}
+  FSPrefix := 'C:\';
+  {$endif}
+  {$if defined(linux)}
+  FSPrefix := HomePath;
+  {$endif}
+  {$if defined(darwin)}
+  FSPrefix := HomePath;
+  {$endif}
+
+//  MapFile: := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := 'castle-data:/up.glb';
+//  ModelFile := 'castle-data:/up311.glb';
+//  ModelFile := 'castle-data:/up131.glb';
+//  ModelFile := 'castle-data:/up113.glb';
+//  ModelFile := 'castle-data:/tavern/scene.gltf';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
+
   InitializeLog;
   {$ifdef darwin}
   WindowState := wsFullScreen;
