@@ -1,11 +1,32 @@
-Convert "Take 001" to separate animations
+[Routine]
+Convert Static Models To GLTF
+Prepare Morph Frames
+
+[ToDo]
+Convert "Take 001" to Separate Animations
+User Defined Menu Options
+Load / Save Settings
+Load / Save Moddel Meta
+Export Portrait
+Export Sprite Sheet
+
+[Via other people]
+Build sheets using internal sheet code (@kagamma)
 Oblique perspective (@michalis)
 Transparent ground (@michalis)
-Build sheets using internal sheet code (@kagamma)
 Lighting + Camera positioning (@michalis)
-User-defined Color Palettes
-Loadable Menu Options
-Command line
+
+[Styling Features]
 Recolor skin
 Skin swapping
+User-defined Color Palettes
+Pixelation
+
+[Exploration]
 Tablet version
+Command line
+
+[Research]
+Rhubarb Lip Sync
+
+wallHole_all_B

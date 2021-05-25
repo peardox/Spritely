@@ -11,7 +11,7 @@ uses
   CastleSceneCore, CastleScene, CastleTransform, CastleViewport, CastleCameras,
   X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages, CastleFilesUtils,
   CastleURIUtils, MiscFunctions, CastleGLUtils,
-  CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse;
+  CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse, CastleLCLUtils;
 
 type
   { TCastleForm }
@@ -34,6 +34,7 @@ type
     procedure TrackBar1Change(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure WindowClose(Sender: TObject);
+    procedure WindowMotion(Sender: TObject; const Event: TInputMotion);
     procedure WindowOpen(Sender: TObject);
 
     procedure AddInfo(const AName: String; const AValue: Integer);
@@ -57,23 +58,26 @@ var
 
 const
   {$if defined(windows)}
-  FSPrefix = 'C:';
+  FSPrefix = 'C:\';
   {$endif}
   {$if defined(linux)}
-  FSPrefix = 'file:/home/simon';
+  FSPrefix = HomePath;
   {$endif}
   {$if defined(darwin)}
-  FSPrefix = 'file:/Users/simon';
+  FSPrefix = HomePath;
   {$endif}
 
   InfoFloatFormat: String = '###0.0000';
-//  MapFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+//  MapFile: String = FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
 //  ModelFile: String = 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
-  ModelFile: String = 'castle-data:/up.glb';
+//  ModelFile: String = 'castle-data:/up.glb';
+//  ModelFile: String = 'castle-data:/up311.glb';
+//  ModelFile: String = 'castle-data:/up131.glb';
+//  ModelFile: String = 'castle-data:/up113.glb';
 //  ModelFile: String = 'castle-data:/tavern/scene.gltf';
-//  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
-//  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
-//  ModelFile: String = FSPrefix + PathDelim + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
+  ModelFile: String = FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
+//  ModelFile: String = FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
+//  ModelFile: String = FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 
 implementation
 {$R *.lfm}
@@ -142,7 +146,7 @@ var
 begin
   with CastleApp do
     begin
-      LoadModel(ModelFile);
+      LoadModel(URIToFilenameSafe(ModelFile));
       if not(TestModel = nil) then
         begin
           model := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(TestModel.ModelName)), TestModel);
@@ -207,6 +211,11 @@ begin
   WriteLnLog('WindowClose : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 
+procedure TCastleForm.WindowMotion(Sender: TObject; const Event: TInputMotion);
+begin
+  UpdateInfo('Mouse', Pos2DTo3D(Event.Position.X, Event.Position.Y));
+end;
+
 procedure TCastleForm.AddInfo(const AName: String; const AValue: Integer);
 begin
   AddInfo(AName, IntToStr(AValue));
@@ -265,6 +274,8 @@ procedure TCastleForm.AddInfoPanel;
 begin
   with CastleApp do
     begin
+      AddInfo('Mouse', '');
+//      AddInfo('Home', HomePath);
       AddInfo('Window Width', Window.Width);
       AddInfo('Window Height', Window.Height);
       AddInfo('Projection (Y Axis)', gYAngle);
