@@ -52,17 +52,17 @@ object CastleForm: TCastleForm
     TabOrder = 1
     object Panel3: TPanel
       Left = 0
-      Height = 388
+      Height = 363
       Top = 0
       Width = 300
       Align = alClient
       BevelOuter = bvNone
-      ClientHeight = 388
+      ClientHeight = 363
       ClientWidth = 300
       TabOrder = 0
       object ListView1: TListView
         Left = 0
-        Height = 54
+        Height = 29
         Top = 334
         Width = 300
         Align = alClient
@@ -89,6 +89,7 @@ object CastleForm: TCastleForm
         ScrollBars = ssAutoBoth
         TabOrder = 1
         OnClick = TreeView1Click
+        OnContextPopup = TreeView1ContextPopup
       end
       object Splitter2: TSplitter
         Cursor = crVSplit
@@ -102,17 +103,17 @@ object CastleForm: TCastleForm
     end
     object Panel4: TPanel
       Left = 0
-      Height = 50
-      Top = 388
+      Height = 75
+      Top = 363
       Width = 300
       Align = alBottom
-      ClientHeight = 50
+      ClientHeight = 75
       ClientWidth = 300
       TabOrder = 1
       object Button1: TButton
         Left = 1
         Height = 25
-        Top = 24
+        Top = 49
         Width = 298
         Align = alBottom
         Caption = 'Button1'
@@ -129,6 +130,16 @@ object CastleForm: TCastleForm
         Position = 0
         Align = alTop
         TabOrder = 1
+      end
+      object Button2: TButton
+        Left = 1
+        Height = 25
+        Top = 24
+        Width = 298
+        Align = alBottom
+        Caption = 'Button2'
+        OnClick = Button2Click
+        TabOrder = 2
       end
     end
   end

@@ -13,7 +13,8 @@ uses
   X3DNodes, X3DFields, X3DTIme, X3DLoad, CastleBoxes,
   CastleImages, CastleGLImages, CastleDebugTransform,
   CastleTextureImages, CastleCompositeImage, CastleClassUtils,
-  CastleLog, CastleTimeUtils, CastleRectangles, CastleRenderOptions;
+  CastleLog, CastleTimeUtils, CastleRectangles, CastleRenderOptions,
+  AniTakeUtils;
 
 type
   { TAnimationInfo }
@@ -29,13 +30,17 @@ type
       IsPaused: Boolean; // Is animation paused
       IsPlaying: Boolean;
       IsLooped: Boolean;
+      IsTakeOne: Boolean;
+      IsUserDefined: Boolean;
       IsHidden: Boolean;
       procedure ReceivedIsActive(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
       procedure ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
     public
       constructor Create(AOwner: TComponent); override;
       constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
+      constructor Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
       destructor Destroy; override;
+      property Sensor: TTimeSensorNode read AnimNode write AnimNode;
   end;
   PAnimationInfo = ^TAnimationInfo;
   TAnimationInfoArray = Array of TAnimationInfo;
@@ -46,12 +51,12 @@ type
     fActions: TStringList;
     fCurrentAnimation: Integer;
     fHasAnimations: Boolean;
-    fIsCombination: Boolean;
     fIsNormalized: Boolean;
     fModelName: String;
     fRootNode: TX3DRootNode;
     fScene: TCastleScene;
     fTransform: TTransformNode;
+    fDebug: TDebugTransformBox;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -68,7 +73,6 @@ type
     procedure FreeAllAnimations;
     property  CurrentAnimation: Integer read fCurrentAnimation write fCurrentAnimation;
     property  HasAnimations: Boolean read fHasAnimations write fHasAnimations;
-    property  IsCombination: Boolean read fIsCombination write fIsCombination;
     property  IsNormalized: Boolean read fIsNormalized write fIsNormalized;
     property  ModelName: String read fModelName write fModelName;
     property  RootNode: TX3DRootNode read fRootNode write fRootNode;
@@ -85,6 +89,7 @@ type
     procedure Load(const AURL: string; const AOptions: TSceneLoadOptions = []);
 
     procedure AddAnimation(const AAction: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
+    function  AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
     function  CurrentFrame: TFloatTime;
     function  TotalFrames: TFloatTime;
     procedure GoToFrame(const AFrame: TFloatTime);
@@ -98,7 +103,7 @@ type
     procedure Start(const AName: String);
     procedure Stop;
     procedure Stop(const AName: String);
-    procedure SelectAnimation(const AName: String);
+    procedure SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
   end;
 
 implementation
@@ -120,11 +125,38 @@ begin
   AnimLow := 0;
   AnimHigh := ASensor.CycleInterval;
   AnimLast := 0;
-  IsLooped := IsLooped;
+  IsLooped := AIsLooped;
+  IsTakeOne := False;
+  IsUserDefined := False;
   IsHidden := False;
   IsPaused := False;
   AnimNode.EventIsActive.AddNotification(@ReceivedIsActive);
   AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
+end;
+
+constructor TAnimationInfo.Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
+var
+ CloneSensor: TTimeSensorNode;
+begin
+  CloneSensor := ASensor.DeepCopy as TTimeSensorNode;
+  TCastleModel(AOwner).Scene.RootNode.AddChildren(CloneSensor);
+
+  Create(AOwner);
+  AnimNode := CloneSensor;
+  AnimName := ATake.TakeName;
+  AnimStart := ATake.TakeStart / ATakeFPS;
+  AnimStop := (ATake.TakeStop + 1) / ATakeFPS;
+  AnimLow := 0;
+  AnimHigh := ASensor.CycleInterval;
+  AnimLast := 0;
+  IsLooped := AIsLooped;
+  IsTakeOne := True;
+  IsUserDefined := True;
+  IsHidden := False;
+  IsPaused := True;
+  AnimNode.EventIsActive.AddNotification(@ReceivedIsActive);
+  AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
+  WriteLnLog(AnimName + ' - ' + FloatToStr(AnimStart) + ' - ' + FloatToStr(AnimStop));
 end;
 
 destructor TAnimationInfo.Destroy;
@@ -152,11 +184,11 @@ begin
       ;
       {$else}
       else
-        WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val) + ' -> Paused');
+//        WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val) + ' -> Paused');
       {$endif}
     end;
   {$ifdef logevents}
-  WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val));
+//  WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val));
   {$endif}
 end;
 
@@ -249,6 +281,13 @@ begin
   fModelName := AURL;
   fScene.Load(AURL, AOptions);
   AddAllAnimations;
+  fDebug := TDebugTransformBox.Create(Self);
+  fDebug.Parent := fScene;
+  fDebug.BoxColor := Vector4(0,0,0, 1);
+  fDebug.Exists := True;
+
+  //  DebugBoxMenu.Checked := Debug.Exists;
+
 //  Self.Normalize;
 end;
 
@@ -300,6 +339,16 @@ begin
   fActions.AddObject(AAction, ainfo);
 end;
 
+function TCastleModel.AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
+var
+  ainfo: TAnimationInfo;
+begin
+  ainfo := TAnimationInfo.Create(Self, ATake, ASensor);
+  fActions.AddObject(ATake.TakeName, ainfo);
+
+  Result := ainfo;
+end;
+
 procedure TCastleModel.Normalize;
 begin
   if not(fScene = nil) then
@@ -327,7 +376,6 @@ begin
   fCurrentAnimation := -1;
   fHasAnimations := False;
   fIsNormalized := False;
-  fIsCombination := True;
   fModelName := EmptyStr;
   fRootNode := nil;
   fTransform := nil;
@@ -472,7 +520,7 @@ begin
     end;
 end;
 
-procedure TCastleModel.SelectAnimation(const AName: String);
+procedure TCastleModel.SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
 var
  ANode: TAnimationInfo;
  I: Integer;
@@ -497,7 +545,7 @@ begin
         end
       else
         PrevAnimWasTPose := True;
-      WriteLnLog('TCastleModel.SelectAnimation - ' + AName + ' (' + IntToStr(I) + ')');
+      WriteLnLog('TCastleModel.SelectAnimation - ' + AName + ' (' + IntToStr(fCurrentAnimation) + ' / ' + IntToStr(I) + ')');
       fCurrentAnimation := I;
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
       GotoFrame(ANode.AnimStart);
@@ -506,7 +554,12 @@ begin
       else
         begin
           if PrevAnimWasTPose then
-            Start
+            begin
+              if StartPlaying then
+                Start
+              else
+                ANode.IsPaused := True;
+            end
           else
             Stop;
         end;

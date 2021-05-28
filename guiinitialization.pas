@@ -1,6 +1,8 @@
 unit GUIInitialization;
 
 {$mode objfpc}{$H+}
+// {$define pausebtn}
+{$define disableMap}
 
 interface
 
@@ -10,14 +12,16 @@ uses
   CastleColors, CastleUIControls, CastleTriangles, CastleShapes, CastleVectors,
   CastleSceneCore, CastleScene, CastleTransform, CastleViewport, CastleCameras,
   X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages, CastleFilesUtils,
-  CastleURIUtils, MiscFunctions, CastleGLUtils,
-  CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse, CastleLCLUtils;
+  CastleURIUtils, MiscFunctions, CastleGLUtils, CastleLCLUtils,
+  CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse,
+  JsonTools, AniTxtJson, AniTakeUtils, Types, multimodel;
 
 type
   { TCastleForm }
 
   TCastleForm = class(TForm)
     Button1: TButton;
+    Button2: TButton;
     ListView1: TListView;
     Panel1: TPanel;
     Panel2: TPanel;
@@ -29,10 +33,13 @@ type
     TreeView1: TTreeView;
     Window: TCastleControlBase;
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure TrackBar1Change(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
+    procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
+      var Handled: Boolean);
     procedure WindowClose(Sender: TObject);
     procedure WindowMotion(Sender: TObject; const Event: TInputMotion);
     procedure WindowOpen(Sender: TObject);
@@ -47,6 +54,7 @@ type
     Tracking: Boolean;
   public
     procedure GuiBootStrap;
+    procedure MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
     function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
     procedure AddInfoPanel;
     procedure UpdateInfoPanel;
@@ -57,7 +65,7 @@ var
   gYAngle: Single;
   FSPrefix: String;
   ModelFile: String;
-//  MapFile: String;
+  MapFile: String;
 
 const
   InfoFloatFormat: String = '###0.0000';
@@ -77,20 +85,22 @@ begin
   FSPrefix := HomePath;
   {$endif}
 
-//  MapFile: := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up311.glb';
 //  ModelFile := 'castle-data:/up131.glb';
 //  ModelFile := 'castle-data:/up113.glb';
 //  ModelFile := 'castle-data:/tavern/scene.gltf';
-  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
+  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
-
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
+//  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'ZerinLabs' + PathDelim + 'Retro-Gothic-EnviroKit' + PathDelim + 'glb' + PathDelim + 'deco_cathedral_table.glb';
+  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'RenderHub' + PathDelim + 'building-medieval' + PathDelim + 'building_01.glb';
   InitializeLog;
   {$ifdef darwin}
-  WindowState := wsFullScreen;
+//  WindowState := wsFullScreen;
   {$endif}
   WriteLnLog('FormCreate : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
   {$ifdef darwin}
@@ -99,9 +109,15 @@ begin
   AppTime := CastleGetTickCount64;
   PrepDone := False;
   gYAngle := 2;
-  Caption := 'Spritely GUI';
+  Caption := 'Spritely';
   Tracking := False;
   Trackbar1.Max := 30000;
+  {$ifdef pausebtn}
+  Button1.Caption := 'Pause / Play';
+  {$else}
+  Button1.Caption := 'Create Sprite';
+  {$endif}
+  Button2.Caption := ''; // 'Split Take 001';
 end;
 
 procedure TCastleForm.TrackBar1Change(Sender: TObject);
@@ -142,29 +158,96 @@ begin
     end;
 end;
 
+procedure TCastleForm.TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
+  var Handled: Boolean);
+var
+  Node: TTreeNode;
+  AnimNode: TAnimationInfo;
+begin
+  {$ifdef disableMap}
+  Exit;
+  {$endif}
+  Node := TreeView1.GetNodeAt(MousePos.X, MousePos.Y);
+  if not Assigned (Node) then
+    begin
+      WriteLnLog('Bad GetNodeAt');
+      Exit;
+    end;
+  if not(Node.Data = nil) then
+    begin
+      if(TObject(Node.Data).ClassName = 'TAnimationInfo') then
+        begin
+          AnimNode := TAnimationInfo(Node.Data);
+          // Node.Visible := False;
+          MapAnims(Node.Parent, AnimNode);
+        end;
+    end;
+
+end;
+
+procedure TCastleForm.MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
+var
+  Json: TJsonNode;
+  Anis: TAniTakeArray;
+  Model: TCastleModel;
+  NewAnimNode: TAnimationInfo;
+  I: Integer;
+begin
+  if (modelNode.Data = nil) then
+    begin
+      WriteLnLog('Bad node : ' + modelNode.Text);
+      Exit;
+    end;
+  if not(TObject(modelNode.Data).ClassName = 'TCastleModel') then
+    begin
+      WriteLnLog('Not a model : ' + TObject(modelNode.Data).ClassName);
+      Exit;
+    end;
+
+  Model := TCastleModel(modelNode.Data);
+
+  Json := AniTxtToJson(MapFile);
+  if not(Json = nil) then
+    begin
+      WriteLnLog('Parsed : ' + MapFile);
+      Anis := AniTakeFromJson(Json);
+      for I := 0 to Length(Anis) - 1 do
+        begin
+          with CastleApp do
+            begin
+              NewAnimNode := Model.AddAnimation(Anis[I], AnimNode.Sensor);
+              Treeview1.Items.AddChildObject(modelNode, Anis[I].TakeName, NewAnimNode);
+            end;
+          WriteLnLog('Action : #' + IntToStr(I) +
+            ' = ' + Anis[I].TakeName +
+            ' : Start = ' + IntToStr(Anis[I].TakeStart) +
+            ' : Stop = ' + IntToStr(Anis[I].TakeStop));
+        end;
+      SetLength(Anis, 0);
+      Json.Free;
+    end;
+end;
+
 procedure TCastleForm.GuiBootStrap;
 var
   I: Integer;
-  model: TTreeNode;
-  anim: TTreeNode;
+  modelNode: TTreeNode;
 begin
   with CastleApp do
     begin
       LoadModel(URIToFilenameSafe(ModelFile));
       if not(TestModel = nil) then
         begin
-          model := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(TestModel.ModelName)), TestModel);
+          modelNode := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(TestModel.ModelName)), TestModel);
           if TestModel.HasAnimations then
             begin
             for I := 0 to TestModel.Actions.Count - 1 do
               begin
-                anim := Treeview1.Items.AddChild(model, TestModel.Actions[I]);
-//                if I = 0 then
-//                  anim.Visible := False;
+                Treeview1.Items.AddChildObject(modelNode, TestModel.Actions[I], TestModel.Animations[I]);
               end;
-            model.Expand(False);
+            modelNode.Expand(False);
             end;
-          model.Selected := True;
+          modelNode.Selected := True;
           ShowModel(TestModel);
           TestModel.ResetAnimationState;
         end;
@@ -179,24 +262,41 @@ var
   Sprite: TCastleImage;
   SName: String;
 begin
-{
+{$ifdef pausebtn}
   if not(CastleApp.TestModel.CurrentAnimation = -1) then
     begin
       CastleApp.TestModel.Pause;
     end;
   Exit;
-}
+{$else}
   if not (CastleApp.TestModel.Scene = nil) then
     begin
-      Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 1536, 1536);
+      Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 8192, 8192);
       if not(Sprite = nil) then
         begin
           SName := FileNameAutoInc('grab_%4.4d.jpg');
           SaveImage(Sprite, SName);
-//          infoNotifications.Show('Saved : ' + SName);
+          with CastleApp do
+            begin
+              WriteLnLog('Scale : ' + FloatToStr(TestModel.Scene.Scale.X));
+              WriteLnLog('BBox0 : ' + FloatToStr(TestModel.Scene.BoundingBox.Data[0].X) +
+                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[0].Y) +
+                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[0].Z));
+              WriteLnLog('BBox1 : ' + FloatToStr(TestModel.Scene.BoundingBox.Data[1].X) +
+                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[1].Y) +
+                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[1].Z));
+              //          infoNotifications.Show('Saved : ' + SName);
+            end;
+
           FreeAndNil(Sprite);
         end;
     end;
+{$endif}
+end;
+
+procedure TCastleForm.Button2Click(Sender: TObject);
+begin
+//  MapAnims(nil, nil);
 end;
 
 procedure TCastleForm.WindowOpen(Sender: TObject);
@@ -279,7 +379,7 @@ begin
   with CastleApp do
     begin
       AddInfo('Mouse', '');
-//      AddInfo('Home', HomePath);
+      AddInfo('Radius', TestModel.Scene.BoundingBox.Radius2D(2).ToString);
       AddInfo('Window Width', Window.Width);
       AddInfo('Window Height', Window.Height);
       AddInfo('Projection (Y Axis)', gYAngle);
@@ -304,6 +404,7 @@ procedure TCastleForm.UpdateInfoPanel;
 begin
   with CastleApp do
     begin
+      UpdateInfo('Radius', TestModel.Scene.BoundingBox.Radius2D(2).ToString);
       UpdateInfo('Window Width', Window.Width);
       UpdateInfo('Window Height', Window.Height);
       UpdateInfo('Ortho Width', Viewport.Camera.Orthographic.Width);

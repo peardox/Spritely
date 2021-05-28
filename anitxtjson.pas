@@ -197,6 +197,7 @@ var
   S: string;
   L: TAniLine;
   Json: TJsonNode;
+  JArray: TJsonNode;
   JObject: TJsonNode;
 begin
   if not(FileExists(InFile)) then
@@ -206,7 +207,9 @@ begin
       Exit(nil);
     end;
   Json := TJsonNode.Create;
-  Json := Json.Add('Animations', nkArray);
+  JArray := Json.Add('Animations', nkObject);
+  JArray.Kind := nkArray;
+
   I := 0;
   F := nil;
   try
@@ -226,7 +229,7 @@ begin
               JSon := nil;
               Break;
             end;
-          JObject := Json.Add('NewRec', nkObject);
+          JObject := JArray.Add('', nkObject);
           JObject.Add('FromFrame', L.FromFrame);
           JObject.Add('ToFrame', L.ToFrame);
           JObject.Add('Action', L.Action);

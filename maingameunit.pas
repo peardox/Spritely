@@ -39,6 +39,7 @@ type
   public
     Viewport: TCastleViewport;
     TestModel: TCastleModel;
+    RotationalAngle: Single;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
     procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
@@ -48,6 +49,7 @@ type
     procedure LoadModel(filename: String);
     procedure ShowModel(AModel: TCastleModel);
     procedure ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
+    procedure ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
     function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isTransparent: Boolean = False): TCastleImage;
   end;
 
@@ -113,15 +115,20 @@ begin
   InsertFront(objLabel);
 end;
 
-procedure TCastleApp.ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
-var
-  Spherical: TVector3;
+procedure TCastleApp.ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
 begin
-  Spherical := -ADirection.Normalize;
-  Spherical := Spherical * ARadius;
+  ViewFromRadius(ARadius, Vector3(sqrt(ARadius) * Cos(ATheta), AElevation, sqrt(ARadius) * Sin(ATheta)));
+end;
+
+procedure TCastleApp.ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
+begin
+  WriteLnLog('ViewFromRadius(' + FloatToStr(ARadius) + ', Vector3(' +
+    FloatToStr(ADirection.X) + ', ' +
+    FloatToStr(ADirection.Y) + ', ' +
+    FloatToStr(ADirection.Z) + ')');
   Viewport.Camera.Up := Vector3(0, 1, 0);
   Viewport.Camera.Direction := ADirection;
-  Viewport.Camera.Position  := Spherical;
+  Viewport.Camera.Position  := ARadius * -ADirection.Normalize;
 end;
 
 procedure TCastleApp.LoadViewport;
@@ -145,7 +152,11 @@ begin
   CreateLabel(LabelFPS, 1);
   CreateLabel(LabelRender, 0);
 
-  ViewFromRadius(2, Vector3(-1, -2, -1));
+
+  ViewFromRadius(2, -2, RotationalAngle);
+//  ViewFromRadius(2, -2, Pi / 4);
+//  ViewFromRadius(2, Vector3(-1, -2, -1));
+//  ViewFromRadius(2, Vector3(0, 0, -1));
 end;
 
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
@@ -161,6 +172,7 @@ begin
     TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.Load(filename);
     TestModel.Normalize;
+//    TestModel.Scene.Scale := Vector3(0.1154000014, 0.1154000014, 0.1154000014);
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
@@ -175,6 +187,8 @@ end;
 procedure TCastleApp.Start;
 begin
   inherited;
+  RotationalAngle := 2 * Pi * (5/8);
+  WriteLnLog('RotationalAngle : ' + FloatToStr(RotationalAngle));
   LogTextureCache := True;
   WriteLnLog('Start : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
   TestModel := nil;
@@ -219,6 +233,9 @@ end;
 
 procedure TCastleApp.Update(const SecondsPassed: Single; var HandleInput: boolean);
 begin
+//  RotationalAngle += (-1/180) * Pi;
+//  ViewFromRadius(2, -2, RotationalAngle);
+
   if not(TestModel = nil) then
     begin
       if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then

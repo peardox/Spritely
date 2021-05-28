@@ -1,14 +1,17 @@
 [Routine]
 Convert Static Models To GLTF
-Prepare Morph Frames
+Prepare Banner Morph Frames
 
 [ToDo]
+Limit CreateSpriteImage to MaxWindowSize
 Convert "Take 001" to Separate Animations
+Extend ViewFromRadius to handle rotation around origin
 User Defined Menu Options
 Load / Save Settings
-Load / Save Moddel Meta
+Load / Save Model Meta
 Export Portrait
 Export Sprite Sheet
+Compressed Archive c/w optional encryption
 
 [Via other people]
 Build sheets using internal sheet code (@kagamma)
@@ -25,8 +28,8 @@ Pixelation
 [Exploration]
 Tablet version
 Command line
+Assimp integration
 
 [Research]
 Rhubarb Lip Sync
-
-wallHole_all_B
+Discord Integration

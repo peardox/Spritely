@@ -5,50 +5,83 @@ unit AniTakeUtils;
 interface
 
 uses
-  Classes, SysUtils, JsonTools, CastleDownload, CastleTimeUtils;
+  Classes, SysUtils, CastleLog, JsonTools, CastleDownload, CastleTimeUtils;
 
 type
   { TAniTake }
-  TAniTake = Class(TComponent)
-    private
-      AnimName: String;
-      AnimStart: TFloatTime;
-      AnimStop: TFloatTime;
-    public
-      constructor Create(AOwner: TComponent); override;
-      constructor Create(AOwner: TComponent; const AName: String; const AStart: Cardinal; const AStop: Cardinal);
+  TAniTake = record
+    TakeName: String;
+    TakeStart: Integer;
+    TakeStop: Integer;
   end;
   PAniTake = ^TAniTake;
   TAniTakeArray = Array of TAniTake;
 
 const
-  AniTakeFPS: Cardinal = 30;
+  AniDefaultTakeFPS: Cardinal = 30;
 
 function AniTakeFromJson(const Json: TJsonNode): TAniTakeArray;
 
 implementation
 
-constructor TAniTake.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-end;
-
-constructor TAniTake.Create(AOwner: TComponent; const AName: String; const AStart: Cardinal; const AStop: Cardinal);
-begin
-  Create(AOwner);
-  AnimName := AName;
-  AnimStart := TFloatTime(AStart / AniTakeFPS);
-  AnimStop := TFloatTime((AStop + 1) / AniTakeFPS);
-end;
-
 function AniTakeFromJson(const Json: TJsonNode): TAniTakeArray;
 var
   Node: TJsonNode;
+  Element: TJsonNode;
+  Data: TJsonNode;
+  Take: TAniTake;
+  I: Integer;
 begin
   Result := nil;
-  if (Json.Kind = nkArray) and (Json.Name = 'Animations') then
+  for Node in Json do
     begin
-//      for Node in Json
+      if (Node.Kind = nkArray) and (Node.Name = 'Animations') then
+        begin
+          WriteLnLog('AnimationCount : ' + IntToStr(Node.Count));
+          SetLength(Result, Node.Count);
+          for I := 0 to Node.Count - 1 do
+            begin
+              Element := Node.Child(I);
+              Take := default(TAniTake);
+              Take.TakeStart := -1; // To trap missing values
+              for Data in Element do
+                begin
+                  case Data.Name of
+                    'FromFrame':
+                      begin
+                        if Data.Kind = nkNumber then
+                          Take.TakeStart := Data.AsInteger
+                        else
+                          raise Exception.Create('FromFrame is not numeric');
+                      end;
+                    'ToFrame':
+                      begin
+                        if Data.Kind = nkNumber then
+                          Take.TakeStop := Data.AsInteger
+                        else
+                          raise Exception.Create('ToFrame is not numeric');
+                      end;
+                    'Action':
+                      begin
+                        if Data.Kind = nkString then
+                          begin
+                            Take.TakeName := Data.AsString;
+                            if (Take.TakeName = EmptyStr) then
+                              raise Exception.Create('Action is blank');
+                          end
+                        else
+                          raise Exception.Create('Action is not a string');
+                      end;
+                  end;
+                end;
+              if not(Take.TakeName = EmptyStr) and not(Take.TakeStart = -1) and not(Take.TakeStop = 0) then
+                Result[I] := Take
+              else
+                raise Exception.Create('Partial record found for Take #' + IntToStr(I));
+            end;
+        end
+      else
+        WriteLnLog('Node : ' + Node.Name + ' =>' + Node.KindAsString);
     end;
 end;
 
