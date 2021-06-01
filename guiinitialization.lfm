@@ -31,6 +31,7 @@ object CastleForm: TCastleForm
       TabOrder = 0
       OnOpen = WindowOpen
       OnClose = WindowClose
+      OnPress = WindowPress
       OnMotion = WindowMotion
     end
     object Splitter1: TSplitter

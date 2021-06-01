@@ -4,6 +4,7 @@ Prepare Banner Morph Frames
 
 [ToDo]
 Dialog Windows + Controls
+Texture Atlas Builder
 Limit CreateSpriteImage to MaxWindowSize
 Convert "Take 001" to Separate Animations
 Extend ViewFromRadius to handle rotation around origin
@@ -12,7 +13,7 @@ Load / Save Settings
 Load / Save Model Meta
 Export Portrait
 Export Sprite Sheet
-Compressed Archive c/w optional encryption
+Portrait Capture Facility
 
 [Via other people]
 Build sheets using internal sheet code (@kagamma)
@@ -30,7 +31,9 @@ Pixelation
 Tablet version
 Command line
 Assimp integration
+Compressed Archive c/w optional encryption
 
 [Research]
 Rhubarb Lip Sync
 Discord Integration
+FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom

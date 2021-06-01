@@ -15,7 +15,8 @@ uses
   CastleCameras, X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages,
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleGLUtils,
   CastleLCLUtils, CastleApplicationProperties, CastleLog, CastleTimeUtils,
-  CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types, multimodel;
+  CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
+  CastleQuaternions, multimodel;
 
 type
   { TCastleForm }
@@ -58,8 +59,10 @@ type
     procedure UpdateInfo(const AName: String; const AValue: Integer);
     procedure UpdateInfo(const AName: String; const AValue: Single);
     procedure UpdateInfo(const AName: String; const AValue: String);
+    procedure WindowPress(Sender: TObject; const Event: TInputPressRelease);
   private
     Tracking: Boolean;
+    ModeOrientation: Boolean;
   public
     procedure GuiBootStrap;
     procedure MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
@@ -70,7 +73,6 @@ type
 
 var
   CastleForm: TCastleForm;
-  gYAngle: Single;
   FSPrefix: String;
   ModelFile: String;
   MapFile: String;
@@ -93,21 +95,23 @@ begin
   FSPrefix := HomePath;
   {$endif}
 
-//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up311.glb';
 //  ModelFile := 'castle-data:/up131.glb';
 //  ModelFile := 'castle-data:/up113.glb';
 //  ModelFile := 'castle-data:/tavern/scene.gltf';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
-  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'ZerinLabs' + PathDelim + 'Retro-Gothic-EnviroKit' + PathDelim + 'glb' + PathDelim + 'deco_cathedral_table.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
+//  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
   InitializeLog;
+  ModeOrientation := True;
   {$ifdef darwin}
 //  WindowState := wsFullScreen;
   {$endif}
@@ -117,16 +121,16 @@ begin
   {$endif}
   AppTime := CastleGetTickCount64;
   PrepDone := False;
-  gYAngle := 2;
+  KeyPreview := True;
   Caption := 'Spritely';
   Tracking := False;
-  Trackbar1.Max := 30000;
+  Trackbar1.Max := 100000;
   {$ifdef pausebtn}
   Button1.Caption := 'Pause / Play';
   {$else}
   Button1.Caption := 'Create Sprite';
   {$endif}
-  Button2.Caption := 'Scale 1.0'; // 'Pause / Play'; // 'Split Take 001';
+  Button2.Caption := 'Change ViewMode'; // 'Pause / Play'; // 'Split Take 001';
 end;
 
 procedure TCastleForm.DebugBoxMenuClick(Sender: TObject);
@@ -150,7 +154,9 @@ procedure TCastleForm.TrackBar1Change(Sender: TObject);
 begin
   if Tracking then
     begin
-      CastleApp.iScale := Trackbar1.Position / 10000;
+    CastleApp.CameraRotation := (2 * Pi) * (Trackbar1.Position / 100000);
+//    CastleApp.iScale := Trackbar1.Position / 10000;
+//      CastleApp.CameraElevation := -Trackbar1.Position / 1000;
     end;
 end;
 
@@ -177,6 +183,7 @@ begin
 
   if (NodeParent.Parent = nil) then  // User clicked on an Animation
     begin
+      CastleApp.TestModel.BaseRotation := Vector3(0, 0, 0);
       CastleApp.TestModel.SelectAnimation(Node.Text);
     end;
 end;
@@ -274,7 +281,7 @@ begin
           ShowModel(TestModel);
           TestModel.ResetAnimationState;
         end;
-      Trackbar1.Position := Trunc(TestModel.Scene.Scale.X * 10000);
+      Trackbar1.Position := 0;
       Tracking := True;
     end;
   AddInfoPanel;
@@ -311,11 +318,15 @@ procedure TCastleForm.Button2Click(Sender: TObject);
 begin
   with CastleApp do
     begin
+      Inc(ViewMode);
+//      ViewFromRadius(2, -2, CastleApp.CameraRotation);
+{
       if not((Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
         begin
           iScale := 1 / Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY);
           TestModel.LockedScale := iScale;
         end;
+}
       //  if not(CastleApp.TestModel.CurrentAnimation = -1) then
       //    begin
       //      CastleApp.TestModel.Pause;
@@ -384,6 +395,44 @@ begin
     end;
 end;
 
+procedure TCastleForm.WindowPress(Sender: TObject;
+  const Event: TInputPressRelease);
+var
+  Q: TQuaternion;
+begin
+  if ModeOrientation then
+    begin
+      with CastleApp do
+        begin
+          if Event.Key = keyNumpadPlus then
+            iScale := iScale + (iScale * 0.1);
+          if Event.Key = keyNumpadMinus then
+            iScale := iScale - (iScale * 0.1);
+          if Event.Key = keyPageUp then
+            TestModel.BaseRotation.Z := TestModel.BaseRotation.Z + (Pi / 2);
+          if Event.Key = keyPageDown then
+            TestModel.BaseRotation.Z := TestModel.BaseRotation.Z - (Pi / 2);
+          if Event.Key = keyArrowUp then
+            TestModel.BaseRotation.X := TestModel.BaseRotation.X + (Pi / 2);
+          if Event.Key = keyArrowDown then
+            TestModel.BaseRotation.X := TestModel.BaseRotation.X - (Pi / 2);
+          if Event.Key = keyArrowRight then
+            TestModel.BaseRotation.Y := TestModel.BaseRotation.Y + (Pi / 2);
+          if Event.Key = keyArrowLeft then
+            TestModel.BaseRotation.Y := TestModel.BaseRotation.Y - (Pi / 2);
+          Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
+          Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, TestModel.BaseRotation.X));
+          Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, TestModel.BaseRotation.Y));
+          Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, TestModel.BaseRotation.Z));
+          TestModel.Scene.Rotation := Q.ToAxisAngle;
+          LabelMode.Caption := 'Orientation : X = ' +
+            FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.X)) + ', Y = ' +
+            FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Y)) + ', Z = ' +
+            FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Z));
+        end;
+    end;
+end;
+
 function TCastleForm.Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
 var
   res: String;
@@ -406,7 +455,7 @@ begin
       AddInfo('Radius', TestModel.Scene.BoundingBox.Radius2D(2).ToString);
       AddInfo('Window Width', Window.Width);
       AddInfo('Window Height', Window.Height);
-      AddInfo('Projection (Y Axis)', gYAngle);
+      AddInfo('Projection (Y Axis)', CastleApp.CameraElevation);
       AddInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
       AddInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
       AddInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);

@@ -14,7 +14,7 @@ uses
   CastleImages, CastleGLImages, CastleDebugTransform,
   CastleTextureImages, CastleCompositeImage, CastleClassUtils,
   CastleLog, CastleTimeUtils, CastleRectangles, CastleRenderOptions,
-  AniTakeUtils;
+  CastleQuaternions, AniTakeUtils;
 
 type
   { TAnimationInfo }
@@ -58,6 +58,7 @@ type
     fScene: TCastleScene;
     fTransform: TTransformNode;
     fDebug: TDebugTransformBox;
+    fBaseRotation: TVector3;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -78,6 +79,7 @@ type
     property  IsLocked: Boolean read fIsLocked write fIsLocked;
     property  LockedScale: Single read fLockedScale write fLockedScale;
     property  ModelName: String read fModelName write fModelName;
+    property  BaseRotation: TVector3 read fBaseRotation write fBaseRotation;
     property  RootNode: TX3DRootNode read fRootNode write fRootNode;
     property  Scene: TCastleScene read fScene write fScene;
     property  Transform: TTransformNode read fTransform write fTransform;
@@ -379,6 +381,7 @@ begin
   fIsLocked := False;
   fLockedScale := 1.0;
   fModelName := EmptyStr;
+  fBaseRotation := Vector3(0, 0, 0);
   fRootNode := nil;
   fTransform := nil;
   fScene := TCastleScene.Create(AOwner);

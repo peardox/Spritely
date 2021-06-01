@@ -39,8 +39,11 @@ type
   public
     Viewport: TCastleViewport;
     TestModel: TCastleModel;
-    RotationalAngle: Single;
+    CameraRotation: Single;
+    CameraElevation: Single;
     iScale: Single;
+    ViewMode: Cardinal;
+    LabelMode: TCastleLabel;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
     procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
@@ -124,10 +127,6 @@ end;
 
 procedure TCastleApp.ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
 begin
-  WriteLnLog('ViewFromRadius(' + FloatToStr(ARadius) + ', Vector3(' +
-    FloatToStr(ADirection.X) + ', ' +
-    FloatToStr(ADirection.Y) + ', ' +
-    FloatToStr(ADirection.Z) + ')');
   Viewport.Camera.Up := Vector3(0, 1, 0);
   Viewport.Camera.Direction := ADirection;
   Viewport.Camera.Position  := ARadius * -ADirection.Normalize;
@@ -150,6 +149,8 @@ begin
 
   InsertFront(Viewport);
 
+  CreateLabel(LabelMode, 0, False);
+
   CreateLabel(LabelSpare, 2);
   CreateLabel(LabelFPS, 1);
   CreateLabel(LabelRender, 0);
@@ -162,9 +163,11 @@ begin
 end;
 
 procedure TCastleApp.LoadModel(filename: String);
+var
+  sc: TVector3;
+  sr: Single;
 begin
   try
-    iScale := 1.0;
     TestModel := TCastleModel.Create(Application);
     TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.Load(filename);
@@ -172,10 +175,12 @@ begin
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
-    if not((Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
-      begin
-        iScale := 1 / Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY);
-      end;
+    sc := Vector3(0, 0, 0);
+    sr := 0;
+    TestModel.Scene.BoundingBox.BoundingSphere(sc, sr);
+    if not(sr = 0) then
+      iScale := 1.0 / sr;
+    WriteLnLog('Spehere Center : ' + sc.ToString + ' Sphere Radius : ' + FloatToStr(sr));
   except
     on E : Exception do
       begin
@@ -187,7 +192,9 @@ end;
 procedure TCastleApp.Start;
 begin
   inherited;
-  RotationalAngle := 2 * Pi * (5/8);
+  CameraRotation := 2 * Pi * (5/8);
+  CameraElevation := 0;
+  ViewMode := 0;
   LogTextureCache := True;
   TestModel := nil;
   LoadViewport;
@@ -205,7 +212,6 @@ begin
   inherited;
   LabelFPS.Caption := 'FPS = ' + FormatFloat('####0.00', Container.Fps.RealFps);
   LabelRender.Caption := 'Render = ' + FormatFloat('####0.00', Container.Fps.OnlyRenderFps);
-
 end;
 
 procedure TCastleApp.Render;
@@ -231,16 +237,40 @@ end;
 
 procedure TCastleApp.Update(const SecondsPassed: Single; var HandleInput: boolean);
 begin
-//  ViewFromRadius(2, -0.81625, RotationalAngle);
-//  ViewFromRadius(2, -2, RotationalAngle);
-  ViewFromRadius(2, 0, 2 * pi * (6/8));
-//  ViewFromRadius(2, Vector3(-1, -2, -1));
+  if ViewMode = 0 then
+    ViewFromRadius(2, 0, 2 * pi * (6/8))
+  else if ViewMode = 1 then
+    begin
+      CameraElevation :=  -0.81625;
+      ViewFromRadius(2, CameraElevation, CameraRotation);
+    end
+  else if ViewMode = 2 then
+    begin
+      CameraElevation :=  -1;
+      ViewFromRadius(2, CameraElevation, CameraRotation);
+    end
+  else if ViewMode = 3 then
+    begin
+      CameraElevation :=  -2;
+      ViewFromRadius(2, CameraElevation, CameraRotation);
+    end
+  else if ViewMode = 4 then
+    begin
+      CameraElevation :=  -9999;
+      ViewFromRadius(2, CameraElevation, CameraRotation);
+    end
+  else
+    begin
+      ViewMode := 0;
+      CameraElevation :=  0;
+      ViewFromRadius(2, CameraElevation, CameraRotation);
+    end;
 
   if not(TestModel = nil) then
     begin
-      if not(TestModel.IsLocked) and not((Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
+      if not(TestModel.IsLocked) and not((Max(TestModel.Scene.BoundingBox.SizeZ, Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY)) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
         begin
-          iScale := (1.0 - Margin) * (1 / Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY));
+          iScale := (1.0 - Margin) * (1 / Max(TestModel.Scene.BoundingBox.SizeZ, Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY)));
           TestModel.LockedScale := iScale;
           TestModel.IsLocked := True;
         end;
