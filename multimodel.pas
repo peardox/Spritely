@@ -51,7 +51,8 @@ type
     fActions: TStringList;
     fCurrentAnimation: Integer;
     fHasAnimations: Boolean;
-    fIsNormalized: Boolean;
+    fIsLocked: Boolean;
+    fLockedScale: Single;
     fModelName: String;
     fRootNode: TX3DRootNode;
     fScene: TCastleScene;
@@ -70,10 +71,12 @@ type
     property  Actions: TStringList read fActions write fActions;
     property  Animations[I: Cardinal]: TAnimationInfo read GetAnimation;
     procedure AddAllAnimations;
+    property  Debug: TDebugTransformBox read fDebug write fDebug;
     procedure FreeAllAnimations;
     property  CurrentAnimation: Integer read fCurrentAnimation write fCurrentAnimation;
     property  HasAnimations: Boolean read fHasAnimations write fHasAnimations;
-    property  IsNormalized: Boolean read fIsNormalized write fIsNormalized;
+    property  IsLocked: Boolean read fIsLocked write fIsLocked;
+    property  LockedScale: Single read fLockedScale write fLockedScale;
     property  ModelName: String read fModelName write fModelName;
     property  RootNode: TX3DRootNode read fRootNode write fRootNode;
     property  Scene: TCastleScene read fScene write fScene;
@@ -284,9 +287,7 @@ begin
   fDebug := TDebugTransformBox.Create(Self);
   fDebug.Parent := fScene;
   fDebug.BoxColor := Vector4(0,0,0, 1);
-  fDebug.Exists := True;
-
-  //  DebugBoxMenu.Checked := Debug.Exists;
+  fDebug.Exists := False;
 
 //  Self.Normalize;
 end;
@@ -375,7 +376,8 @@ begin
   fActions := nil;
   fCurrentAnimation := -1;
   fHasAnimations := False;
-  fIsNormalized := False;
+  fIsLocked := False;
+  fLockedScale := 1.0;
   fModelName := EmptyStr;
   fRootNode := nil;
   fTransform := nil;

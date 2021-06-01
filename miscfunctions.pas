@@ -5,11 +5,19 @@ unit MiscFunctions;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, CastleVectors;
 
 function StripExtension(S: String): String;
+function Vector3(const X: Single): TVector3; overload; inline;
 
 implementation
+
+function Vector3(const X: Single): TVector3;
+begin
+  Result.Data[0] := X;
+  Result.Data[1] := X;
+  Result.Data[2] := X;
+end;
 
 function StripExtension(S: String): String;
 var

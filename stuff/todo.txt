@@ -3,6 +3,7 @@ Convert Static Models To GLTF
 Prepare Banner Morph Frames
 
 [ToDo]
+Dialog Windows + Controls
 Limit CreateSpriteImage to MaxWindowSize
 Convert "Take 001" to Separate Animations
 Extend ViewFromRadius to handle rotation around origin

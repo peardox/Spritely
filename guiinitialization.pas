@@ -4,17 +4,18 @@ unit GUIInitialization;
 // {$define pausebtn}
 {$define disableMap}
 
+// FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 interface
 
 uses
   Classes, SysUtils, Math, CastleUIState, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, ComCtrls, CastleControl, MainGameUnit, CastleControls,
-  CastleColors, CastleUIControls, CastleTriangles, CastleShapes, CastleVectors,
-  CastleSceneCore, CastleScene, CastleTransform, CastleViewport, CastleCameras,
-  X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages, CastleFilesUtils,
-  CastleURIUtils, MiscFunctions, CastleGLUtils, CastleLCLUtils,
-  CastleApplicationProperties, CastleLog, CastleTimeUtils, CastleKeysMouse,
-  JsonTools, AniTxtJson, AniTakeUtils, Types, multimodel;
+  ExtCtrls, StdCtrls, ComCtrls, Menus, CastleControl, MainGameUnit,
+  CastleControls, CastleColors, CastleUIControls, CastleTriangles, CastleShapes,
+  CastleVectors, CastleSceneCore, CastleScene, CastleTransform, CastleViewport,
+  CastleCameras, X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages,
+  CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleGLUtils,
+  CastleLCLUtils, CastleApplicationProperties, CastleLog, CastleTimeUtils,
+  CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types, multimodel;
 
 type
   { TCastleForm }
@@ -23,6 +24,11 @@ type
     Button1: TButton;
     Button2: TButton;
     ListView1: TListView;
+    MainMenu1: TMainMenu;
+    MenuItem1: TMenuItem;
+    FileOpenMenu: TMenuItem;
+    DebugBoxMenu: TMenuItem;
+    CreateSpriteMenu: TMenuItem;
     Panel1: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
@@ -36,6 +42,8 @@ type
     procedure Button2Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure DebugBoxMenuClick(Sender: TObject);
+    procedure CreateSpriteMenuClick(Sender: TObject);
     procedure TrackBar1Change(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -87,17 +95,18 @@ begin
 
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/up.glb';
+//  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up311.glb';
 //  ModelFile := 'castle-data:/up131.glb';
 //  ModelFile := 'castle-data:/up113.glb';
 //  ModelFile := 'castle-data:/tavern/scene.gltf';
-  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'ZerinLabs' + PathDelim + 'Retro-Gothic-EnviroKit' + PathDelim + 'glb' + PathDelim + 'deco_cathedral_table.glb';
-  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'RenderHub' + PathDelim + 'building-medieval' + PathDelim + 'building_01.glb';
+//  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
   InitializeLog;
   {$ifdef darwin}
 //  WindowState := wsFullScreen;
@@ -117,17 +126,31 @@ begin
   {$else}
   Button1.Caption := 'Create Sprite';
   {$endif}
-  Button2.Caption := ''; // 'Split Take 001';
+  Button2.Caption := 'Scale 1.0'; // 'Pause / Play'; // 'Split Take 001';
+end;
+
+procedure TCastleForm.DebugBoxMenuClick(Sender: TObject);
+begin
+  with CastleApp.TestModel.Debug do
+    begin
+      Exists := not Exists;
+      DebugBoxMenu.Checked := Exists;
+    end;
+end;
+
+procedure TCastleForm.CreateSpriteMenuClick(Sender: TObject);
+begin
+  {$ifndef pausebtn}
+  Button1.Enabled := False;
+  {$endif}
+  Button1Click(Sender);
 end;
 
 procedure TCastleForm.TrackBar1Change(Sender: TObject);
-var
-  NewScale: Single;
 begin
   if Tracking then
     begin
-      NewScale := Trackbar1.Position / 10000;
-      CastleApp.TestModel.Scene.Scale := Vector3(NewScale, NewScale, NewScale);
+      CastleApp.iScale := Trackbar1.Position / 10000;
     end;
 end;
 
@@ -269,6 +292,7 @@ begin
     end;
   Exit;
 {$else}
+  Button1.Enabled := False;
   if not (CastleApp.TestModel.Scene = nil) then
     begin
       Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 8192, 8192);
@@ -276,27 +300,27 @@ begin
         begin
           SName := FileNameAutoInc('grab_%4.4d.jpg');
           SaveImage(Sprite, SName);
-          with CastleApp do
-            begin
-              WriteLnLog('Scale : ' + FloatToStr(TestModel.Scene.Scale.X));
-              WriteLnLog('BBox0 : ' + FloatToStr(TestModel.Scene.BoundingBox.Data[0].X) +
-                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[0].Y) +
-                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[0].Z));
-              WriteLnLog('BBox1 : ' + FloatToStr(TestModel.Scene.BoundingBox.Data[1].X) +
-                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[1].Y) +
-                ', ' + FloatToStr(TestModel.Scene.BoundingBox.Data[1].Z));
-              //          infoNotifications.Show('Saved : ' + SName);
-            end;
-
           FreeAndNil(Sprite);
         end;
     end;
+  Button1.Enabled := True;
 {$endif}
 end;
 
 procedure TCastleForm.Button2Click(Sender: TObject);
 begin
-//  MapAnims(nil, nil);
+  with CastleApp do
+    begin
+      if not((Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
+        begin
+          iScale := 1 / Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY);
+          TestModel.LockedScale := iScale;
+        end;
+      //  if not(CastleApp.TestModel.CurrentAnimation = -1) then
+      //    begin
+      //      CastleApp.TestModel.Pause;
+      //    end;
+    end;
 end;
 
 procedure TCastleForm.WindowOpen(Sender: TObject);
@@ -396,6 +420,7 @@ begin
       AddInfo('3D Scale', TestModel.Scene.Scale.ToString);
       AddInfo('Pos A', '');
       AddInfo('Pos B', '');
+      AddInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
       AddInfo('Max Viewport', MaxVP.ToString);
     end;
 end;
@@ -420,6 +445,7 @@ begin
       UpdateInfo('3D Scale', TestModel.Scene.Scale.ToString);
       UpdateInfo('Pos A', Pos2DTo3D(0, 0));
       UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
+      UpdateInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
       end;
 end;
 

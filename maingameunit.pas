@@ -40,6 +40,7 @@ type
     Viewport: TCastleViewport;
     TestModel: TCastleModel;
     RotationalAngle: Single;
+    iScale: Single;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
     procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
@@ -62,7 +63,8 @@ var
 
   const
     SpriteWidth = 64;
-    SpriteHeight = 96;
+    SpriteHeight = 64;
+    Margin = 0.1;
 
 implementation
 {$ifdef cgeapp}
@@ -151,12 +153,6 @@ begin
   CreateLabel(LabelSpare, 2);
   CreateLabel(LabelFPS, 1);
   CreateLabel(LabelRender, 0);
-
-
-  ViewFromRadius(2, -2, RotationalAngle);
-//  ViewFromRadius(2, -2, Pi / 4);
-//  ViewFromRadius(2, Vector3(-1, -2, -1));
-//  ViewFromRadius(2, Vector3(0, 0, -1));
 end;
 
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
@@ -168,14 +164,18 @@ end;
 procedure TCastleApp.LoadModel(filename: String);
 begin
   try
+    iScale := 1.0;
     TestModel := TCastleModel.Create(Application);
     TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.Load(filename);
     TestModel.Normalize;
-//    TestModel.Scene.Scale := Vector3(0.1154000014, 0.1154000014, 0.1154000014);
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
+    if not((Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
+      begin
+        iScale := 1 / Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY);
+      end;
   except
     on E : Exception do
       begin
@@ -188,9 +188,7 @@ procedure TCastleApp.Start;
 begin
   inherited;
   RotationalAngle := 2 * Pi * (5/8);
-  WriteLnLog('RotationalAngle : ' + FloatToStr(RotationalAngle));
   LogTextureCache := True;
-  WriteLnLog('Start : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
   TestModel := nil;
   LoadViewport;
   PrepDone := True;
@@ -233,11 +231,21 @@ end;
 
 procedure TCastleApp.Update(const SecondsPassed: Single; var HandleInput: boolean);
 begin
-//  RotationalAngle += (-1/180) * Pi;
+//  ViewFromRadius(2, -0.81625, RotationalAngle);
 //  ViewFromRadius(2, -2, RotationalAngle);
+  ViewFromRadius(2, 0, 2 * pi * (6/8));
+//  ViewFromRadius(2, Vector3(-1, -2, -1));
 
   if not(TestModel = nil) then
     begin
+      if not(TestModel.IsLocked) and not((Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
+        begin
+          iScale := (1.0 - Margin) * (1 / Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY));
+          TestModel.LockedScale := iScale;
+          TestModel.IsLocked := True;
+        end;
+
+      TestModel.Scene.Scale := Vector3(iScale, iScale, iScale);
       if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
         begin
           if TestModel.IsPaused then

@@ -1,28 +1,29 @@
 object CastleForm: TCastleForm
-  Left = 694
+  Left = 975
   Height = 438
-  Top = 383
+  Top = 539
   Width = 700
   Caption = 'CastleApp'
-  ClientHeight = 438
+  ClientHeight = 418
   ClientWidth = 700
+  Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel
     Left = 300
-    Height = 438
+    Height = 418
     Top = 0
     Width = 400
     Align = alClient
     Caption = 'Panel1'
-    ClientHeight = 438
+    ClientHeight = 418
     ClientWidth = 400
     TabOrder = 0
     object Window: TCastleControlBase
       Left = 6
-      Height = 436
+      Height = 416
       Top = 1
       Width = 393
       Align = alClient
@@ -34,36 +35,36 @@ object CastleForm: TCastleForm
     end
     object Splitter1: TSplitter
       Left = 1
-      Height = 436
+      Height = 416
       Top = 1
       Width = 5
     end
   end
   object Panel2: TPanel
     Left = 0
-    Height = 438
+    Height = 418
     Top = 0
     Width = 300
     Align = alLeft
     BevelOuter = bvNone
     Caption = 'Panel2'
-    ClientHeight = 438
+    ClientHeight = 418
     ClientWidth = 300
     TabOrder = 1
     object Panel3: TPanel
       Left = 0
-      Height = 363
+      Height = 343
       Top = 0
       Width = 300
       Align = alClient
       BevelOuter = bvNone
-      ClientHeight = 363
+      ClientHeight = 343
       ClientWidth = 300
       TabOrder = 0
       object ListView1: TListView
         Left = 0
-        Height = 29
-        Top = 334
+        Height = 185
+        Top = 158
         Width = 300
         Align = alClient
         AutoSort = False
@@ -82,7 +83,7 @@ object CastleForm: TCastleForm
       end
       object TreeView1: TTreeView
         Left = 0
-        Height = 329
+        Height = 153
         Top = 0
         Width = 300
         Align = alTop
@@ -95,7 +96,7 @@ object CastleForm: TCastleForm
         Cursor = crVSplit
         Left = 0
         Height = 5
-        Top = 329
+        Top = 153
         Width = 300
         Align = alTop
         ResizeAnchor = akTop
@@ -104,7 +105,7 @@ object CastleForm: TCastleForm
     object Panel4: TPanel
       Left = 0
       Height = 75
-      Top = 363
+      Top = 343
       Width = 300
       Align = alBottom
       ClientHeight = 75
@@ -140,6 +141,28 @@ object CastleForm: TCastleForm
         Caption = 'Button2'
         OnClick = Button2Click
         TabOrder = 2
+      end
+    end
+  end
+  object MainMenu1: TMainMenu
+    Left = 373
+    Top = 51
+    object MenuItem1: TMenuItem
+      Caption = 'File'
+      ShortCut = 32838
+      object FileOpenMenu: TMenuItem
+        Caption = 'Open'
+        ShortCut = 16463
+      end
+      object DebugBoxMenu: TMenuItem
+        Caption = 'Debug'
+        ShortCut = 16452
+        OnClick = DebugBoxMenuClick
+      end
+      object CreateSpriteMenu: TMenuItem
+        Caption = 'Create Sprite'
+        ShortCut = 16467
+        OnClick = CreateSpriteMenuClick
       end
     end
   end
