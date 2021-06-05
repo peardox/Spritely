@@ -9,6 +9,7 @@ object CastleForm: TCastleForm
   Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyPress = FormKeyPress
   Position = poDefault
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel

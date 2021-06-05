@@ -22,6 +22,16 @@ uses
   multimodel;
 
 type
+  { TViewMode }
+  TViewMode = (
+    vmFlat,
+    vmTwoToOne,
+    vmIsometric,
+    vmIsometricX2,
+    vmMilitary,
+    vmCustom
+  );
+
   { TCastleApp }
 
   TCastleApp = class(TUIState)
@@ -33,6 +43,8 @@ type
     function  Press(const Event: TInputPressRelease): Boolean; override; // TUIState
     function  Release(const Event: TInputPressRelease): Boolean; override; // TUIState
   private
+    fViewMode: Cardinal;
+    fStretchMultiplier: Single;
     LabelFPS: TCastleLabel;
     LabelRender: TCastleLabel;
     LabelSpare: TCastleLabel;
@@ -42,7 +54,7 @@ type
     CameraRotation: Single;
     CameraElevation: Single;
     iScale: Single;
-    ViewMode: Cardinal;
+    BoundRadius: Single;
     LabelMode: TCastleLabel;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
@@ -52,10 +64,16 @@ type
     procedure LoadViewport;
     procedure LoadModel(filename: String);
     procedure ShowModel(AModel: TCastleModel);
+    procedure SetStretchMultiplier(const AStretch: Single);
+    procedure SetViewMode(const AViewMode: Cardinal);
     procedure ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
     procedure ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
     function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isTransparent: Boolean = False): TCastleImage;
-  end;
+    procedure UpdateScale;
+
+    property  StretchMultiplier: Single read fStretchMultiplier write SetStretchMultiplier default 0;
+    property  ViewMode: Cardinal read fViewMode write SetViewMode default 0;
+end;
 
 var
   AppTime: Int64;
@@ -64,10 +82,10 @@ var
   CastleApp: TCastleApp;
   MaxVP: TVector2Integer;
 
-  const
-    SpriteWidth = 64;
-    SpriteHeight = 64;
-    Margin = 0.1;
+const
+  SpriteWidth = 64;
+  SpriteHeight = 64;
+  Margin = 0.1;
 
 implementation
 {$ifdef cgeapp}
@@ -77,6 +95,41 @@ uses GUIInitialization;
 {$endif}
 
 { TCastleApp }
+
+procedure TCastleApp.SetStretchMultiplier(const AStretch: Single);
+begin
+  if not(fStretchMultiplier = AStretch) then
+    begin
+      fStretchMultiplier := AStretch;
+      UpdateScale;
+    end;
+end;
+
+procedure TCastleApp.SetViewMode(const AViewMode: Cardinal);
+begin
+  if not(fViewMode = AViewMode) then
+    begin
+      fViewMode := AViewMode;
+      UpdateScale;
+    end;
+end;
+
+procedure TCastleApp.UpdateScale;
+begin
+  if not(Viewport = nil) and not(Viewport.Camera = nil) and (Viewport.Camera.ProjectionType = ptOrthographic) then
+    begin
+      Viewport.Camera.Orthographic.Width := Viewport.EffectiveWidth / StretchMultiplier;
+      Viewport.Camera.Orthographic.Height := Viewport.EffectiveHeight;
+      WriteLnLog('EW : ' + Viewport.EffectiveWidth.ToString + ' x ' + Viewport.EffectiveHeight.ToString);
+    end
+end;
+
+procedure TCastleApp.Resize;
+begin
+  WriteLnLog('Resize : ' + IntToStr(Container.Width) + ' x ' + IntToStr(Container.Height));
+  inherited;
+  UpdateScale;
+end;
 
 procedure TCastleApp.BootStrap;
 var
@@ -134,6 +187,8 @@ end;
 
 procedure TCastleApp.LoadViewport;
 begin
+  StretchMultiplier := 1;
+
   Viewport := TCastleViewport.Create(Application);
   Viewport.FullSize := True;
   Viewport.AutoCamera := False;
@@ -144,10 +199,12 @@ begin
   Viewport.Camera.Orthographic.Width := SpriteWidth;
   Viewport.Camera.Orthographic.Height := SpriteHeight;
   Viewport.Camera.Orthographic.Origin := Vector2(0.5, 0.5);
-  Viewport.Camera.Orthographic.Scale := (SpriteHeight / SpriteWidth) / Min(SpriteWidth, SpriteHeight);
+  Viewport.Camera.Orthographic.Scale := 1;
   Viewport.Camera.ProjectionType := ptOrthographic;
 
   InsertFront(Viewport);
+
+  UpdateScale; // SB
 
   CreateLabel(LabelMode, 0, False);
 
@@ -163,9 +220,6 @@ begin
 end;
 
 procedure TCastleApp.LoadModel(filename: String);
-var
-  sc: TVector3;
-  sr: Single;
 begin
   try
     TestModel := TCastleModel.Create(Application);
@@ -175,12 +229,6 @@ begin
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
-    sc := Vector3(0, 0, 0);
-    sr := 0;
-    TestModel.Scene.BoundingBox.BoundingSphere(sc, sr);
-    if not(sr = 0) then
-      iScale := 1.0 / sr;
-    WriteLnLog('Spehere Center : ' + sc.ToString + ' Sphere Radius : ' + FloatToStr(sr));
   except
     on E : Exception do
       begin
@@ -195,6 +243,8 @@ begin
   CameraRotation := 2 * Pi * (5/8);
   CameraElevation := 0;
   ViewMode := 0;
+  BoundRadius := 1.0;
+  iScale := 1.0;
   LogTextureCache := True;
   TestModel := nil;
   LoadViewport;
@@ -230,37 +280,56 @@ begin
   RenderReady := True;
 end;
 
-procedure TCastleApp.Resize;
-begin
-  inherited;
-end;
-
 procedure TCastleApp.Update(const SecondsPassed: Single; var HandleInput: boolean);
+var
+  sc: TVector3;
+  sr: Single;
 begin
   if ViewMode = 0 then
-    ViewFromRadius(2, 0, 2 * pi * (6/8))
+    begin
+      StretchMultiplier := 1;
+      Viewport.Camera.Orthographic.Stretch := False;
+      ViewFromRadius(2, 0, 2 * pi * (6/8));
+    end
   else if ViewMode = 1 then
     begin
+      StretchMultiplier := 1;
+      Viewport.Camera.Orthographic.Stretch := False;
       CameraElevation :=  -0.81625;
       ViewFromRadius(2, CameraElevation, CameraRotation);
     end
   else if ViewMode = 2 then
     begin
+      StretchMultiplier := 1;
+      Viewport.Camera.Orthographic.Stretch := False;
       CameraElevation :=  -1;
       ViewFromRadius(2, CameraElevation, CameraRotation);
     end
   else if ViewMode = 3 then
     begin
+      StretchMultiplier := 1;
+      Viewport.Camera.Orthographic.Stretch := False;
       CameraElevation :=  -2;
       ViewFromRadius(2, CameraElevation, CameraRotation);
     end
   else if ViewMode = 4 then
     begin
+      StretchMultiplier := 0.81625;
+      Viewport.Camera.Orthographic.Stretch := True;
+      CameraElevation :=  -2;
+      ViewFromRadius(2, CameraElevation, CameraRotation);
+    end
+  else if ViewMode = 5 then
+    begin
+      StretchMultiplier := 1;
+      Viewport.Camera.Orthographic.Stretch := False;
       CameraElevation :=  -9999;
       ViewFromRadius(2, CameraElevation, CameraRotation);
     end
   else
     begin
+      StretchMultiplier := 1;
+      Viewport.Camera.Orthographic.Stretch := False;
       ViewMode := 0;
       CameraElevation :=  0;
       ViewFromRadius(2, CameraElevation, CameraRotation);
@@ -268,14 +337,24 @@ begin
 
   if not(TestModel = nil) then
     begin
-      if not(TestModel.IsLocked) and not((Max(TestModel.Scene.BoundingBox.SizeZ, Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY)) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
+      if not(TestModel.IsLocked) then
         begin
-          iScale := (1.0 - Margin) * (1 / Max(TestModel.Scene.BoundingBox.SizeZ, Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY)));
+          sc := Vector3(0, 0, 0);
+          sr := 0;
+          TestModel.Scene.BoundingBox.BoundingSphere(sc, sr);
+          if not(sr = 0) then
+            BoundRadius := sr
+          else
+            BoundRadius := 1.0;
+
+          iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
           TestModel.LockedScale := iScale;
           TestModel.IsLocked := True;
+          WriteLnLog('BoundRadius : ' + BoundRadius.ToString + ' iScale : ' + iScale.ToString);
         end;
 
-      TestModel.Scene.Scale := Vector3(iScale, iScale, iScale);
+      Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
+
       if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
         begin
           if TestModel.IsPaused then
@@ -348,11 +427,15 @@ begin
           SourceViewport.Camera.Up := Viewport.Camera.Up;
           SourceViewport.Camera.Direction := Viewport.Camera.Direction;
           SourceViewport.Camera.Position  := Viewport.Camera.Position;
-          SourceViewport.Camera.Orthographic.Scale := Min(
-            Viewport.Camera.Orthographic.EffectiveWidth / TextureWidth,
-            Viewport.Camera.Orthographic.EffectiveHeight / TextureHeight);
 
-          WriteLnLog('Scale : ' + FloatToStr(SourceViewport.Camera.Orthographic.Scale));
+          if Viewport.Camera.Orthographic.Stretch then
+            begin
+              SourceViewport.Camera.Orthographic.Stretch := True;
+              SourceViewport.Camera.Orthographic.Width := SourceViewport.EffectiveWidth / StretchMultiplier;
+              SourceViewport.Camera.Orthographic.Height := SourceViewport.EffectiveHeight;
+            end;
+
+          SourceViewport.Camera.Orthographic.Scale := 1 / iScale;
 
           SourceViewport.Items := ViewPort.Items;
           ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);

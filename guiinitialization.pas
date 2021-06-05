@@ -45,6 +45,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure DebugBoxMenuClick(Sender: TObject);
     procedure CreateSpriteMenuClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: char);
     procedure TrackBar1Change(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -95,11 +96,13 @@ begin
   FSPrefix := HomePath;
   {$endif}
 
-  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/up.glb';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'quaking-aspen.glb';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'fan-palm.glb';
 //  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up311.glb';
-//  ModelFile := 'castle-data:/up131.glb';
+  ModelFile := 'castle-data:/up131.glb';
 //  ModelFile := 'castle-data:/up113.glb';
 //  ModelFile := 'castle-data:/tavern/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
@@ -150,13 +153,24 @@ begin
   Button1Click(Sender);
 end;
 
+procedure TCastleForm.FormKeyPress(Sender: TObject; var Key: char);
+begin
+  if Ord(Key) = Ord(keySpace) then
+    begin
+//      CastleApp.TestModel.IsLocked := False;
+      if not(CastleApp.TestModel.CurrentAnimation = -1) then
+        begin
+          CastleApp.TestModel.Pause;
+        end;
+    end;
+
+end;
+
 procedure TCastleForm.TrackBar1Change(Sender: TObject);
 begin
   if Tracking then
     begin
     CastleApp.CameraRotation := (2 * Pi) * (Trackbar1.Position / 100000);
-//    CastleApp.iScale := Trackbar1.Position / 10000;
-//      CastleApp.CameraElevation := -Trackbar1.Position / 1000;
     end;
 end;
 
@@ -318,15 +332,7 @@ procedure TCastleForm.Button2Click(Sender: TObject);
 begin
   with CastleApp do
     begin
-      Inc(ViewMode);
-//      ViewFromRadius(2, -2, CastleApp.CameraRotation);
-{
-      if not((Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY) - Min(Viewport.Camera.Orthographic.EffectiveHeight, Viewport.Camera.Orthographic.EffectiveWidth)) < 0.1) then
-        begin
-          iScale := 1 / Max(TestModel.Scene.BoundingBox.SizeX, TestModel.Scene.BoundingBox.SizeY);
-          TestModel.LockedScale := iScale;
-        end;
-}
+      ViewMode := ViewMode + 1;
       //  if not(CastleApp.TestModel.CurrentAnimation = -1) then
       //    begin
       //      CastleApp.TestModel.Pause;
@@ -400,6 +406,15 @@ procedure TCastleForm.WindowPress(Sender: TObject;
 var
   Q: TQuaternion;
 begin
+  if Event.Key = keySpace then
+    begin
+      if not(CastleApp.TestModel.CurrentAnimation = -1) then
+        begin
+//          CastleApp.TestModel.IsLocked := False;
+          CastleApp.TestModel.Pause;
+        end;
+    end;
+
   if ModeOrientation then
     begin
       with CastleApp do
@@ -466,7 +481,8 @@ begin
       AddInfo('Translation', TestModel.Scene.Translation.ToString);
       AddInfo('Center', TestModel.Scene.Center.ToString);
       AddInfo('Rotation', TestModel.Scene.Rotation.ToString);
-      AddInfo('3D Scale', TestModel.Scene.Scale.ToString);
+      AddInfo('iScale', CastleApp.iScale.ToString);
+      AddInfo('BoundRadius', CastleApp.BoundRadius.ToString);
       AddInfo('Pos A', '');
       AddInfo('Pos B', '');
       AddInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
@@ -491,7 +507,8 @@ begin
       UpdateInfo('Translation', TestModel.Scene.Translation.ToString);
       UpdateInfo('Center', TestModel.Scene.Center.ToString);
       UpdateInfo('Rotation', TestModel.Scene.Rotation.ToString);
-      UpdateInfo('3D Scale', TestModel.Scene.Scale.ToString);
+      UpdateInfo('iScale', CastleApp.iScale.ToString);
+      UpdateInfo('BoundRadius', CastleApp.BoundRadius.ToString);
       UpdateInfo('Pos A', Pos2DTo3D(0, 0));
       UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
       UpdateInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
