@@ -16,7 +16,7 @@ uses
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleGLUtils,
   CastleLCLUtils, CastleApplicationProperties, CastleLog, CastleTimeUtils,
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, multimodel;
+  CastleQuaternions, multimodel, BGRAImageTheme;
 
 type
   { TCastleForm }
@@ -96,13 +96,13 @@ begin
   FSPrefix := HomePath;
   {$endif}
 
-//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'quaking-aspen.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'fan-palm.glb';
 //  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up311.glb';
-  ModelFile := 'castle-data:/up131.glb';
+//  ModelFile := 'castle-data:/up131.glb';
 //  ModelFile := 'castle-data:/up113.glb';
 //  ModelFile := 'castle-data:/tavern/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
@@ -157,13 +157,12 @@ procedure TCastleForm.FormKeyPress(Sender: TObject; var Key: char);
 begin
   if Ord(Key) = Ord(keySpace) then
     begin
-//      CastleApp.TestModel.IsLocked := False;
+      CastleApp.ModelRotationCheck := True;
       if not(CastleApp.TestModel.CurrentAnimation = -1) then
         begin
           CastleApp.TestModel.Pause;
         end;
     end;
-
 end;
 
 procedure TCastleForm.TrackBar1Change(Sender: TObject);
@@ -306,6 +305,9 @@ var
   Sprite: TCastleImage;
   SName: String;
 begin
+//  CastleApp.ModelRotationCheck := True;
+//  Exit;
+
 {$ifdef pausebtn}
   if not(CastleApp.TestModel.CurrentAnimation = -1) then
     begin

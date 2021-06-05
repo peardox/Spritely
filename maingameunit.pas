@@ -52,10 +52,13 @@ type
     Viewport: TCastleViewport;
     TestModel: TCastleModel;
     CameraRotation: Single;
+    ModelRotation: Single;
     CameraElevation: Single;
     iScale: Single;
     BoundRadius: Single;
     LabelMode: TCastleLabel;
+    ModelRotationCheck: Boolean;
+    procedure UpdateModelRotation;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
     procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
@@ -120,6 +123,8 @@ begin
     begin
       Viewport.Camera.Orthographic.Width := Viewport.EffectiveWidth / StretchMultiplier;
       Viewport.Camera.Orthographic.Height := Viewport.EffectiveHeight;
+      iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
+      Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
       WriteLnLog('EW : ' + Viewport.EffectiveWidth.ToString + ' x ' + Viewport.EffectiveHeight.ToString);
     end
 end;
@@ -225,7 +230,6 @@ begin
     TestModel := TCastleModel.Create(Application);
     TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.Load(filename);
-    TestModel.Normalize;
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
@@ -241,6 +245,8 @@ procedure TCastleApp.Start;
 begin
   inherited;
   CameraRotation := 2 * Pi * (5/8);
+  ModelRotation := 0;
+  ModelRotationCheck := False;
   CameraElevation := 0;
   ViewMode := 0;
   BoundRadius := 1.0;
@@ -264,6 +270,21 @@ begin
   LabelRender.Caption := 'Render = ' + FormatFloat('####0.00', Container.Fps.OnlyRenderFps);
 end;
 
+procedure TCastleApp.UpdateModelRotation;
+begin
+  ModelRotation += 3;
+  if ModelRotation < 360 then
+    begin
+      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
+    end
+  else
+    begin
+      ModelRotation := 0;
+      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
+      ModelRotationCheck := False;
+    end;
+end;
+
 procedure TCastleApp.Render;
 begin
   inherited;
@@ -285,6 +306,11 @@ var
   sc: TVector3;
   sr: Single;
 begin
+  if ModelRotationCheck then
+    begin
+      UpdateModelRotation;
+    end;
+
   if ViewMode = 0 then
     begin
       StretchMultiplier := 1;
@@ -343,14 +369,13 @@ begin
           sr := 0;
           TestModel.Scene.BoundingBox.BoundingSphere(sc, sr);
           if not(sr = 0) then
-            BoundRadius := sr
+            BoundRadius := sqrt(sr)
           else
             BoundRadius := 1.0;
 
           iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
           TestModel.LockedScale := iScale;
           TestModel.IsLocked := True;
-          WriteLnLog('BoundRadius : ' + BoundRadius.ToString + ' iScale : ' + iScale.ToString);
         end;
 
       Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
@@ -435,7 +460,8 @@ begin
               SourceViewport.Camera.Orthographic.Height := SourceViewport.EffectiveHeight;
             end;
 
-          SourceViewport.Camera.Orthographic.Scale := 1 / iScale;
+          SourceViewport.Camera.Orthographic.Scale := (2 * BoundRadius) /
+            Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight);
 
           SourceViewport.Items := ViewPort.Items;
           ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);

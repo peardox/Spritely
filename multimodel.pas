@@ -254,8 +254,6 @@ begin
 end;
 
 procedure TCastleModel.ResetAnimationState(const IgnoreAffectedBy: TTimeSensorNode = nil);
-var
-  ANode: TAnimationInfo;
 begin
   if not(fCurrentAnimation = -1) then
     begin
@@ -277,21 +275,32 @@ procedure TCastleModel.Load(const ARootNode: TX3DRootNode; const AOwnsRootNode: 
   const AOptions: TSceneLoadOptions);
 begin
   fScene.Load(ARootNode, AOwnsRootNode, AOptions);
-//  AddAllAnimations;
-// Self.Normalize;
+  AddAllAnimations;
+  Self.Normalize;
 end;
 
 procedure TCastleModel.Load(const AURL: string; const AOptions: TSceneLoadOptions);
+var
+ TempNode: TX3DRootNode;
 begin
+  fRootNode := TX3DRootNode.Create;
+  fTransform := TTransformNode.Create;
+
+  TempNode := LoadNode(AURL);
+  fTransform.AddChildren(TempNode);
+  fRootNode.AddChildren(fTransform);
+
   fModelName := AURL;
-  fScene.Load(AURL, AOptions);
+
+//  fScene.Load(AURL, AOptions);
+  fScene.Load(fRootNode, True, AOptions);
   AddAllAnimations;
   fDebug := TDebugTransformBox.Create(Self);
   fDebug.Parent := fScene;
   fDebug.BoxColor := Vector4(0,0,0, 1);
   fDebug.Exists := False;
 
-//  Self.Normalize;
+  Normalize;
 end;
 
 { TCastleModel }
@@ -363,9 +372,9 @@ begin
             fScene.Center := Vector3(Min(fScene.BoundingBox.Data[0].X, fScene.BoundingBox.Data[1].X) + (fScene.BoundingBox.SizeX / 2),
                               Min(fScene.BoundingBox.Data[0].Y, fScene.BoundingBox.Data[1].Y) + (fScene.BoundingBox.SizeY / 2),
                               Min(fScene.BoundingBox.Data[0].Z, fScene.BoundingBox.Data[1].Z) + (fScene.BoundingBox.SizeZ / 2));
-            fScene.Scale := Vector3(1 / fScene.BoundingBox.MaxSize,
-                             1 / fScene.BoundingBox.MaxSize,
-                             1 / fScene.BoundingBox.MaxSize);
+            fScene.Scale := Vector3(2 / fScene.BoundingBox.MaxSize,
+                             2 / fScene.BoundingBox.MaxSize,
+                             2 / fScene.BoundingBox.MaxSize);
             fScene.Translation := -fScene.Center;
           end;
       end;
