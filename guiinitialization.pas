@@ -14,8 +14,8 @@ uses
   CastleVectors, CastleSceneCore, CastleScene, CastleTransform, CastleViewport,
   CastleCameras, X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages,
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleGLUtils,
-  CastleLCLUtils, CastleApplicationProperties, CastleLog, CastleTimeUtils,
-  CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
+  CastleLCLUtils, CastleDialogs, CastleApplicationProperties, CastleLog,
+  CastleTimeUtils, CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
   CastleQuaternions, multimodel, BGRAImageTheme;
 
 type
@@ -24,12 +24,14 @@ type
   TCastleForm = class(TForm)
     Button1: TButton;
     Button2: TButton;
+    CastleOpenDialog1: TCastleOpenDialog;
     ListView1: TListView;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     FileOpenMenu: TMenuItem;
     DebugBoxMenu: TMenuItem;
     CreateSpriteMenu: TMenuItem;
+    ExitMenu: TMenuItem;
     Panel1: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
@@ -41,6 +43,7 @@ type
     Window: TCastleControlBase;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure FileOpenMenuClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure DebugBoxMenuClick(Sender: TObject);
@@ -342,6 +345,23 @@ begin
     end;
 end;
 
+procedure TCastleForm.FileOpenMenuClick(Sender: TObject);
+begin
+  CastleOpenDialog1.Filter := '3D Models|*.gltf;*.glb;*.obj;';
+  if CastleOpenDialog1.Execute then
+    begin
+      CastleApp.LoadModel(URIToFilenameSafe(CastleOpenDialog1.Filename));
+      Caption := 'Spritely : ' + CastleOpenDialog1.Filename;
+      {$ifdef usestage}
+      Stage := LoadStage(Scene);
+      Viewport.Items.UseHeadlight := hlOff;
+      Viewport.Items.MainScene := Stage;
+      Viewport.Items.Remove(Scene);
+      Viewport.Items.Add(Stage);
+      {$endif}
+    end;
+end;
+
 procedure TCastleForm.WindowOpen(Sender: TObject);
 begin
   WriteLnLog('WindowOpen : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
@@ -421,31 +441,34 @@ begin
     begin
       with CastleApp do
         begin
-          if Event.Key = keyNumpadPlus then
-            iScale := iScale + (iScale * 0.1);
-          if Event.Key = keyNumpadMinus then
-            iScale := iScale - (iScale * 0.1);
-          if Event.Key = keyPageUp then
-            TestModel.BaseRotation.Z := TestModel.BaseRotation.Z + (Pi / 2);
-          if Event.Key = keyPageDown then
-            TestModel.BaseRotation.Z := TestModel.BaseRotation.Z - (Pi / 2);
-          if Event.Key = keyArrowUp then
-            TestModel.BaseRotation.X := TestModel.BaseRotation.X + (Pi / 2);
-          if Event.Key = keyArrowDown then
-            TestModel.BaseRotation.X := TestModel.BaseRotation.X - (Pi / 2);
-          if Event.Key = keyArrowRight then
-            TestModel.BaseRotation.Y := TestModel.BaseRotation.Y + (Pi / 2);
-          if Event.Key = keyArrowLeft then
-            TestModel.BaseRotation.Y := TestModel.BaseRotation.Y - (Pi / 2);
-          Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
-          Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, TestModel.BaseRotation.X));
-          Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, TestModel.BaseRotation.Y));
-          Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, TestModel.BaseRotation.Z));
-          TestModel.Scene.Rotation := Q.ToAxisAngle;
-          LabelMode.Caption := 'Orientation : X = ' +
-            FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.X)) + ', Y = ' +
-            FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Y)) + ', Z = ' +
-            FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Z));
+          if not(TestModel = nil) then
+            begin
+              if Event.Key = keyNumpadPlus then
+                iScale := iScale + (iScale * 0.1);
+              if Event.Key = keyNumpadMinus then
+                iScale := iScale - (iScale * 0.1);
+              if Event.Key = keyPageUp then
+                TestModel.BaseRotation.Z := TestModel.BaseRotation.Z + (Pi / 2);
+              if Event.Key = keyPageDown then
+                TestModel.BaseRotation.Z := TestModel.BaseRotation.Z - (Pi / 2);
+              if Event.Key = keyArrowUp then
+                TestModel.BaseRotation.X := TestModel.BaseRotation.X + (Pi / 2);
+              if Event.Key = keyArrowDown then
+                TestModel.BaseRotation.X := TestModel.BaseRotation.X - (Pi / 2);
+              if Event.Key = keyArrowRight then
+                TestModel.BaseRotation.Y := TestModel.BaseRotation.Y + (Pi / 2);
+              if Event.Key = keyArrowLeft then
+                TestModel.BaseRotation.Y := TestModel.BaseRotation.Y - (Pi / 2);
+              Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
+              Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, TestModel.BaseRotation.X));
+              Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, TestModel.BaseRotation.Y));
+              Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, TestModel.BaseRotation.Z));
+              TestModel.Scene.Rotation := Q.ToAxisAngle;
+              LabelMode.Caption := 'Orientation : X = ' +
+                FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.X)) + ', Y = ' +
+                FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Y)) + ', Z = ' +
+                FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Z));
+            end;
         end;
     end;
 end;

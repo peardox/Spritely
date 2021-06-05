@@ -155,6 +155,7 @@ object CastleForm: TCastleForm
       object FileOpenMenu: TMenuItem
         Caption = 'Open'
         ShortCut = 16463
+        OnClick = FileOpenMenuClick
       end
       object DebugBoxMenu: TMenuItem
         Caption = 'Debug'
@@ -166,6 +167,14 @@ object CastleForm: TCastleForm
         ShortCut = 16467
         OnClick = CreateSpriteMenuClick
       end
+      object ExitMenu: TMenuItem
+        Caption = 'Exit'
+        ShortCut = 32856
+      end
     end
+  end
+  object CastleOpenDialog1: TCastleOpenDialog
+    Left = 426
+    Top = 50
   end
 end

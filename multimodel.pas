@@ -400,11 +400,11 @@ destructor TCastleModel.Destroy;
 begin
   FreeAllAnimations;
   FreeAndNil(fActions);
-{
-  FreeAndNil(fScene);
-  FreeAndNil(fTransform);
-  FreeAndNil(fRootNode);
-}
+
+//  FreeAndNil(fScene);
+//  FreeAndNil(fTransform);
+//  FreeAndNil(fRootNode);
+
   inherited;
 end;
 

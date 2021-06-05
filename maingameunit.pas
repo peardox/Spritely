@@ -227,6 +227,19 @@ end;
 procedure TCastleApp.LoadModel(filename: String);
 begin
   try
+    if not(TestModel = nil) then
+      begin
+        FreeAndNil(TestModel);
+      end;
+
+    CameraRotation := 2 * Pi * (5/8);
+    ModelRotation := 0;
+    ModelRotationCheck := False;
+    CameraElevation := 0;
+    ViewMode := 0;
+    BoundRadius := 1.0;
+    iScale := 1.0;
+
     TestModel := TCastleModel.Create(Application);
     TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.Load(filename);
@@ -244,13 +257,6 @@ end;
 procedure TCastleApp.Start;
 begin
   inherited;
-  CameraRotation := 2 * Pi * (5/8);
-  ModelRotation := 0;
-  ModelRotationCheck := False;
-  CameraElevation := 0;
-  ViewMode := 0;
-  BoundRadius := 1.0;
-  iScale := 1.0;
   LogTextureCache := True;
   TestModel := nil;
   LoadViewport;
