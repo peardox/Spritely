@@ -2,7 +2,7 @@ unit GUIInitialization;
 
 {$mode objfpc}{$H+}
 // {$define pausebtn}
-{$define disableMap}
+// {$define disableMap}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 interface
@@ -99,6 +99,7 @@ begin
   FSPrefix := HomePath;
   {$endif}
 
+{$ifdef disableMap}
   ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'quaking-aspen.glb';
@@ -109,14 +110,20 @@ begin
 //  ModelFile := 'castle-data:/up113.glb';
 //  ModelFile := 'castle-data:/tavern/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
-//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'ZerinLabs' + PathDelim + 'Retro-Gothic-EnviroKit' + PathDelim + 'glb' + PathDelim + 'deco_cathedral_table.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
-  InitializeLog;
+{$else}
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
+  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
+
+{$endif}
+
+InitializeLog;
   ModeOrientation := True;
   {$ifdef darwin}
 //  WindowState := wsFullScreen;

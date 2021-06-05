@@ -23,6 +23,7 @@ function ParseText_FormatB(const S: String): TAniLine;
 implementation
 
 const
+  CHECK_TAB      = $09;
   CHECK_DIGIT_0  = $30;
   CHECK_DIGIT_9  = $39;
   CHECK_COLON    = $3A;
@@ -44,6 +45,67 @@ begin
 end;
 {$inline off}
 
+// <Action><Tab(s)><Start><End>
+function ParseText_FormatC(const S: String): TAniLine;
+var
+  p: PChar;
+  l: Integer;
+  i: Integer;
+  stage: Integer;
+  TmpFrom: String;
+  TmpTo: String;
+begin
+  stage := 0;
+  TmpFrom := EmptyStr;
+  TmpTo := EmptyStr;
+  Result := Default(TAniLine);
+
+  // Get a pointer to the start of the string
+  p := PChar(S);
+  // Length of string
+  l := Length(S);
+
+  // Loop over the string
+  for i := 0 to l - 1 do
+    begin
+
+      if (stage = 0) and (ord(p^) = CHECK_TAB) then
+        Inc(stage)
+      else if (stage > 0) and isDigit(ord(p^)) then
+        begin
+          case stage of
+            1:
+              begin
+                TmpFrom += p^;
+              end;
+            2:
+              begin
+                TmpTo += p^;
+              end;
+            end;
+          end
+        else
+          begin
+            if (stage = 0) then
+              Result.Action += p^;
+            if (stage = 1) and (Length(TmpFrom) > 0) and not(isDigit(ord(p^))) then
+              Inc(stage);
+            if (stage = 2) and (Length(TmpTo) > 0) and not(isDigit(ord(p^))) then
+              Break;
+          end;
+      Inc(p);
+    end;
+
+  if (stage = 2) then
+    begin
+      Result.Success := True;
+      Result.FromFrame := StrToIntDef(TmpFrom.Trim, 0);
+      Result.ToFrame := StrToIntDef(TmpTo.Trim, 0);
+      Result.Action := Result.Action.Trim;
+    end;
+end;
+
+// <Action>:<Start><End>
 function ParseText_FormatB(const S: String): TAniLine;
 var
   p: PChar;
@@ -103,6 +165,7 @@ begin
     end;
 end;
 
+// <Start><End><Action>
 function ParseText_FormatA(const S: String): TAniLine;
 var
   p: PChar;
@@ -184,6 +247,8 @@ begin
       if isAlpha(ord(p^)) then
         begin
           Result := ParseText_FormatB(S);
+          if not(Result.Success) then
+            Result := ParseText_FormatC(S);
           Break;
         end;
       Inc(p);
