@@ -5,18 +5,16 @@ unit MiscFunctions;
 interface
 
 uses
-  Classes, SysUtils, CastleVectors;
+  Classes, SysUtils, Math, CastleVectors, CastleUtils;
 
 function StripExtension(S: String): String;
-function Vector3(const X: Single): TVector3; overload; inline;
+function WrapRadians(const AValue: Single): Single;
 
 implementation
 
-function Vector3(const X: Single): TVector3;
+function WrapRadians(const AValue: Single): Single;
 begin
-  Result.Data[0] := X;
-  Result.Data[1] := X;
-  Result.Data[2] := X;
+  Result := (FloatModulo(AValue + Pi, 2 * Pi)) - Pi;
 end;
 
 function StripExtension(S: String): String;

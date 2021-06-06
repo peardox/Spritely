@@ -1,6 +1,7 @@
 unit GUIInitialization;
 
 {$mode objfpc}{$H+}
+{$TYPEDADDRESS ON}
 // {$define pausebtn}
 // {$define disableMap}
 
@@ -48,7 +49,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure DebugBoxMenuClick(Sender: TObject);
     procedure CreateSpriteMenuClick(Sender: TObject);
-    procedure FormKeyPress(Sender: TObject; var Key: char);
+    procedure ListView1Click(Sender: TObject);
     procedure TrackBar1Change(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -100,7 +101,7 @@ begin
   {$endif}
 
 {$ifdef disableMap}
-  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'quaking-aspen.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'fan-palm.glb';
@@ -110,17 +111,19 @@ begin
 //  ModelFile := 'castle-data:/up113.glb';
 //  ModelFile := 'castle-data:/tavern/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'ZerinLabs' + PathDelim + 'Retro-Gothic-EnviroKit' + PathDelim + 'glb' + PathDelim + 'deco_cathedral_table.glb';
-//  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
+  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'alpha_wolf' + PathDelim + 'fbxwolf.glb';
 {$else}
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
   MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
   ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
-
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + '_bike_animations.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
+//  MapFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'Thief-animations-list.txt';
+//  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 {$endif}
 
 InitializeLog;
@@ -163,16 +166,9 @@ begin
   Button1Click(Sender);
 end;
 
-procedure TCastleForm.FormKeyPress(Sender: TObject; var Key: char);
+procedure TCastleForm.ListView1Click(Sender: TObject);
 begin
-  if Ord(Key) = Ord(keySpace) then
-    begin
-      CastleApp.ModelRotationCheck := True;
-      if not(CastleApp.TestModel.CurrentAnimation = -1) then
-        begin
-          CastleApp.TestModel.Pause;
-        end;
-    end;
+  ActiveControl := Window;
 end;
 
 procedure TCastleForm.TrackBar1Change(Sender: TObject);
@@ -205,10 +201,17 @@ begin
     end;
 
   if (NodeParent.Parent = nil) then  // User clicked on an Animation
-    begin
+    begin // A proper animation node
+      CastleApp.TestModel.BaseRotation := Vector3(0, 0, 0);
+      CastleApp.TestModel.SelectAnimation(Node.Text);
+    end
+  else
+    begin // A TakeOne Node
       CastleApp.TestModel.BaseRotation := Vector3(0, 0, 0);
       CastleApp.TestModel.SelectAnimation(Node.Text);
     end;
+
+  ActiveControl := Window;
 end;
 
 procedure TCastleForm.TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -231,11 +234,11 @@ begin
       if(TObject(Node.Data).ClassName = 'TAnimationInfo') then
         begin
           AnimNode := TAnimationInfo(Node.Data);
-          // Node.Visible := False;
-          MapAnims(Node.Parent, AnimNode);
+          if not(Node.Data = nil) then
+            MapAnims(Node, AnimNode);
         end;
     end;
-
+  ActiveControl := Window;
 end;
 
 procedure TCastleForm.MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
@@ -251,13 +254,13 @@ begin
       WriteLnLog('Bad node : ' + modelNode.Text);
       Exit;
     end;
-  if not(TObject(modelNode.Data).ClassName = 'TCastleModel') then
+  if not(TObject(modelNode.parent.Data).ClassName = 'TCastleModel') then
     begin
       WriteLnLog('Not a model : ' + TObject(modelNode.Data).ClassName);
       Exit;
     end;
 
-  Model := TCastleModel(modelNode.Data);
+  Model := TCastleModel(modelNode.parent.Data);
 
   Json := AniTxtToJson(MapFile);
   if not(Json = nil) then
@@ -268,7 +271,8 @@ begin
         begin
           with CastleApp do
             begin
-              NewAnimNode := Model.AddAnimation(Anis[I], AnimNode.Sensor);
+              WriteLnLog('Adding Action : #' + IntToStr(I) + ' - ' + Anis[I].TakeName);
+              NewAnimNode := Model.AddAnimation(Anis[I], AnimNode.Sensor, AnimNode.ParentAnim);
               Treeview1.Items.AddChildObject(modelNode, Anis[I].TakeName, NewAnimNode);
             end;
           WriteLnLog('Action : #' + IntToStr(I) +
@@ -278,6 +282,7 @@ begin
         end;
       SetLength(Anis, 0);
       Json.Free;
+      modelNode.Expand(False);
     end;
 end;
 
@@ -315,9 +320,8 @@ var
   Sprite: TCastleImage;
   SName: String;
 begin
-//  CastleApp.ModelRotationCheck := True;
-//  Exit;
-
+  CastleApp.TestModel.Normalize;
+  Exit;
 {$ifdef pausebtn}
   if not(CastleApp.TestModel.CurrentAnimation = -1) then
     begin
@@ -338,6 +342,7 @@ begin
     end;
   Button1.Enabled := True;
 {$endif}
+  ActiveControl := Window;
 end;
 
 procedure TCastleForm.Button2Click(Sender: TObject);
@@ -350,6 +355,7 @@ begin
       //      CastleApp.TestModel.Pause;
       //    end;
     end;
+  ActiveControl := Window;
 end;
 
 procedure TCastleForm.FileOpenMenuClick(Sender: TObject);
@@ -435,11 +441,11 @@ procedure TCastleForm.WindowPress(Sender: TObject;
 var
   Q: TQuaternion;
 begin
+  ActiveControl := Window;
   if Event.Key = keySpace then
     begin
       if not(CastleApp.TestModel.CurrentAnimation = -1) then
         begin
-//          CastleApp.TestModel.IsLocked := False;
           CastleApp.TestModel.Pause;
         end;
     end;
@@ -450,6 +456,8 @@ begin
         begin
           if not(TestModel = nil) then
             begin
+              if Event.Key = keyR then
+                ModelRotationCheck := True;
               if Event.Key = keyNumpadPlus then
                 iScale := iScale + (iScale * 0.1);
               if Event.Key = keyNumpadMinus then
@@ -470,11 +478,11 @@ begin
               Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, TestModel.BaseRotation.X));
               Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, TestModel.BaseRotation.Y));
               Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, TestModel.BaseRotation.Z));
-              TestModel.Scene.Rotation := Q.ToAxisAngle;
+              TestModel.Transform.Rotation := Q.ToAxisAngle;
               LabelMode.Caption := 'Orientation : X = ' +
-                FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.X)) + ', Y = ' +
-                FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Y)) + ', Z = ' +
-                FormatFloat('##0.0', RadToDeg(TestModel.BaseRotation.Z));
+                FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.X))) + ', Y = ' +
+                FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.Y))) + ', Z = ' +
+                FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.Z)));
             end;
         end;
     end;
@@ -498,27 +506,33 @@ procedure TCastleForm.AddInfoPanel;
 begin
   with CastleApp do
     begin
-      AddInfo('Mouse', '');
-      AddInfo('Radius', TestModel.Scene.BoundingBox.Radius2D(2).ToString);
-      AddInfo('Window Width', Window.Width);
-      AddInfo('Window Height', Window.Height);
-      AddInfo('Projection (Y Axis)', CastleApp.CameraElevation);
-      AddInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
-      AddInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
-      AddInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
-      AddInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
-      AddInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
-      AddInfo('BBox 0', TestModel.Scene.BoundingBox.Data[0].ToString);
-      AddInfo('BBox 1', TestModel.Scene.BoundingBox.Data[1].ToString);
-      AddInfo('Translation', TestModel.Scene.Translation.ToString);
-      AddInfo('Center', TestModel.Scene.Center.ToString);
-      AddInfo('Rotation', TestModel.Scene.Rotation.ToString);
-      AddInfo('iScale', CastleApp.iScale.ToString);
-      AddInfo('BoundRadius', CastleApp.BoundRadius.ToString);
-      AddInfo('Pos A', '');
-      AddInfo('Pos B', '');
-      AddInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
-      AddInfo('Max Viewport', MaxVP.ToString);
+      if not(TestModel = nil) then
+        begin
+          AddInfo('Mouse', '');
+          AddInfo('Radius', TestModel.Scene.BoundingBox.Radius2D(2).ToString);
+          AddInfo('Window Width', Window.Width);
+          AddInfo('Window Height', Window.Height);
+          AddInfo('Projection (Y Axis)', CastleApp.CameraElevation);
+          AddInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
+          AddInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
+          AddInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
+          AddInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
+          AddInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
+          AddInfo('BBox 0', TestModel.Scene.BoundingBox.Data[0].ToString);
+          AddInfo('BBox 1', TestModel.Scene.BoundingBox.Data[1].ToString);
+          AddInfo('Translation', TestModel.Scene.Translation.ToString);
+          AddInfo('Center', TestModel.Scene.Center.ToString);
+          AddInfo('Rotation', TestModel.Scene.Rotation.ToString);
+          AddInfo('iScale', CastleApp.iScale.ToString);
+          AddInfo('BoundRadius', CastleApp.BoundRadius.ToString);
+          AddInfo('Pos A', '');
+          AddInfo('Pos B', '');
+          AddInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
+          AddInfo('Max Viewport', MaxVP.ToString);
+          AddInfo('Translation', TestModel.Transform.Translation.ToString);
+          AddInfo('Center', TestModel.Transform.Center.ToString);
+          AddInfo('Rotation', TestModel.Transform.Rotation.ToString);
+        end;
     end;
 end;
 
@@ -526,25 +540,31 @@ procedure TCastleForm.UpdateInfoPanel;
 begin
   with CastleApp do
     begin
-      UpdateInfo('Radius', TestModel.Scene.BoundingBox.Radius2D(2).ToString);
-      UpdateInfo('Window Width', Window.Width);
-      UpdateInfo('Window Height', Window.Height);
-      UpdateInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
-      UpdateInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
-      UpdateInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
-      UpdateInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
-      UpdateInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
-      UpdateInfo('BBox 0', TestModel.Scene.BoundingBox.Data[0].ToString);
-      UpdateInfo('BBox 1', TestModel.Scene.BoundingBox.Data[1].ToString);
-      UpdateInfo('Translation', TestModel.Scene.Translation.ToString);
-      UpdateInfo('Center', TestModel.Scene.Center.ToString);
-      UpdateInfo('Rotation', TestModel.Scene.Rotation.ToString);
-      UpdateInfo('iScale', CastleApp.iScale.ToString);
-      UpdateInfo('BoundRadius', CastleApp.BoundRadius.ToString);
-      UpdateInfo('Pos A', Pos2DTo3D(0, 0));
-      UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
-      UpdateInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
-      end;
+      if not(TestModel = nil) then
+        begin
+          UpdateInfo('Radius', TestModel.Scene.BoundingBox.Radius2D(2).ToString);
+          UpdateInfo('Window Width', Window.Width);
+          UpdateInfo('Window Height', Window.Height);
+          UpdateInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
+          UpdateInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
+          UpdateInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
+          UpdateInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
+          UpdateInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
+          UpdateInfo('BBox 0', TestModel.Scene.BoundingBox.Data[0].ToString);
+          UpdateInfo('BBox 1', TestModel.Scene.BoundingBox.Data[1].ToString);
+          UpdateInfo('Translation', TestModel.Scene.Translation.ToString);
+          UpdateInfo('Center', TestModel.Scene.Center.ToString);
+          UpdateInfo('Rotation', TestModel.Scene.Rotation.ToString);
+          UpdateInfo('iScale', CastleApp.iScale.ToString);
+          UpdateInfo('BoundRadius', CastleApp.BoundRadius.ToString);
+          UpdateInfo('Pos A', Pos2DTo3D(0, 0));
+          UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
+          UpdateInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
+          UpdateInfo('Translation', TestModel.Transform.Translation.ToString);
+          UpdateInfo('Center', TestModel.Transform.Center.ToString);
+          UpdateInfo('Rotation', TestModel.Transform.Rotation.ToString);
+        end;
+    end;
 end;
 
 end.

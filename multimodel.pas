@@ -18,6 +18,7 @@ uses
 
 type
   { TAnimationInfo }
+  PAnimationInfo = ^TAnimationInfo;
   TAnimationInfo = Class(TComponent)
     private
       AnimNode: TTimeSensorNode;
@@ -28,21 +29,23 @@ type
       AnimHigh: TFloatTime; // Always CycleInterval
       AnimLast: TFloatTime; // Stores time animation paused at
       IsPaused: Boolean; // Is animation paused
-      IsPlaying: Boolean;
       IsLooped: Boolean;
       IsTakeOne: Boolean;
       IsUserDefined: Boolean;
       IsHidden: Boolean;
+      fParentAnim: TAnimationInfo;
+      fThisAnim: Integer;
       procedure ReceivedIsActive(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
       procedure ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
     public
       constructor Create(AOwner: TComponent); override;
-      constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
-      constructor Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
+      constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIndex: Integer; const AIsLooped: Boolean = True);
+      constructor Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIndex: Integer; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
       destructor Destroy; override;
       property Sensor: TTimeSensorNode read AnimNode write AnimNode;
+      property ThisAnim: Integer read fThisAnim write fThisAnim;
+      property ParentAnim: TAnimationInfo read fParentAnim write fParentAnim;
   end;
-  PAnimationInfo = ^TAnimationInfo;
   TAnimationInfoArray = Array of TAnimationInfo;
 
   { TCastleModel }
@@ -89,12 +92,10 @@ type
     procedure ResetAnimationState(const IgnoreAffectedBy: TTimeSensorNode = nil);
     procedure PrepareResources(const Options: TPrepareResourcesOptions;
       const ProgressStep: boolean; const Params: TPrepareParams);
-    procedure Load(const ARootNode: TX3DRootNode; const AOwnsRootNode: boolean;
-      const AOptions: TSceneLoadOptions = []);
     procedure Load(const AURL: string; const AOptions: TSceneLoadOptions = []);
 
     procedure AddAnimation(const AAction: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
-    function  AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
+    function  AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
     function  CurrentFrame: TFloatTime;
     function  TotalFrames: TFloatTime;
     procedure GoToFrame(const AFrame: TFloatTime);
@@ -120,7 +121,7 @@ begin
   inherited Create(AOwner);
 end;
 
-constructor TAnimationInfo.Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
+constructor TAnimationInfo.Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIndex: Integer; const AIsLooped: Boolean = True);
 begin
   Create(AOwner);
   AnimNode := ASensor;
@@ -132,6 +133,8 @@ begin
   AnimLast := 0;
   IsLooped := AIsLooped;
   IsTakeOne := False;
+  ParentAnim := Self;
+  ThisAnim := AIndex;
   IsUserDefined := False;
   IsHidden := False;
   IsPaused := False;
@@ -139,15 +142,10 @@ begin
   AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
 end;
 
-constructor TAnimationInfo.Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
-var
- CloneSensor: TTimeSensorNode;
+constructor TAnimationInfo.Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIndex: Integer; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
 begin
-  CloneSensor := ASensor.DeepCopy as TTimeSensorNode;
-  TCastleModel(AOwner).Scene.RootNode.AddChildren(CloneSensor);
-
   Create(AOwner);
-  AnimNode := CloneSensor;
+  AnimNode := ASensor;
   AnimName := ATake.TakeName;
   AnimStart := ATake.TakeStart / ATakeFPS;
   AnimStop := (ATake.TakeStop + 1) / ATakeFPS;
@@ -156,11 +154,13 @@ begin
   AnimLast := 0;
   IsLooped := AIsLooped;
   IsTakeOne := True;
+  ParentAnim := AParent;
+  ThisAnim := AIndex;
   IsUserDefined := True;
   IsHidden := False;
   IsPaused := True;
-  AnimNode.EventIsActive.AddNotification(@ReceivedIsActive);
-  AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
+//  AnimNode.EventIsActive.AddNotification(@ReceivedIsActive);
+//  AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
   WriteLnLog(AnimName + ' - ' + FloatToStr(AnimStart) + ' - ' + FloatToStr(AnimStop));
 end;
 
@@ -240,6 +240,7 @@ begin
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
       Result := ANode.IsLooped;
     end;
+  Result := False;
 end;
 
 procedure TCastleModel.SetIsLooped(const Value: Boolean);
@@ -271,14 +272,6 @@ begin
   fScene.PrepareResources(Options, ProgressStep, Params);
 end;
 
-procedure TCastleModel.Load(const ARootNode: TX3DRootNode; const AOwnsRootNode: boolean;
-  const AOptions: TSceneLoadOptions);
-begin
-  fScene.Load(ARootNode, AOwnsRootNode, AOptions);
-  AddAllAnimations;
-  Self.Normalize;
-end;
-
 procedure TCastleModel.Load(const AURL: string; const AOptions: TSceneLoadOptions);
 var
  TempNode: TX3DRootNode;
@@ -292,7 +285,6 @@ begin
 
   fModelName := AURL;
 
-//  fScene.Load(AURL, AOptions);
   fScene.Load(fRootNode, True, AOptions);
   AddAllAnimations;
   fDebug := TDebugTransformBox.Create(Self);
@@ -347,15 +339,24 @@ procedure TCastleModel.AddAnimation(const AAction: String; const ASensor: TTimeS
 var
   ainfo: TAnimationInfo;
 begin
-  ainfo := TAnimationInfo.Create(Self, AAction, ASensor, IsLooped);
+  ainfo := TAnimationInfo.Create(Self, AAction, ASensor, fActions.Count, IsLooped);
   fActions.AddObject(AAction, ainfo);
 end;
 
-function TCastleModel.AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
+function TCastleModel.AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
 var
   ainfo: TAnimationInfo;
 begin
-  ainfo := TAnimationInfo.Create(Self, ATake, ASensor);
+  if fActions = nil then
+    begin
+      fScene.ProcessEvents := True;
+      fHasAnimations := True;
+      fActions := TStringList.Create;
+      fActions.Sorted := True;
+      fActions.Duplicates := dupError;
+    end;
+
+  ainfo := TAnimationInfo.Create(Self, ATake, ASensor, fActions.Count, AParent);
   fActions.AddObject(ATake.TakeName, ainfo);
 
   Result := ainfo;
@@ -376,6 +377,8 @@ begin
                              2 / fScene.BoundingBox.MaxSize,
                              2 / fScene.BoundingBox.MaxSize);
             fScene.Translation := -fScene.Center;
+            fTransform.Center := fScene.Center;
+
           end;
       end;
     end;
@@ -537,6 +540,7 @@ end;
 procedure TCastleModel.SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
 var
  ANode: TAnimationInfo;
+ PNode: TAnimationInfo;
  I: Integer;
  PrevAnimWasRunning: Boolean;
  PrevAnimWasTPose: Boolean;
@@ -562,6 +566,15 @@ begin
       WriteLnLog('TCastleModel.SelectAnimation - ' + AName + ' (' + IntToStr(fCurrentAnimation) + ' / ' + IntToStr(I) + ')');
       fCurrentAnimation := I;
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
+      if ANode.IsTakeOne then
+        begin
+          PNode := ANode.ParentAnim;
+          if not(PNode = nil) then
+            begin
+              PNode.AnimStart := ANode.AnimStart;
+              PNode.AnimStop := ANode.AnimStop;
+            end;
+        end;
       GotoFrame(ANode.AnimStart);
       if PrevAnimWasRunning then
         Start

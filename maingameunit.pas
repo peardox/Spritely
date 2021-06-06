@@ -281,12 +281,14 @@ begin
   ModelRotation += 3;
   if ModelRotation < 360 then
     begin
-      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
+      ViewFromRadius(2, CameraElevation, CameraRotation + (2 * Pi * (ModelRotation / 360)));
+//      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
     end
   else
     begin
       ModelRotation := 0;
-      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
+      ViewFromRadius(2, CameraElevation, CameraRotation);
+//      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
       ModelRotationCheck := False;
     end;
 end;
@@ -315,87 +317,90 @@ begin
   if ModelRotationCheck then
     begin
       UpdateModelRotation;
-    end;
-
-  if ViewMode = 0 then
-    begin
-      StretchMultiplier := 1;
-      Viewport.Camera.Orthographic.Stretch := False;
-      ViewFromRadius(2, 0, 2 * pi * (6/8));
-    end
-  else if ViewMode = 1 then
-    begin
-      StretchMultiplier := 1;
-      Viewport.Camera.Orthographic.Stretch := False;
-      CameraElevation :=  -0.81625;
-      ViewFromRadius(2, CameraElevation, CameraRotation);
-    end
-  else if ViewMode = 2 then
-    begin
-      StretchMultiplier := 1;
-      Viewport.Camera.Orthographic.Stretch := False;
-      CameraElevation :=  -1;
-      ViewFromRadius(2, CameraElevation, CameraRotation);
-    end
-  else if ViewMode = 3 then
-    begin
-      StretchMultiplier := 1;
-      Viewport.Camera.Orthographic.Stretch := False;
-      CameraElevation :=  -2;
-      ViewFromRadius(2, CameraElevation, CameraRotation);
-    end
-  else if ViewMode = 4 then
-    begin
-      StretchMultiplier := 0.81625;
-      Viewport.Camera.Orthographic.Stretch := True;
-      CameraElevation :=  -2;
-      ViewFromRadius(2, CameraElevation, CameraRotation);
-    end
-  else if ViewMode = 5 then
-    begin
-      StretchMultiplier := 1;
-      Viewport.Camera.Orthographic.Stretch := False;
-      CameraElevation :=  -9999;
-      ViewFromRadius(2, CameraElevation, CameraRotation);
     end
   else
     begin
-      StretchMultiplier := 1;
-      Viewport.Camera.Orthographic.Stretch := False;
-      ViewMode := 0;
-      CameraElevation :=  0;
-      ViewFromRadius(2, CameraElevation, CameraRotation);
-    end;
+    if ViewMode = 0 then
+      begin
+        StretchMultiplier := 1;
+        Viewport.Camera.Orthographic.Stretch := False;
+        ViewFromRadius(2, 0, 2 * pi * (6/8));
+      end
+    else if ViewMode = 1 then
+      begin
+        StretchMultiplier := 1;
+        Viewport.Camera.Orthographic.Stretch := False;
+        CameraElevation :=  -0.81625;
+        ViewFromRadius(2, CameraElevation, CameraRotation);
+      end
+    else if ViewMode = 2 then
+      begin
+        StretchMultiplier := 1;
+        Viewport.Camera.Orthographic.Stretch := False;
+        CameraElevation :=  -1;
+        ViewFromRadius(2, CameraElevation, CameraRotation);
+      end
+    else if ViewMode = 3 then
+      begin
+        StretchMultiplier := 1;
+        Viewport.Camera.Orthographic.Stretch := False;
+        CameraElevation :=  -2;
+        ViewFromRadius(2, CameraElevation, CameraRotation);
+      end
+    else if ViewMode = 4 then
+      begin
+        StretchMultiplier := 0.81625;
+        Viewport.Camera.Orthographic.Stretch := True;
+        CameraElevation :=  -2;
+        ViewFromRadius(2, CameraElevation, CameraRotation);
+      end
+    else if ViewMode = 5 then
+      begin
+        StretchMultiplier := 1;
+        Viewport.Camera.Orthographic.Stretch := False;
+        CameraElevation :=  -9999;
+        ViewFromRadius(2, CameraElevation, CameraRotation);
+      end
+    else
+      begin
+        StretchMultiplier := 1;
+        Viewport.Camera.Orthographic.Stretch := False;
+        ViewMode := 0;
+        CameraElevation :=  0;
+        ViewFromRadius(2, CameraElevation, CameraRotation);
+      end;
 
-  if not(TestModel = nil) then
-    begin
-      if not(TestModel.IsLocked) then
-        begin
-          sc := Vector3(0, 0, 0);
-          sr := 0;
-          TestModel.Scene.BoundingBox.BoundingSphere(sc, sr);
-          if not(sr = 0) then
-            BoundRadius := sqrt(sr)
-          else
-            BoundRadius := 1.0;
+    if not(TestModel = nil) then
+      begin
+        if not(TestModel.IsLocked) then
+          begin
+            sc := Vector3(0, 0, 0);
+            sr := 0;
+            TestModel.Scene.BoundingBox.BoundingSphere(sc, sr);
+            if not(sr = 0) then
+              BoundRadius := sqrt(sr)
+            else
+              BoundRadius := 1.0;
 
-          iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
-          TestModel.LockedScale := iScale;
-          TestModel.IsLocked := True;
-        end;
+            iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
+            TestModel.LockedScale := iScale;
+            TestModel.IsLocked := True;
+          end;
 
-      Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
+        Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
 
-      if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
-        begin
-          if TestModel.IsPaused then
-            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames) + ' (Paused)'
-          else
-            LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames);
-        end;
+        if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
+          begin
+            if TestModel.IsPaused then
+              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames) + ' (Paused)'
+            else
+              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames);
+          end;
+
       {$ifdef cgeapp}
 // Todo : UpdateInfoPanel for App
       {$else}
+      end;
       CastleForm.UpdateInfoPanel;
       {$endif}
     end;

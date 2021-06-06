@@ -9,7 +9,6 @@ object CastleForm: TCastleForm
   Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnKeyPress = FormKeyPress
   Position = poDefault
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel
@@ -82,6 +81,7 @@ object CastleForm: TCastleForm
         ScrollBars = ssAutoBoth
         TabOrder = 0
         ViewStyle = vsReport
+        OnClick = ListView1Click
       end
       object TreeView1: TTreeView
         Left = 0
@@ -122,6 +122,7 @@ object CastleForm: TCastleForm
         Caption = 'Button1'
         OnClick = Button1Click
         TabOrder = 0
+        TabStop = False
       end
       object TrackBar1: TTrackBar
         Left = 1
@@ -131,6 +132,7 @@ object CastleForm: TCastleForm
         Max = 1
         OnChange = TrackBar1Change
         Position = 0
+        TabStop = False
         Align = alTop
         TabOrder = 1
       end
@@ -143,6 +145,7 @@ object CastleForm: TCastleForm
         Caption = 'Button2'
         OnClick = Button2Click
         TabOrder = 2
+        TabStop = False
       end
     end
   end
