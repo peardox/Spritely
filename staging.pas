@@ -3,16 +3,20 @@ unit Staging;
 {$mode objfpc}{$H+}
 
 interface
+// "uri" : "Tileable Brick Ground Textures - Set 1/Ground_01_Nrm.png"
+// "uri" : "Tileable Brick Ground Textures - Set 1/Ground_01.png"
 
 uses
   Classes, Math, SysUtils, CastleRectangles, CastleLog,
-  CastleSceneCore, CastleScene, CastleTransform,
+  CastleSceneCore, CastleScene, CastleTransform, CastleURIUtils,
   CastleImages, CastleTriangles, CastleShapes, CastleVectors,
   X3DNodes, X3DFields, X3DTIme, X3DLoad, CastleRenderOptions,
   CastleViewport, CastleCameras, CastleProjection;
 
-function LoadStage(var AScene: TCastleScene; const GroundLevel: Single = 0): TCastleScene;
-function LoadStage(var AScene: TCastleScene; const GroundLevel: Single; const GroundColor: TVector3): TCastleScene;
+function LoadStage(const GroundModel: String; const GroundLevel: Single = 0): TCastleScene;
+function LoadStage(const GroundLevel: Single = 0): TCastleScene;
+function LoadStage(const GroundLevel: Single; const GroundColor: TVector3): TCastleScene;
+function LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String): TCastleScene;
 function CreatePointLight: TPointLightNode;
 function CreateDirectionalLight: TDirectionalLightNode;
 function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 1.0; const LayerDepth: Single = 0): TTransformNode;
@@ -89,7 +93,7 @@ begin
   Light.DefaultShadowMap.Size := 4096;
   Light.ShadowVolumesMain := False;
   Light.ShadowVolumes := False;
-  Light.ProjectionRectangle := FloatRectangle(-5.0, -5.0, 2 * 5.0, 2 * 5.0).ToX3DVector;
+  Light.ProjectionRectangle := FloatRectangle(-20.0, -20.0, 40.0, 40.0).ToX3DVector;
   Light.ProjectionLocation := Vector3(1.0, 3.0, 1.0);
 
   Result := Light;
@@ -111,13 +115,22 @@ begin
   Result := Light;
 end;
 
-
-function LoadStage(var AScene: TCastleScene; const GroundLevel: Single = 0): TCastleScene;
+function LoadStage(const GroundModel: String; const GroundLevel: Single = 0): TCastleScene;
 begin
-  Result := LoadStage(AScene, GroundLevel, Vector3(1,1,1));
+  Result := LoadStage(GroundLevel, Vector3(1,1,1), GroundModel);
 end;
 
-function LoadStage(var AScene: TCastleScene; const GroundLevel: Single; const GroundColor: TVector3): TCastleScene;
+function LoadStage(const GroundLevel: Single = 0): TCastleScene;
+begin
+  Result := LoadStage(GroundLevel, Vector3(1,1,1));
+end;
+
+function LoadStage(const GroundLevel: Single; const GroundColor: TVector3): TCastleScene;
+begin
+  Result := LoadStage(GroundLevel, Vector3(1,1,1), EmptyStr);
+end;
+
+function LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String): TCastleScene;
 var
   NewStage: TCastleScene;
   GroundNode: TTransformNode;
@@ -127,32 +140,34 @@ var
   Light: TDirectionalLightNode;
   {$endif}
   Root: TX3DRootNode;
+  GroundModelRoot: TX3DRootNode;
 begin
-  if AScene = nil then
-    begin
-      Exit(nil);
-    end;
-
   try
     NewStage := TCastleScene.Create(nil);
     Root := TX3DRootNode.Create;
+    if (GroundModel = EmptyStr) or not(URIFileExists(GroundModel)) then
+      GroundNode := CreateColorPlane(20, 20, GroundLevel, GroundColor)
+    else
+      begin
+        GroundModelRoot := LoadNode(GroundModel);
+        GroundNode := TTransformNode.Create;
+        GroundNode.Translation := Vector3(0, GroundLevel, 0);
+        GroundNode.AddChildren(GroundModelRoot);
+      end;
+    GroundNode.X3DName := 'GroundNode';
 
-    AScene.Spatial := [ssDynamicCollisions, ssRendering];
-    AScene.ProcessEvents := True;
-
-    GroundNode := CreateColorPlane(5000, 5000, Min(AScene.BoundingBox.Data[0].Y, AScene.BoundingBox.Data[1].Y) + GroundLevel, GroundColor);
     {$ifdef usepoint}
     Light := CreatePointLight;
     {$else}
     Light := CreateDirectionalLight;
     {$endif}
+    Light.X3DName := 'MainLight';
 
     Light.projectionFar := 240.00;
 
     Root.AddChildren(Light);
     Root.AddChildren(GroundNode);
     NewStage.Load(Root, True);
-    NewStage.Add(AScene);
 
     NewStage.ReceiveShadowVolumes:=True;
     NewStage.Spatial := [ssDynamicCollisions, ssRendering];

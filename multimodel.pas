@@ -424,25 +424,50 @@ end;
 
 procedure TCastleModel.Resume;
 var
-  ANode: TAnimationInfo;
+ ANode: TAnimationInfo;
+ PNode: TAnimationInfo;
 begin
   if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
     begin
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
-      ANode.AnimNode.Start(False, True, ANode.AnimLast);
       ANode.IsPaused := False;
+      if ANode.IsTakeOne then
+        begin
+          PNode := ANode.ParentAnim;
+          if not(PNode = nil) then
+            begin
+              PNode.IsPaused := False;
+              PNode.AnimNode.Start(False, True, PNode.AnimLast);
+            end;
+        end
+      else
+        ANode.AnimNode.Start(False, True, ANode.AnimLast);
+
     end;
 end;
 
 procedure TCastleModel.Start;
 var
-  ANode: TAnimationInfo;
+ ANode: TAnimationInfo;
+ PNode: TAnimationInfo;
 begin
   if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
     begin
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
-      ANode.AnimNode.Start(False, True, ANode.AnimStart);
       ANode.IsPaused := False;
+      if ANode.IsTakeOne then
+        begin
+          PNode := ANode.ParentAnim;
+          if not(PNode = nil) then
+            begin
+              PNode.IsPaused := False;
+              PNode.AnimLast := PNode.AnimStart;
+              PNode.AnimNode.FakeTime(PNode.AnimLast, False, True, fScene.NextEventTime);
+              PNode.AnimNode.Start(False, True, PNode.AnimStart);
+            end;
+        end
+      else
+        ANode.AnimNode.Start(False, True, ANode.AnimStart);
     end;
 end;
 
@@ -463,13 +488,23 @@ end;
 procedure TCastleModel.Stop;
 var
   ANode: TAnimationInfo;
+  PNode: TAnimationInfo;
 begin
   if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
     begin
       WriteLnLog('TCastleModel.Stop - Stopping - ' + IntToStr(fCurrentAnimation));
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
-      ANode.AnimNode.Stop;
-      ANode.IsPaused := True;
+      PNode := ANode.ParentAnim;
+      if not(PNode = nil) then
+        begin
+          PNode.AnimNode.Stop;
+          PNode.IsPaused := True;
+        end
+      else
+        begin
+          ANode.AnimNode.Stop;
+          ANode.IsPaused := True;
+        end;
     end;
 end;
 
@@ -489,6 +524,7 @@ end;
 procedure TCastleModel.Pause;
 var
   ANode: TAnimationInfo;
+  PNode: TAnimationInfo;
 begin
   if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
     begin
@@ -500,9 +536,24 @@ begin
         end
       else
         begin
-          ANode.AnimNode.Stop;
-          ANode.AnimLast := ANode.AnimNode.ElapsedTimeInCycle;
-          ANode.IsPaused := True;
+          if ANode.IsTakeOne then
+            begin
+              PNode := ANode.ParentAnim;
+              if not(PNode = nil) then
+                begin
+                  PNode.AnimNode.Stop;
+                  PNode.AnimLast := PNode.AnimNode.ElapsedTimeInCycle;
+                  PNode.IsPaused := True;
+                  ANode.AnimLast := PNode.AnimLast;
+                  ANode.IsPaused := True;
+                end;
+            end
+          else
+            begin
+              ANode.AnimNode.Stop;
+              ANode.AnimLast := ANode.AnimNode.ElapsedTimeInCycle;
+              ANode.IsPaused := True;
+            end;
         end;
     end;
 end;
@@ -522,14 +573,28 @@ end;
 
 procedure TCastleModel.GoToFrame(const AFrame: TFloatTime);
 var
-  ANode: TAnimationInfo;
+ ANode: TAnimationInfo;
+ PNode: TAnimationInfo;
 begin
   WriteLnLog('TCastleModel.GoToFrame - ' + FloatToStr(AFrame) + ' (' + IntToStr(fCurrentAnimation) + ')');
   if(fCurrentAnimation >= 0) and (fCurrentAnimation < fActions.Count) then
     begin
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
-      ANode.AnimLast := AFrame;
-      ANode.AnimNode.FakeTime(ANode.AnimLast, False, True, fScene.NextEventTime);
+      if ANode.IsTakeOne then
+        begin
+          PNode := ANode.ParentAnim;
+          if not(PNode = nil) then
+            begin
+              PNode.AnimLast := AFrame;
+              PNode.AnimNode.FakeTime(ANode.AnimLast, False, True, fScene.NextEventTime);
+              ANode.AnimLast := AFrame;
+            end;
+        end
+      else
+        begin
+          ANode.AnimLast := AFrame;
+          ANode.AnimNode.FakeTime(ANode.AnimLast, False, True, fScene.NextEventTime);
+        end;
     end;
 end;
 
@@ -559,6 +624,7 @@ begin
         end
       else
         PrevAnimWasTPose := True;
+
       WriteLnLog('TCastleModel.SelectAnimation - ' + AName + ' (' + IntToStr(fCurrentAnimation) + ' / ' + IntToStr(I) + ')');
       fCurrentAnimation := I;
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
@@ -569,8 +635,10 @@ begin
             begin
               PNode.AnimStart := ANode.AnimStart;
               PNode.AnimStop := ANode.AnimStop;
-              PNode.IsPaused := False;
-              ANode.IsPaused := False;
+              PNode.AnimLast := PNode.AnimStart;
+              PNode.IsPaused := True;
+              ANode.IsPaused := True;
+              PNode.AnimNode.FakeTime(PNode.AnimLast, False, True, fScene.NextEventTime);
               Start;
             end;
         end

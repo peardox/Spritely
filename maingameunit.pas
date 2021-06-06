@@ -51,6 +51,7 @@ type
   public
     Viewport: TCastleViewport;
     TestModel: TCastleModel;
+    Stage: TCastleScene;
     CameraRotation: Single;
     ModelRotation: Single;
     CameraElevation: Single;
@@ -219,6 +220,7 @@ end;
 
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
 begin
+  Viewport.Items.Add(Stage);
   Viewport.Items.Add(AModel.Scene);
   Viewport.Items.MainScene := AModel.Scene;
 end;

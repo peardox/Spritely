@@ -1,9 +1,7 @@
 unit GUIInitialization;
 
 {$mode objfpc}{$H+}
-{$TYPEDADDRESS ON}
-// {$define pausebtn}
-// {$define disableMap}
+ {$define disableMap}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 interface
@@ -17,7 +15,7 @@ uses
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleGLUtils,
   CastleLCLUtils, CastleDialogs, CastleApplicationProperties, CastleLog,
   CastleTimeUtils, CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, multimodel, BGRAImageTheme;
+  CastleQuaternions, staging, multimodel, BGRAImageTheme;
 
 type
   { TCastleForm }
@@ -101,28 +99,22 @@ begin
   {$endif}
 
 {$ifdef disableMap}
-//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
-//  ModelFile := 'castle-data:/up.glb';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'quaking-aspen.glb';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'fan-palm.glb';
+    MapFile := '';
 //  ModelFile := 'castle-data:/oblique.glb';
-//  ModelFile := 'castle-data:/up311.glb';
+//  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
-//  ModelFile := 'castle-data:/up113.glb';
-//  ModelFile := 'castle-data:/tavern/scene.gltf';
+  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
-//  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'ZerinLabs' + PathDelim + 'Retro-Gothic-EnviroKit' + PathDelim + 'glb' + PathDelim + 'deco_cathedral_table.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
-  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'alpha_wolf' + PathDelim + 'fbxwolf.glb';
 {$else}
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
-//  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
+  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + '_bike_animations.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
-  MapFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'Thief-animations-list.txt';
-  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
+//  MapFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'Thief-animations-list.txt';
+//  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 {$endif}
 
@@ -141,12 +133,8 @@ InitializeLog;
   Caption := 'Spritely';
   Tracking := False;
   Trackbar1.Max := 100000;
-  {$ifdef pausebtn}
-  Button1.Caption := 'Pause / Play';
-  {$else}
   Button1.Caption := 'Create Sprite';
-  {$endif}
-  Button2.Caption := 'Change ViewMode'; // 'Pause / Play'; // 'Split Take 001';
+  Button2.Caption := 'Change ViewMode';
 end;
 
 procedure TCastleForm.DebugBoxMenuClick(Sender: TObject);
@@ -160,9 +148,6 @@ end;
 
 procedure TCastleForm.CreateSpriteMenuClick(Sender: TObject);
 begin
-  {$ifndef pausebtn}
-  Button1.Enabled := False;
-  {$endif}
   Button1Click(Sender);
 end;
 
@@ -181,6 +166,7 @@ end;
 
 procedure TCastleForm.FormDestroy(Sender: TObject);
 begin
+//  FreeAndNil(CastleApp.Stage);
   WriteLnLog('FormDestroy : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 
@@ -220,9 +206,6 @@ var
   Node: TTreeNode;
   AnimNode: TAnimationInfo;
 begin
-  {$ifdef disableMap}
-  Exit;
-  {$endif}
   Node := TreeView1.GetNodeAt(MousePos.X, MousePos.Y);
   if not Assigned (Node) then
     begin
@@ -259,6 +242,9 @@ begin
       WriteLnLog('Not a model : ' + TObject(modelNode.Data).ClassName);
       Exit;
     end;
+//  if not(RegularFileExists(URIToFilenameSafe(MapFile))) then
+  if not(URIFileExists(MapFile)) then
+    Exit;
 
   Model := TCastleModel(modelNode.parent.Data);
 
@@ -293,7 +279,12 @@ var
 begin
   with CastleApp do
     begin
+      if not(URIFileExists(ModelFile)) then
+        Exit;
+
       LoadModel(URIToFilenameSafe(ModelFile));
+      CastleApp.Stage := LoadStage('castle-data:/ground/floor.gltf', -1);
+
       if not(TestModel = nil) then
         begin
           modelNode := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(TestModel.ModelName)), TestModel);
@@ -320,15 +311,6 @@ var
   Sprite: TCastleImage;
   SName: String;
 begin
-  CastleApp.TestModel.Normalize;
-  Exit;
-{$ifdef pausebtn}
-  if not(CastleApp.TestModel.CurrentAnimation = -1) then
-    begin
-      CastleApp.TestModel.Pause;
-    end;
-  Exit;
-{$else}
   Button1.Enabled := False;
   if not (CastleApp.TestModel.Scene = nil) then
     begin
@@ -341,7 +323,6 @@ begin
         end;
     end;
   Button1.Enabled := True;
-{$endif}
   ActiveControl := Window;
 end;
 
