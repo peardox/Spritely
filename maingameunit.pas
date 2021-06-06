@@ -125,7 +125,6 @@ begin
       Viewport.Camera.Orthographic.Height := Viewport.EffectiveHeight;
       iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
       Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
-      WriteLnLog('EW : ' + Viewport.EffectiveWidth.ToString + ' x ' + Viewport.EffectiveHeight.ToString);
     end
 end;
 

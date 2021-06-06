@@ -34,16 +34,14 @@ type
       IsUserDefined: Boolean;
       IsHidden: Boolean;
       fParentAnim: TAnimationInfo;
-      fThisAnim: Integer;
       procedure ReceivedIsActive(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
       procedure ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
     public
       constructor Create(AOwner: TComponent); override;
-      constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIndex: Integer; const AIsLooped: Boolean = True);
-      constructor Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIndex: Integer; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
+      constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
+      constructor Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
       destructor Destroy; override;
       property Sensor: TTimeSensorNode read AnimNode write AnimNode;
-      property ThisAnim: Integer read fThisAnim write fThisAnim;
       property ParentAnim: TAnimationInfo read fParentAnim write fParentAnim;
   end;
   TAnimationInfoArray = Array of TAnimationInfo;
@@ -121,7 +119,7 @@ begin
   inherited Create(AOwner);
 end;
 
-constructor TAnimationInfo.Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIndex: Integer; const AIsLooped: Boolean = True);
+constructor TAnimationInfo.Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
 begin
   Create(AOwner);
   AnimNode := ASensor;
@@ -134,7 +132,6 @@ begin
   IsLooped := AIsLooped;
   IsTakeOne := False;
   ParentAnim := Self;
-  ThisAnim := AIndex;
   IsUserDefined := False;
   IsHidden := False;
   IsPaused := False;
@@ -142,7 +139,7 @@ begin
   AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
 end;
 
-constructor TAnimationInfo.Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AIndex: Integer; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
+constructor TAnimationInfo.Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
 begin
   Create(AOwner);
   AnimNode := ASensor;
@@ -155,7 +152,6 @@ begin
   IsLooped := AIsLooped;
   IsTakeOne := True;
   ParentAnim := AParent;
-  ThisAnim := AIndex;
   IsUserDefined := True;
   IsHidden := False;
   IsPaused := True;
@@ -189,11 +185,11 @@ begin
       ;
       {$else}
       else
-//        WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val) + ' -> Paused');
+        WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val) + ' -> Paused');
       {$endif}
     end;
   {$ifdef logevents}
-//  WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val));
+  WriteLnLog('TAnimationInfo.ReceivedIsActive - ' + BoolToStr(Val));
   {$endif}
 end;
 
@@ -339,7 +335,7 @@ procedure TCastleModel.AddAnimation(const AAction: String; const ASensor: TTimeS
 var
   ainfo: TAnimationInfo;
 begin
-  ainfo := TAnimationInfo.Create(Self, AAction, ASensor, fActions.Count, IsLooped);
+  ainfo := TAnimationInfo.Create(Self, AAction, ASensor, IsLooped);
   fActions.AddObject(AAction, ainfo);
 end;
 
@@ -356,7 +352,7 @@ begin
       fActions.Duplicates := dupError;
     end;
 
-  ainfo := TAnimationInfo.Create(Self, ATake, ASensor, fActions.Count, AParent);
+  ainfo := TAnimationInfo.Create(Self, ATake, ASensor, AParent);
   fActions.AddObject(ATake.TakeName, ainfo);
 
   Result := ainfo;
@@ -573,22 +569,28 @@ begin
             begin
               PNode.AnimStart := ANode.AnimStart;
               PNode.AnimStop := ANode.AnimStop;
+              PNode.IsPaused := False;
+              ANode.IsPaused := False;
+              Start;
             end;
-        end;
-      GotoFrame(ANode.AnimStart);
-      if PrevAnimWasRunning then
-        Start
+        end
       else
         begin
-          if PrevAnimWasTPose then
-            begin
-              if StartPlaying then
-                Start
-              else
-                ANode.IsPaused := True;
-            end
-          else
-            Stop;
+        GotoFrame(ANode.AnimStart);
+        if PrevAnimWasRunning then
+          Start
+        else
+          begin
+            if PrevAnimWasTPose then
+              begin
+                if StartPlaying then
+                  Start
+                else
+                  ANode.IsPaused := True;
+              end
+            else
+              Stop;
+          end;
         end;
     end;
 end;
