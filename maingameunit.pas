@@ -39,8 +39,6 @@ type
     procedure Render; override; // TCastleUserInterface
     procedure Resize; override; // TCastleUserInterface
     procedure Update(const SecondsPassed: Single; var HandleInput: boolean); override; // TUIState
-    function  Press(const Event: TInputPressRelease): Boolean; override; // TUIState
-    function  Release(const Event: TInputPressRelease): Boolean; override; // TUIState
   private
     fViewMode: Cardinal;
     fStretchMultiplier: Single;
@@ -405,16 +403,6 @@ begin
       {$endif}
     end;
   inherited;
-end;
-
-function TCastleApp.Press(const Event: TInputPressRelease): Boolean;
-begin
-  Result := inherited;
-end;
-
-function TCastleApp.Release(const Event: TInputPressRelease): Boolean;
-begin
-  Result := inherited;
 end;
 
 procedure ShowAppMessage(const AMsg: String);
