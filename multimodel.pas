@@ -40,7 +40,6 @@ type
       constructor Create(AOwner: TComponent); override;
       constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
       constructor Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
-      destructor Destroy; override;
       property Sensor: TTimeSensorNode read AnimNode write AnimNode;
       property ParentAnim: TAnimationInfo read fParentAnim write fParentAnim;
   end;
@@ -155,16 +154,7 @@ begin
   IsUserDefined := True;
   IsHidden := False;
   IsPaused := True;
-//  AnimNode.EventIsActive.AddNotification(@ReceivedIsActive);
-//  AnimNode.EventElapsedTime.AddNotification(@ReceivedElapsedTime);
   WriteLnLog(AnimName + ' - ' + FloatToStr(AnimStart) + ' - ' + FloatToStr(AnimStop));
-end;
-
-destructor TAnimationInfo.Destroy;
-begin
-//  AnimNode.EventIsActive.RemoveNotification(@ReceivedIsActive);
-//  AnimNode.EventElapsedTime.RemoveNotification(@ReceivedElapsedTime);
-  inherited;
 end;
 
 procedure TAnimationInfo.ReceivedIsActive(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
@@ -272,6 +262,7 @@ procedure TCastleModel.Load(const AURL: string; const AOptions: TSceneLoadOption
 var
  TempNode: TX3DRootNode;
 begin
+  {
   fRootNode := TX3DRootNode.Create;
   fTransform := TTransformNode.Create;
 
@@ -279,9 +270,12 @@ begin
   fTransform.AddChildren(TempNode);
   fRootNode.AddChildren(fTransform);
 
+  fScene.Load(fRootNode, True, AOptions);
+  }
+  fScene.Load(AURL, AOptions);
+
   fModelName := AURL;
 
-  fScene.Load(fRootNode, True, AOptions);
   AddAllAnimations;
   fDebug := TDebugTransformBox.Create(Self);
   fDebug.Parent := fScene;
@@ -325,6 +319,8 @@ begin
           for I := 0 to fActions.Count - 1 do
             begin
               obj := TAnimationInfo(fActions.Objects[I]);
+              obj.AnimNode := nil;
+              obj.fParentAnim := nil;
               FreeAndNil(obj);
             end;
         end;
@@ -373,7 +369,8 @@ begin
                              2 / fScene.BoundingBox.MaxSize,
                              2 / fScene.BoundingBox.MaxSize);
             fScene.Translation := -fScene.Center;
-            fTransform.Center := fScene.Center;
+            if not(fTransform = nil) then
+              fTransform.Center := fScene.Center;
 
           end;
       end;
@@ -399,8 +396,10 @@ destructor TCastleModel.Destroy;
 begin
   FreeAllAnimations;
   FreeAndNil(fActions);
-
-//  FreeAndNil(fScene);
+//  FreeAndNIl(fTransform);
+    if not(fScene = nil) then
+      if not(fScene.OwnsRootNode) then
+        FreeAndNil(fScene);
 //  FreeAndNil(fTransform);
 //  FreeAndNil(fRootNode);
 

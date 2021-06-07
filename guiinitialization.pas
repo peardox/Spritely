@@ -2,6 +2,7 @@ unit GUIInitialization;
 
 {$mode objfpc}{$H+}
  {$define disableMap}
+// {$define usetransform}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 // DG - 838383, LG B2B2B2
@@ -64,15 +65,17 @@ type
     procedure UpdateInfo(const AName: String; const AValue: Single);
     procedure UpdateInfo(const AName: String; const AValue: String);
     procedure WindowPress(Sender: TObject; const Event: TInputPressRelease);
+
+    procedure MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
+    function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
+    procedure AddInfoPanel;
+    procedure UpdateInfoPanel;
+    procedure LoadGuiModel(const AModel: String);
   private
     Tracking: Boolean;
     ModeOrientation: Boolean;
   public
     procedure GuiBootStrap;
-    procedure MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
-    function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
-    procedure AddInfoPanel;
-    procedure UpdateInfoPanel;
   end;
 
 var
@@ -168,7 +171,7 @@ end;
 
 procedure TCastleForm.FormDestroy(Sender: TObject);
 begin
-//  FreeAndNil(CastleApp.Stage);
+//  FreeAndNil(CastleApp.TestModel);
   WriteLnLog('FormDestroy : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 
@@ -275,17 +278,21 @@ begin
 end;
 
 procedure TCastleForm.GuiBootStrap;
+begin
+  LoadGuiModel(ModelFile);
+end;
+
+procedure TCastleForm.LoadGuiModel(const AModel: String);
 var
   I: Integer;
   modelNode: TTreeNode;
 begin
   with CastleApp do
     begin
-      if not(URIFileExists(ModelFile)) then
+      if not(URIFileExists(AModel)) then
         Exit;
 
-      LoadModel(URIToFilenameSafe(ModelFile));
-      CastleApp.Stage := LoadStage('castle-data:/ground/floor.gltf', -1);
+      LoadModel(URIToFilenameSafe(AModel));
 
       if not(TestModel = nil) then
         begin
@@ -346,15 +353,8 @@ begin
   CastleOpenDialog1.Filter := '3D Models|*.gltf;*.glb;*.obj;';
   if CastleOpenDialog1.Execute then
     begin
-      CastleApp.LoadModel(URIToFilenameSafe(CastleOpenDialog1.Filename));
+      LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Filename));
       Caption := 'Spritely : ' + CastleOpenDialog1.Filename;
-      {$ifdef usestage}
-      Stage := LoadStage(Scene);
-      Viewport.Items.UseHeadlight := hlOff;
-      Viewport.Items.MainScene := Stage;
-      Viewport.Items.Remove(Scene);
-      Viewport.Items.Add(Stage);
-      {$endif}
     end;
 end;
 
@@ -461,7 +461,12 @@ begin
               Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, TestModel.BaseRotation.X));
               Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, TestModel.BaseRotation.Y));
               Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, TestModel.BaseRotation.Z));
+
+              {$ifdef usetransform}
               TestModel.Transform.Rotation := Q.ToAxisAngle;
+              {$else}
+              TestModel.Scene.Rotation := Q.ToAxisAngle;
+              {$endif}
               LabelMode.Caption := 'Orientation : X = ' +
                 FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.X))) + ', Y = ' +
                 FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.Y))) + ', Z = ' +
@@ -512,9 +517,11 @@ begin
           AddInfo('Pos B', '');
           AddInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
           AddInfo('Max Viewport', MaxVP.ToString);
+          {$ifdef usetransform}
           AddInfo('Translation', TestModel.Transform.Translation.ToString);
           AddInfo('Center', TestModel.Transform.Center.ToString);
           AddInfo('Rotation', TestModel.Transform.Rotation.ToString);
+          {$endif}
         end;
     end;
 end;
@@ -543,9 +550,11 @@ begin
           UpdateInfo('Pos A', Pos2DTo3D(0, 0));
           UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
           UpdateInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
+          {$ifdef usetransform}
           UpdateInfo('Translation', TestModel.Transform.Translation.ToString);
           UpdateInfo('Center', TestModel.Transform.Center.ToString);
           UpdateInfo('Rotation', TestModel.Transform.Rotation.ToString);
+          {$endif}
         end;
     end;
 end;

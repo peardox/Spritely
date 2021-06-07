@@ -1,6 +1,7 @@
 unit MainGameUnit;
 
 {$mode objfpc}{$H+}
+// {$define usestage}
 
 interface
 
@@ -217,9 +218,14 @@ end;
 
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
 begin
+  {$ifdef usestage}
   Viewport.Items.Add(Stage);
   Viewport.Items.Add(AModel.Scene);
   Viewport.Items.MainScene := AModel.Scene;
+  {$else}
+  Viewport.Items.Add(AModel.Scene);
+  Viewport.Items.MainScene := AModel.Scene;
+  {$endif}
 end;
 
 procedure TCastleApp.LoadModel(filename: String);
@@ -244,6 +250,9 @@ begin
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
+    {$ifdef usestage}
+    Stage := LoadStage('castle-data:/ground/floor.gltf', -1);
+    {$endif}
   except
     on E : Exception do
       begin
@@ -395,10 +404,10 @@ begin
               LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames);
           end;
 
+      end;
       {$ifdef cgeapp}
 // Todo : UpdateInfoPanel for App
       {$else}
-      end;
       CastleForm.UpdateInfoPanel;
       {$endif}
     end;
