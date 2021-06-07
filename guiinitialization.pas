@@ -4,6 +4,7 @@ unit GUIInitialization;
  {$define disableMap}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
+// DG - 838383, LG B2B2B2
 interface
 
 uses
@@ -104,6 +105,7 @@ begin
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
   ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
 {$else}
