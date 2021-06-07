@@ -39,7 +39,6 @@ type
     procedure Render; override; // TCastleUserInterface
     procedure Resize; override; // TCastleUserInterface
     procedure Update(const SecondsPassed: Single; var HandleInput: boolean); override; // TUIState
-    function  Motion(const Event: TInputMotion): Boolean; override; // TUIState
     function  Press(const Event: TInputPressRelease): Boolean; override; // TUIState
     function  Release(const Event: TInputPressRelease): Boolean; override; // TUIState
   private
@@ -406,11 +405,6 @@ begin
       {$endif}
     end;
   inherited;
-end;
-
-function TCastleApp.Motion(const Event: TInputMotion): Boolean;
-begin
-  Result := inherited;
 end;
 
 function TCastleApp.Press(const Event: TInputPressRelease): Boolean;
