@@ -44,6 +44,7 @@ type
     Window: TCastleControlBase;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure ExitMenuClick(Sender: TObject);
     procedure FileOpenMenuClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -346,6 +347,11 @@ begin
       //    end;
     end;
   ActiveControl := Window;
+end;
+
+procedure TCastleForm.ExitMenuClick(Sender: TObject);
+begin
+  Application.Terminate;
 end;
 
 procedure TCastleForm.FileOpenMenuClick(Sender: TObject);

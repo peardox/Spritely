@@ -173,6 +173,7 @@ object CastleForm: TCastleForm
       object ExitMenu: TMenuItem
         Caption = 'Exit'
         ShortCut = 32856
+        OnClick = ExitMenuClick
       end
     end
   end
