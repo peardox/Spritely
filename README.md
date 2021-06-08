@@ -1,5 +1,5 @@
 # Spritely
-
+![](stuff/dm04-readme-banner.jpg)
 This project is multi-platform thanks to Lazarus + FPC
 
 ##### To compile with Lazarus
