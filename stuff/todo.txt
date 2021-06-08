@@ -24,7 +24,7 @@ Lighting + Camera positioning (@michalis)
 [Styling Features]
 Recolor skin
 Skin swapping
-User-defined Color Palettes
+User-defined Color Palettes - https://lospec.com/palettes/api
 Pixelation
 
 [Exploration]
