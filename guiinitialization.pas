@@ -3,6 +3,7 @@ unit GUIInitialization;
 {$mode objfpc}{$H+}
  {$define disableMap}
 // {$define usetransform}
+ {$define usestage}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 // DG - 838383, LG B2B2B2
@@ -106,9 +107,9 @@ begin
 {$ifdef disableMap}
     MapFile := '';
 //  ModelFile := 'castle-data:/oblique.glb';
-//  ModelFile := 'castle-data:/up.glb';
+  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
-  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
@@ -172,7 +173,11 @@ end;
 
 procedure TCastleForm.FormDestroy(Sender: TObject);
 begin
-//  FreeAndNil(CastleApp.TestModel);
+{
+  if not(CastleApp.TestModel = nil) then
+    if not(CastleApp.TestModel.Scene = nil) then
+      CastleApp.TestModel.FreeScene;
+}
   WriteLnLog('FormDestroy : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 
@@ -307,7 +312,11 @@ begin
             modelNode.Expand(False);
             end;
           modelNode.Selected := True;
+          {$ifdef usestage}
+          ShowModel(Stage);
+          {$else}
           ShowModel(TestModel);
+          {$endif}
           TestModel.ResetAnimationState;
         end;
       Trackbar1.Position := 0;

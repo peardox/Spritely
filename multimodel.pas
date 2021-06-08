@@ -56,6 +56,7 @@ type
     fModelName: String;
     fRootNode: TX3DRootNode;
     fScene: TCastleScene;
+    fSceneNode:  TX3DRootNode;
     fTransform: TTransformNode;
     fDebug: TDebugTransformBox;
     fBaseRotation: TVector3;
@@ -91,6 +92,8 @@ type
       const ProgressStep: boolean; const Params: TPrepareParams);
     procedure Load(const AURL: string; const AOptions: TSceneLoadOptions = []);
 
+    procedure FreeScene;
+    procedure RemoveScene(var AViewport: TCastleViewport);
     procedure AddAnimation(const AAction: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
     function  AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
     function  CurrentFrame: TFloatTime;
@@ -258,31 +261,52 @@ begin
   fScene.PrepareResources(Options, ProgressStep, Params);
 end;
 
-procedure TCastleModel.Load(const AURL: string; const AOptions: TSceneLoadOptions);
-var
- TempNode: TX3DRootNode;
+procedure TCastleModel.RemoveScene(var AViewport: TCastleViewport);
 begin
-  {
-  fRootNode := TX3DRootNode.Create;
-  fTransform := TTransformNode.Create;
+  if not(fScene = nil) then
+    begin
+      AViewport.Items.Remove(fScene);
+    end;
+end;
 
-  TempNode := LoadNode(AURL);
-  fTransform.AddChildren(TempNode);
-  fRootNode.AddChildren(fTransform);
+procedure TCastleModel.FreeScene;
+begin
+  if not(fScene = nil) then
+    begin
+      if fScene.OwnsRootNode then
+        FreeAndNil(fScene);
+    end;
+end;
 
-  fScene.Load(fRootNode, True, AOptions);
-  }
-  fScene.Load(AURL, AOptions);
+procedure TCastleModel.Load(const AURL: string; const AOptions: TSceneLoadOptions);
+begin
+  if not(fSceneNode = nil) then
+    FreeAndNil(fSceneNode);
 
-  fModelName := AURL;
+  fSceneNode := LoadNode(AURL, True);
+  if not(fSceneNode = nil) Then
+    begin
+      fRootNode := TX3DRootNode.Create;
+      fTransform := TTransformNode.Create;
 
-  AddAllAnimations;
-  fDebug := TDebugTransformBox.Create(Self);
-  fDebug.Parent := fScene;
-  fDebug.BoxColor := Vector4(0,0,0, 1);
-  fDebug.Exists := False;
+      fTransform.AddChildren(fSceneNode);
+      fRootNode.AddChildren(fTransform);
 
-  Normalize;
+      fScene := TCastleScene.Create(Self);
+      fScene.Load(fRootNode, True, AOptions);
+
+//  fScene.Load(AURL, AOptions);
+
+      fModelName := AURL;
+
+      AddAllAnimations;
+      fDebug := TDebugTransformBox.Create(Self);
+      fDebug.Parent := fScene;
+      fDebug.BoxColor := Vector4(0,0,0, 1);
+      fDebug.Exists := False;
+
+      Normalize;
+    end;
 end;
 
 { TCastleModel }
@@ -389,17 +413,21 @@ begin
   fBaseRotation := Vector3(0, 0, 0);
   fRootNode := nil;
   fTransform := nil;
-  fScene := TCastleScene.Create(AOwner);
+  fSceneNode := nil;
+  fScene := nil;
 end;
 
 destructor TCastleModel.Destroy;
 begin
   FreeAllAnimations;
   FreeAndNil(fActions);
-//  FreeAndNIl(fTransform);
+  FreeAndNil(fDebug);
+  //  FreeAndNIl(fTransform);
+{
     if not(fScene = nil) then
       if not(fScene.OwnsRootNode) then
         FreeAndNil(fScene);
+}
 //  FreeAndNil(fTransform);
 //  FreeAndNil(fRootNode);
 

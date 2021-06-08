@@ -1,7 +1,7 @@
 unit MainGameUnit;
 
 {$mode objfpc}{$H+}
-// {$define usestage}
+{$define usestage}
 
 interface
 
@@ -20,7 +20,7 @@ uses
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  multimodel;
+  multimodel, staging;
 
 type
   { TViewMode }
@@ -65,6 +65,7 @@ type
     procedure Stop; override; // TUIState
     procedure LoadViewport;
     procedure LoadModel(filename: String);
+    procedure ShowModel(AModel: TCastleScene);
     procedure ShowModel(AModel: TCastleModel);
     procedure SetStretchMultiplier(const AStretch: Single);
     procedure SetViewMode(const AViewMode: Cardinal);
@@ -216,16 +217,17 @@ begin
   CreateLabel(LabelRender, 0);
 end;
 
+procedure TCastleApp.ShowModel(AModel: TCastleScene);
+begin
+  AModel.Add(TestModel.Scene);
+  Viewport.Items.Add(AModel);
+  Viewport.Items.MainScene := AModel;
+end;
+
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
 begin
-  {$ifdef usestage}
-  Viewport.Items.Add(Stage);
   Viewport.Items.Add(AModel.Scene);
   Viewport.Items.MainScene := AModel.Scene;
-  {$else}
-  Viewport.Items.Add(AModel.Scene);
-  Viewport.Items.MainScene := AModel.Scene;
-  {$endif}
 end;
 
 procedure TCastleApp.LoadModel(filename: String);
@@ -233,6 +235,8 @@ begin
   try
     if not(TestModel = nil) then
       begin
+        TestModel.RemoveScene(Viewport);
+        TestModel.FreeScene;
         FreeAndNil(TestModel);
       end;
 
@@ -245,8 +249,8 @@ begin
     iScale := 1.0;
 
     TestModel := TCastleModel.Create(Application);
-    TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.Load(filename);
+    TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
