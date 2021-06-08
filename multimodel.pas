@@ -295,8 +295,6 @@ begin
       fScene := TCastleScene.Create(Self);
       fScene.Load(fRootNode, True, AOptions);
 
-//  fScene.Load(AURL, AOptions);
-
       fModelName := AURL;
 
       AddAllAnimations;

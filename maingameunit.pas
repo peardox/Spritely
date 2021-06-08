@@ -49,7 +49,7 @@ type
   public
     Viewport: TCastleViewport;
     TestModel: TCastleModel;
-    Stage: TCastleScene;
+    Stage: TCastleStage;
     CameraRotation: Single;
     ModelRotation: Single;
     CameraElevation: Single;
@@ -65,7 +65,7 @@ type
     procedure Stop; override; // TUIState
     procedure LoadViewport;
     procedure LoadModel(filename: String);
-    procedure ShowModel(AModel: TCastleScene);
+    procedure ShowModel(AModel: TCastleStage);
     procedure ShowModel(AModel: TCastleModel);
     procedure SetStretchMultiplier(const AStretch: Single);
     procedure SetViewMode(const AViewMode: Cardinal);
@@ -217,11 +217,11 @@ begin
   CreateLabel(LabelRender, 0);
 end;
 
-procedure TCastleApp.ShowModel(AModel: TCastleScene);
+procedure TCastleApp.ShowModel(AModel: TCastleStage);
 begin
-  AModel.Add(TestModel.Scene);
-  Viewport.Items.Add(AModel);
-  Viewport.Items.MainScene := AModel;
+//  AModel.Add(TestModel.Scene);
+//  Viewport.Items.Add(AModel);
+//  Viewport.Items.MainScene := AModel;
 end;
 
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
@@ -235,9 +235,14 @@ begin
   try
     if not(TestModel = nil) then
       begin
+        {$ifdef usestage}
+        Stage.Remove(TestModel.Scene);
+        FreeAndNil(TestModel);
+        {$else}
         TestModel.RemoveScene(Viewport);
         TestModel.FreeScene;
         FreeAndNil(TestModel);
+        {$endif}
       end;
 
     CameraRotation := 2 * Pi * (5/8);
@@ -250,13 +255,27 @@ begin
 
     TestModel := TCastleModel.Create(Application);
     TestModel.Load(filename);
+
+    {$ifdef usestage}
+    if (Stage = nil) then
+      begin
+        Stage := TCastleStage.Create(Self);
+        Stage.LoadStage('castle-data:/ground/floor.gltf', -1);
+        Stage.Add(TestModel.Scene);
+        Viewport.Items.Add(Stage);
+        Viewport.Items.MainScene := Stage;
+    end
+    else
+      begin
+        Stage.Add(TestModel.Scene);
+      end;
+    {$endif}
+{
     TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
-    {$ifdef usestage}
-    Stage := LoadStage('castle-data:/ground/floor.gltf', -1);
-    {$endif}
+}
   except
     on E : Exception do
       begin

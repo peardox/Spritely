@@ -173,11 +173,11 @@ end;
 
 procedure TCastleForm.FormDestroy(Sender: TObject);
 begin
-{
-  if not(CastleApp.TestModel = nil) then
-    if not(CastleApp.TestModel.Scene = nil) then
-      CastleApp.TestModel.FreeScene;
-}
+//  CastleApp.TestModel.RemoveScene(CastleApp.Viewport);
+//  FreeAndNil(GroundModelRoot);
+//  FreeAndNil(GroundNode);
+//  FreeAndNil(LightNode);
+//  FreeAndNil(CastleApp.Stage);
   WriteLnLog('FormDestroy : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 

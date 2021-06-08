@@ -13,10 +13,20 @@ uses
   X3DNodes, X3DFields, X3DTIme, X3DLoad, CastleRenderOptions,
   CastleViewport, CastleCameras, CastleProjection;
 
-function LoadStage(const GroundModel: String; const GroundLevel: Single = 0): TCastleScene;
-function LoadStage(const GroundLevel: Single = 0): TCastleScene;
-function LoadStage(const GroundLevel: Single; const GroundColor: TVector3): TCastleScene;
-function LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String): TCastleScene;
+type
+  TCastleStage = Class(TCastleScene)
+  private
+    fGroundTransformNode: TTransformNode;
+    fLightNode: TDirectionalLightNode;
+  public
+    procedure LoadStage(const GroundModel: String; const GroundLevel: Single = 0);
+    procedure LoadStage(const GroundLevel: Single = 0);
+    procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3);
+    procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String);
+    property  GroundTransformNode: TTransformNode read fGroundTransformNode write fGroundTransformNode;
+    property  LightNode: TDirectionalLightNode read fLightNode write fLightNode;
+  end;
+
 function CreatePointLight: TPointLightNode;
 function CreateDirectionalLight: TDirectionalLightNode;
 function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 1.0; const LayerDepth: Single = 0): TTransformNode;
@@ -81,7 +91,7 @@ var
   Light: TDirectionalLightNode;
 begin
   Light := TDirectionalLightNode.Create;
-  Light.Direction := Vector3( 0.00, -0.98, -0.00);
+  Light.Direction := Vector3( -0.500, -0.500, -0.500);
   Light.Color := Vector3(1, 1, 1);
   Light.Intensity := 1;
   Light.FdOn.Value := true;
@@ -115,66 +125,55 @@ begin
   Result := Light;
 end;
 
-function LoadStage(const GroundModel: String; const GroundLevel: Single = 0): TCastleScene;
+procedure TCastleStage.LoadStage(const GroundModel: String; const GroundLevel: Single = 0);
 begin
-  Result := LoadStage(GroundLevel, Vector3(1,1,1), GroundModel);
+  LoadStage(GroundLevel, Vector3(1,1,1), GroundModel);
 end;
 
-function LoadStage(const GroundLevel: Single = 0): TCastleScene;
+procedure TCastleStage.LoadStage(const GroundLevel: Single = 0);
 begin
-  Result := LoadStage(GroundLevel, Vector3(1,1,1));
+  LoadStage(GroundLevel, Vector3(1,1,1));
 end;
 
-function LoadStage(const GroundLevel: Single; const GroundColor: TVector3): TCastleScene;
+procedure TCastleStage.LoadStage(const GroundLevel: Single; const GroundColor: TVector3);
 begin
-  Result := LoadStage(GroundLevel, Vector3(1,1,1), EmptyStr);
+  LoadStage(GroundLevel, Vector3(1,1,1), EmptyStr);
 end;
 
-function LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String): TCastleScene;
+
+procedure TCastleStage.LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String);
 var
-  NewStage: TCastleScene;
-  GroundNode: TTransformNode;
-  {$ifdef usepoint}
-  Light: TPointLightNode;
-  {$else}
-  Light: TDirectionalLightNode;
-  {$endif}
-  Root: TX3DRootNode;
   GroundModelRoot: TX3DRootNode;
+  StageRootNode: TX3DRootNode;
 begin
   try
-    NewStage := TCastleScene.Create(nil);
-    Root := TX3DRootNode.Create;
+    StageRootNode := TX3DRootNode.Create;
     if (GroundModel = EmptyStr) or not(URIFileExists(GroundModel)) then
-      GroundNode := CreateColorPlane(20, 20, GroundLevel, GroundColor)
+      fGroundTransformNode := CreateColorPlane(20, 20, GroundLevel, GroundColor)
     else
       begin
         GroundModelRoot := LoadNode(GroundModel);
-        GroundNode := TTransformNode.Create;
-        GroundNode.Translation := Vector3(0, GroundLevel, 0);
-        GroundNode.AddChildren(GroundModelRoot);
+        fGroundTransformNode := TTransformNode.Create;
+        fGroundTransformNode.Translation := Vector3(0, GroundLevel, 0);
+        fGroundTransformNode.AddChildren(GroundModelRoot);
       end;
-    GroundNode.X3DName := 'GroundNode';
+    fGroundTransformNode.X3DName := 'GroundTransformNode';
 
-    {$ifdef usepoint}
-    Light := CreatePointLight;
-    {$else}
-    Light := CreateDirectionalLight;
-    {$endif}
-    Light.X3DName := 'MainLight';
+    fLightNode := CreateDirectionalLight;
+    fLightNode.X3DName := 'LightNode';
 
-    Light.projectionFar := 240.00;
+    fLightNode.projectionFar := 240.00;
 
-    Root.AddChildren(Light);
-    Root.AddChildren(GroundNode);
-    NewStage.Load(Root, True);
+    StageRootNode.AddChildren(fLightNode);
+    StageRootNode.AddChildren(fGroundTransformNode);
+    Load(StageRootNode, True);
 
-    NewStage.ReceiveShadowVolumes:=True;
-    NewStage.Spatial := [ssDynamicCollisions, ssRendering];
-    NewStage.ProcessEvents := True;
-    NewStage.RenderOptions.PhongShading := true;
-    NewStage.RenderOptions.ShadowSampling := ssSimple;
-    NewStage.RenderOptions.BlendingSort := bs2D;
+    ReceiveShadowVolumes:=True;
+    Spatial := [ssDynamicCollisions, ssRendering];
+    ProcessEvents := True;
+    RenderOptions.PhongShading := true;
+    RenderOptions.ShadowSampling := ssSimple;
+    RenderOptions.BlendingSort := bs2D;
 
   except
     on E : Exception do
@@ -182,8 +181,6 @@ begin
         WriteLnLog('Oops #1' + LineEnding + E.ClassName + LineEnding + E.Message);
        end;
   end;
-
-  Result := NewStage;
 end;
 
 end.
