@@ -108,11 +108,12 @@ begin
   {$endif}
 
 {$ifdef disableMap}
-    MapFile := '';
-//  ModelFile := 'castle-data:/oblique.glb';
+  MapFile := '';
+  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
-  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := 'castle-data:/isoroom/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
@@ -132,12 +133,13 @@ begin
   ApplicationProperties.ApplicationName := 'Spritely';
   ApplicationProperties.Caption := 'Spritely';
   ApplicationProperties.Version := '0.1';
+  ApplicationProperties.LimitFPS := 30;
   ApplicationProperties.OnLog.Add(@LogHandler.LogCallback);
 
   InitializeLog;
 
   PageControl1.ActivePage := TabSheet1;
-  TabSheet3.TabVisible := False;
+  TabSheet3.TabVisible := True;
 
   ModeOrientation := True;
   {$ifdef darwin}
@@ -163,7 +165,7 @@ begin
     begin
       Exists := not Exists;
       DebugBoxMenu.Checked := Exists;
-      TabSheet3.TabVisible := Exists;
+//      TabSheet3.TabVisible := Exists;
     end;
 end;
 
@@ -326,7 +328,6 @@ begin
             modelNode.Expand(False);
             end;
           modelNode.Selected := True;
-          ShowModel(Stage);
           TestModel.ResetAnimationState;
         end;
       Trackbar1.Position := 0;
@@ -467,7 +468,10 @@ begin
           if not(TestModel = nil) then
             begin
               if Event.Key = keyR then
-                ModelRotationCheck := True;
+                begin
+                  ModelRotationCheck := not ModelRotationCheck;
+                  ModelRotationDone := False;
+                end;
               if Event.Key = keyNumpadPlus then
                 iScale := iScale + (iScale * 0.1);
               if Event.Key = keyNumpadMinus then

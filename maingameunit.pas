@@ -56,6 +56,7 @@ type
     BoundRadius: Single;
     LabelMode: TCastleLabel;
     ModelRotationCheck: Boolean;
+    ModelRotationDone: Boolean;
     procedure UpdateModelRotation;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
@@ -64,7 +65,6 @@ type
     procedure Stop; override; // TUIState
     procedure LoadViewport;
     procedure LoadModel(filename: String);
-    procedure ShowModel(AModel: TCastleStage);
     procedure ShowModel(AModel: TCastleModel);
     procedure SetStretchMultiplier(const AStretch: Single);
     procedure SetViewMode(const AViewMode: Cardinal);
@@ -85,8 +85,8 @@ var
   MaxVP: TVector2Integer;
 
 const
-  SpriteWidth = 64;
-  SpriteHeight = 64;
+  SpriteWidth: Integer = 64;
+  SpriteHeight: Integer = 64;
   Margin = 0.1;
 
 implementation
@@ -128,8 +128,46 @@ begin
 end;
 
 procedure TCastleApp.Resize;
+var
+  DesiredAspect: Single;
+  ActualAspect: Single;
 begin
-  WriteLnLog('Resize : ' + IntToStr(Container.Width) + ' x ' + IntToStr(Container.Height));
+  DesiredAspect := SpriteWidth / SpriteHeight;
+  ActualAspect := Container.Width / Container.Height;
+
+  if DesiredAspect <= ActualAspect then
+    begin
+      WriteLnLog('DesiredAspect <= ActualAspect');
+      if Container.Width <= (Container.Height / DesiredAspect) then
+        begin
+          LabelMode.Caption := '1 = Aspect Switch';
+          Viewport.Height := Container.Height;
+          Viewport.Width := Container.Height * DesiredAspect;
+        end
+      else
+        begin
+          LabelMode.Caption := '2 = Aspect Switch';
+          Viewport.Height := Container.Height;
+          Viewport.Width := Container.Height * DesiredAspect;
+        end;
+    end
+  else
+    begin
+      WriteLnLog('DesiredAspect > ActualAspect');
+      if Container.Width <= (Container.Height / DesiredAspect) then
+        begin
+          LabelMode.Caption := '3 = Aspect Switch';
+          Viewport.Width := Container.Width;
+          Viewport.Height := Container.Width / DesiredAspect;
+        end
+      else
+        begin
+          LabelMode.Caption := '4 = Aspect Switch';
+          Viewport.Width := Container.Width;
+          Viewport.Height := Container.Width / DesiredAspect;
+        end;
+    end;
+  LabelMode.Caption := LabelMode.Caption + '1 = Aspect Switch' + ' => ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
   inherited;
   UpdateScale;
 end;
@@ -194,7 +232,7 @@ begin
   StretchMultiplier := 1;
 
   Viewport := TCastleViewport.Create(Application);
-  Viewport.FullSize := True;
+  Viewport.FullSize := False;
   Viewport.AutoCamera := False;
   Viewport.Setup2D;
   Viewport.BackgroundColor := Vector4(1, 1, 1, 1);
@@ -217,13 +255,6 @@ begin
   CreateLabel(LabelRender, 0);
 end;
 
-procedure TCastleApp.ShowModel(AModel: TCastleStage);
-begin
-//  AModel.Add(TestModel.Scene);
-//  Viewport.Items.Add(AModel);
-//  Viewport.Items.MainScene := AModel;
-end;
-
 procedure TCastleApp.ShowModel(AModel: TCastleModel);
 begin
   Viewport.Items.Add(AModel.Scene);
@@ -242,6 +273,7 @@ begin
     CameraRotation := 2 * Pi * (5/8);
     ModelRotation := 0;
     ModelRotationCheck := False;
+    ModelRotationDone := False;
     CameraElevation := 0;
     ViewMode := 2;
     BoundRadius := 1.0;
@@ -301,18 +333,20 @@ end;
 
 procedure TCastleApp.UpdateModelRotation;
 begin
-  ModelRotation += 3;
+  if not ModelRotationCheck then
+    ModelRotation += 12
+  else
+    ModelRotation += 3;
   if ModelRotation < 360 then
     begin
       ViewFromRadius(2, CameraElevation, CameraRotation + (2 * Pi * (ModelRotation / 360)));
-//      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
     end
   else
     begin
       ModelRotation := 0;
       ViewFromRadius(2, CameraElevation, CameraRotation);
-//      TestModel.Transform.Rotation := Vector4(0, 1, 0, 2 * Pi * (ModelRotation / 360));
-      ModelRotationCheck := False;
+      if not ModelRotationCheck then
+        ModelRotationDone := True;
     end;
 end;
 
@@ -337,7 +371,7 @@ var
   sc: TVector3;
   sr: Single;
 begin
-  if ModelRotationCheck then
+  if ModelRotationCheck or not ModelRotationDone then
     begin
       UpdateModelRotation;
     end
@@ -382,7 +416,7 @@ begin
         StretchMultiplier := 1;
         Viewport.Camera.Orthographic.Stretch := False;
         CameraElevation :=  -2;
-        ViewFromRadius(2, CameraElevation, 0);
+        ViewFromRadius(2, CameraElevation,  2 * pi * (6/8));
       end
     else
       begin
@@ -427,6 +461,7 @@ begin
       CastleForm.UpdateInfoPanel;
       {$endif}
     end;
+
   inherited;
 end;
 

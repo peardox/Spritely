@@ -32,9 +32,9 @@ object CastleForm: TCastleForm
       Height = 416
       Top = 1
       Width = 393
-      ActivePage = TabSheet2
+      ActivePage = TabSheet1
       Align = alClient
-      TabIndex = 1
+      TabIndex = 0
       TabOrder = 1
       object TabSheet1: TTabSheet
         Caption = 'Sprite Builder'
