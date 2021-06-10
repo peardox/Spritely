@@ -12,9 +12,9 @@ DEF LightNode DirectionalLight {
 		light USE LightNode
 	}
 	shadows TRUE
-	direction -0.699999988079071 -0.699999988079071 0.699999988079071
-	projectionRectangle -6 -16 26 16
-	projectionLocation 16 16 1
+	direction -0.5 -2 0.5
+	projectionRectangle -8 -16 24 16
+	projectionLocation 11 12 1
 }
 DEF GroundTransformNode Transform {
 	children Group {
