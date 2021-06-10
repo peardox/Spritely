@@ -1,7 +1,6 @@
 unit MainGameUnit;
 
 {$mode objfpc}{$H+}
-{$define usestage}
 
 interface
 
@@ -191,6 +190,7 @@ end;
 
 procedure TCastleApp.LoadViewport;
 begin
+  WriteLnLog('LoadViewport');
   StretchMultiplier := 1;
 
   Viewport := TCastleViewport.Create(Application);
@@ -235,32 +235,26 @@ begin
   try
     if not(TestModel = nil) then
       begin
-        {$ifdef usestage}
         Stage.Remove(TestModel.Scene);
         FreeAndNil(TestModel);
-        {$else}
-        TestModel.RemoveScene(Viewport);
-        TestModel.FreeScene;
-        FreeAndNil(TestModel);
-        {$endif}
       end;
 
     CameraRotation := 2 * Pi * (5/8);
     ModelRotation := 0;
     ModelRotationCheck := False;
     CameraElevation := 0;
-    ViewMode := 0;
+    ViewMode := 2;
     BoundRadius := 1.0;
     iScale := 1.0;
 
     TestModel := TCastleModel.Create(Application);
     TestModel.Load(filename);
 
-    {$ifdef usestage}
     if (Stage = nil) then
       begin
         Stage := TCastleStage.Create(Self);
-        Stage.LoadStage('castle-data:/ground/floor.gltf', -1);
+        Stage.LoadStage('castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png', -1);
+//        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
         Stage.Add(TestModel.Scene);
         Viewport.Items.Add(Stage);
         Viewport.Items.MainScene := Stage;
@@ -269,7 +263,6 @@ begin
       begin
         Stage.Add(TestModel.Scene);
       end;
-    {$endif}
 {
     TestModel.Spatial := [ssDynamicCollisions, ssRendering];
     TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
@@ -388,8 +381,8 @@ begin
       begin
         StretchMultiplier := 1;
         Viewport.Camera.Orthographic.Stretch := False;
-        CameraElevation :=  -9999;
-        ViewFromRadius(2, CameraElevation, CameraRotation);
+        CameraElevation :=  -2;
+        ViewFromRadius(2, CameraElevation, 0);
       end
     else
       begin

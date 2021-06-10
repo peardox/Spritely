@@ -129,12 +129,12 @@
         {
             "mimeType" : "image/png",
             "name" : "Ground_Normal",
-            "uri" : "Tileable Brick Ground Textures - Set 2/Brick_03_Nrm.png"
+            "uri" : "White_Normal.png"
         },
         {
             "mimeType" : "image/png",
             "name" : "Ground_Texture",
-            "uri" : "Tileable Brick Ground Textures - Set 2/Brick_03.png"
+            "uri" : "White_Texture.png"
         }
     ],
     "accessors" : [

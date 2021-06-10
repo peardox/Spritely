@@ -18,12 +18,17 @@ type
   private
     fGroundTransformNode: TTransformNode;
     fLightNode: TDirectionalLightNode;
+    fGroundModelRoot: TX3DRootNode;
   public
     procedure LoadStage(const GroundModel: String; const GroundLevel: Single = 0);
     procedure LoadStage(const GroundLevel: Single = 0);
     procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3);
     procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String);
     property  GroundTransformNode: TTransformNode read fGroundTransformNode write fGroundTransformNode;
+    procedure ChangeTextureCoordinates(const Model3D: TX3DRootNode; const AScale: Single = 1.0);
+    function  ChangeTexture(const ANode: TX3DRootNode; const TextureUrl: String): TVector3Cardinal;
+    function  CreateGroundPlane(AFileName: String; const AScale: Single = 1.0): TX3DRootNode;
+
     property  LightNode: TDirectionalLightNode read fLightNode write fLightNode;
   end;
 
@@ -91,20 +96,22 @@ var
   Light: TDirectionalLightNode;
 begin
   Light := TDirectionalLightNode.Create;
-  Light.Direction := Vector3( -0.500, -0.500, -0.500);
+  Light.Direction := Vector3( -0.700, -0.700, 0.700);
   Light.Color := Vector3(1, 1, 1);
   Light.Intensity := 1;
   Light.FdOn.Value := true;
   Light.Global := true;
   Light.Shadows := true;
+  Light.projectionNear := 1.00;
+  Light.projectionFar := 40.00;
 
   Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
   Light.DefaultShadowMap.Update := upAlways;
   Light.DefaultShadowMap.Size := 4096;
   Light.ShadowVolumesMain := False;
   Light.ShadowVolumes := False;
-  Light.ProjectionRectangle := FloatRectangle(-20.0, -20.0, 40.0, 40.0).ToX3DVector;
-  Light.ProjectionLocation := Vector3(1.0, 3.0, 1.0);
+  Light.ProjectionRectangle := FloatRectangle(-6.0, -16.0, 32.0, 32.0).ToX3DVector;
+  Light.ProjectionLocation := Vector3(16.0, 16.0, 1.0);
 
   Result := Light;
 end;
@@ -143,7 +150,6 @@ end;
 
 procedure TCastleStage.LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String);
 var
-  GroundModelRoot: TX3DRootNode;
   StageRootNode: TX3DRootNode;
 begin
   try
@@ -152,21 +158,21 @@ begin
       fGroundTransformNode := CreateColorPlane(20, 20, GroundLevel, GroundColor)
     else
       begin
-        GroundModelRoot := LoadNode(GroundModel);
+        fGroundModelRoot := CreateGroundPlane(GroundModel, 5);
         fGroundTransformNode := TTransformNode.Create;
         fGroundTransformNode.Translation := Vector3(0, GroundLevel, 0);
-        fGroundTransformNode.AddChildren(GroundModelRoot);
+        fGroundTransformNode.Scale := Vector3(20, 1, 20);
+        fGroundTransformNode.AddChildren(fGroundModelRoot);
       end;
     fGroundTransformNode.X3DName := 'GroundTransformNode';
 
     fLightNode := CreateDirectionalLight;
     fLightNode.X3DName := 'LightNode';
 
-    fLightNode.projectionFar := 240.00;
-
     StageRootNode.AddChildren(fLightNode);
     StageRootNode.AddChildren(fGroundTransformNode);
     Load(StageRootNode, True);
+            SaveNode(StageRootNode, 'test.x3dv');
 
     ReceiveShadowVolumes:=True;
     Spatial := [ssDynamicCollisions, ssRendering];
@@ -181,6 +187,46 @@ begin
         WriteLnLog('Oops #1' + LineEnding + E.ClassName + LineEnding + E.Message);
        end;
   end;
+end;
+
+procedure TCastleStage.ChangeTextureCoordinates(const Model3D: TX3DRootNode; const AScale: Single = 1.0);
+var
+  TextureCoordinateNode: TTextureCoordinateNode;
+  NewCoords: array[0..3] of TVector2;
+begin
+  // Find the texture
+  TextureCoordinateNode := Model3D.FindNodeByName(TTextureCoordinateNode, 'ObjFrontTextureCoordinates', false) as TTextureCoordinateNode;
+  // Set new texture coordinates so each tile maps to the whole image
+  NewCoords[0] := Vector2(AScale, 0);
+  NewCoords[1] := Vector2(AScale, AScale);
+  NewCoords[2] := Vector2(0, AScale);
+  NewCoords[3] := Vector2(0, 0);
+
+  TextureCoordinateNode.SetPoint(NewCoords);
+end;
+
+function TCastleStage.ChangeTexture(const ANode: TX3DRootNode; const TextureUrl: String): TVector3Cardinal;
+var
+  TextureNode: TImageTextureNode;
+begin
+  Result := TVector3Cardinal.Zero;
+  TextureNode := ANode.TryFindNodeByName(TImageTextureNode, 'ObjFrontTexture', false) as TImageTextureNode;
+  if not (TextureNode = nil) then
+  begin
+    TextureNode.SetUrl(TextureUrl);
+    if TextureNode.IsTextureImage then
+      Result := TextureNode.TextureImage.Dimensions;
+  end;
+end;
+
+function TCastleStage.CreateGroundPlane(AFileName: String; const AScale: Single = 1.0): TX3DRootNode;
+var
+  PlaneNode: TX3DRootNode;
+begin
+  PlaneNode := LoadNode('castle-data:/ground/plane.x3dv');
+  ChangeTexture(PlaneNode, AFileName);
+  ChangeTextureCoordinates(PlaneNode, AScale);
+  Result := PlaneNode;
 end;
 
 end.

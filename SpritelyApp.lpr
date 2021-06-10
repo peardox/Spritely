@@ -14,7 +14,7 @@ uses
     {$ifdef UNIX} CThreads, {$endif}
   {$endif}
   CastleApplicationProperties, CastleLog, CastleWindow, AppInitialization,
-  MainGameUnit, multimodel;
+  MainGameUnit, multimodel, SpritelyLog;
 
 begin
   { Optionally you can specify here your application version.
@@ -24,8 +24,13 @@ begin
     and specify <version> inside CastleEngineManifest.xml.
     In this case, the program file, with appropriate version set,
     will be automatically generated and updated by the build tool. }
-  ApplicationProperties.Version := '1';
+  LogHandler := TLogHandler.Create(Application);
+
   Application.ParseStandardParameters;
+  ApplicationProperties.ApplicationName := 'Spritely';
+  ApplicationProperties.Caption := 'Spritely';
+  ApplicationProperties.Version := '0.1';
+
 
   { On standalone, activate log only after parsing command-line options.
     This allows to handle --version and --help command-line parameters

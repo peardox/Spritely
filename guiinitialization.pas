@@ -2,8 +2,6 @@ unit GUIInitialization;
 
 {$mode objfpc}{$H+}
  {$define disableMap}
-// {$define usetransform}
- {$define usestage}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 // DG - 838383, LG B2B2B2
@@ -18,7 +16,7 @@ uses
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleGLUtils,
   CastleLCLUtils, CastleDialogs, CastleApplicationProperties, CastleLog,
   CastleTimeUtils, CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, staging, multimodel, BGRAImageTheme;
+  CastleQuaternions, SpritelyLog, staging, multimodel;
 
 type
   { TCastleForm }
@@ -29,17 +27,22 @@ type
     CastleOpenDialog1: TCastleOpenDialog;
     ListView1: TListView;
     MainMenu1: TMainMenu;
+    AppLog: TMemo;
     MenuItem1: TMenuItem;
     FileOpenMenu: TMenuItem;
     DebugBoxMenu: TMenuItem;
     CreateSpriteMenu: TMenuItem;
     ExitMenu: TMenuItem;
+    PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
     Panel4: TPanel;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
+    TabSheet1: TTabSheet;
+    TabSheet2: TTabSheet;
+    TabSheet3: TTabSheet;
     TrackBar1: TTrackBar;
     TreeView1: TTreeView;
     Window: TCastleControlBase;
@@ -107,9 +110,9 @@ begin
 {$ifdef disableMap}
     MapFile := '';
 //  ModelFile := 'castle-data:/oblique.glb';
-  ModelFile := 'castle-data:/up.glb';
+//  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
-//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
@@ -124,8 +127,18 @@ begin
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 {$endif}
+  LogHandler := TLogHandler.Create(Application);
 
-InitializeLog;
+  ApplicationProperties.ApplicationName := 'Spritely';
+  ApplicationProperties.Caption := 'Spritely';
+  ApplicationProperties.Version := '0.1';
+  ApplicationProperties.OnLog.Add(@LogHandler.LogCallback);
+
+  InitializeLog;
+
+  PageControl1.ActivePage := TabSheet1;
+  TabSheet3.TabVisible := False;
+
   ModeOrientation := True;
   {$ifdef darwin}
 //  WindowState := wsFullScreen;
@@ -150,6 +163,7 @@ begin
     begin
       Exists := not Exists;
       DebugBoxMenu.Checked := Exists;
+      TabSheet3.TabVisible := Exists;
     end;
 end;
 
@@ -312,11 +326,7 @@ begin
             modelNode.Expand(False);
             end;
           modelNode.Selected := True;
-          {$ifdef usestage}
           ShowModel(Stage);
-          {$else}
-          ShowModel(TestModel);
-          {$endif}
           TestModel.ResetAnimationState;
         end;
       Trackbar1.Position := 0;
@@ -438,6 +448,8 @@ procedure TCastleForm.WindowPress(Sender: TObject;
   const Event: TInputPressRelease);
 var
   Q: TQuaternion;
+const
+  OrientationStepSize = 4;
 begin
   ActiveControl := Window;
   if Event.Key = keySpace then
@@ -461,31 +473,27 @@ begin
               if Event.Key = keyNumpadMinus then
                 iScale := iScale - (iScale * 0.1);
               if Event.Key = keyPageUp then
-                TestModel.BaseRotation.Z := TestModel.BaseRotation.Z + (Pi / 2);
+                TestModel.BaseRotation.Z := TestModel.BaseRotation.Z + (Pi / OrientationStepSize);
               if Event.Key = keyPageDown then
-                TestModel.BaseRotation.Z := TestModel.BaseRotation.Z - (Pi / 2);
-              if Event.Key = keyArrowUp then
-                TestModel.BaseRotation.X := TestModel.BaseRotation.X + (Pi / 2);
+                TestModel.BaseRotation.Z := TestModel.BaseRotation.Z - (Pi / OrientationStepSize);
               if Event.Key = keyArrowDown then
-                TestModel.BaseRotation.X := TestModel.BaseRotation.X - (Pi / 2);
+                TestModel.BaseRotation.X := TestModel.BaseRotation.X + (Pi / OrientationStepSize);
+              if Event.Key = keyArrowUp then
+                TestModel.BaseRotation.X := TestModel.BaseRotation.X - (Pi / OrientationStepSize);
               if Event.Key = keyArrowRight then
-                TestModel.BaseRotation.Y := TestModel.BaseRotation.Y + (Pi / 2);
+                TestModel.BaseRotation.Y := TestModel.BaseRotation.Y + (Pi / OrientationStepSize);
               if Event.Key = keyArrowLeft then
-                TestModel.BaseRotation.Y := TestModel.BaseRotation.Y - (Pi / 2);
+                TestModel.BaseRotation.Y := TestModel.BaseRotation.Y - (Pi / OrientationStepSize);
               Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
               Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, TestModel.BaseRotation.X));
               Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, TestModel.BaseRotation.Y));
               Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, TestModel.BaseRotation.Z));
 
-              {$ifdef usetransform}
               TestModel.Transform.Rotation := Q.ToAxisAngle;
-              {$else}
-              TestModel.Scene.Rotation := Q.ToAxisAngle;
-              {$endif}
               LabelMode.Caption := 'Orientation : X = ' +
-                FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.X))) + ', Y = ' +
-                FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.Y))) + ', Z = ' +
-                FormatFloat('##0.0', RadToDeg(WrapRadians(TestModel.BaseRotation.Z)));
+                IntToStr(RadsToFace(TestModel.BaseRotation.X)) + ', Y = ' +
+                IntToStr(RadsToFace(TestModel.BaseRotation.Y)) + ', Z = ' +
+                IntToStr(RadsToFace(TestModel.BaseRotation.Z));
             end;
         end;
     end;
@@ -532,11 +540,9 @@ begin
           AddInfo('Pos B', '');
           AddInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
           AddInfo('Max Viewport', MaxVP.ToString);
-          {$ifdef usetransform}
           AddInfo('Translation', TestModel.Transform.Translation.ToString);
           AddInfo('Center', TestModel.Transform.Center.ToString);
           AddInfo('Rotation', TestModel.Transform.Rotation.ToString);
-          {$endif}
         end;
     end;
 end;
@@ -565,11 +571,9 @@ begin
           UpdateInfo('Pos A', Pos2DTo3D(0, 0));
           UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
           UpdateInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
-          {$ifdef usetransform}
           UpdateInfo('Translation', TestModel.Transform.Translation.ToString);
           UpdateInfo('Center', TestModel.Transform.Center.ToString);
           UpdateInfo('Rotation', TestModel.Transform.Rotation.ToString);
-          {$endif}
         end;
     end;
 end;

@@ -1,0 +1,76 @@
+#X3D V3.2 utf8
+
+PROFILE Interchange
+
+DEF LightNode DirectionalLight {
+	global TRUE
+	projectionNear 1
+	projectionFar 40
+	defaultShadowMap DEF LightNode_ShadowMap_generated_by_ProcessShadowMapsReceivers GeneratedShadowMap {
+		update "ALWAYS"
+		size 4096
+		light USE LightNode
+	}
+	shadows TRUE
+	direction -0.699999988079071 -0.699999988079071 0.699999988079071
+	projectionRectangle -6 -16 26 16
+	projectionLocation 16 16 1
+}
+DEF GroundTransformNode Transform {
+	children Group {
+		children Shape {
+			appearance DEF Material_PlaneFace Appearance {
+				texture MultiTexture {
+					texture [
+						DEF ObjFrontTexture ImageTexture {
+							url "castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png"
+						}
+						USE LightNode_ShadowMap_generated_by_ProcessShadowMapsReceivers
+					]
+				}
+			}
+			geometry IndexedFaceSet {
+				coord DEF ObjCoordinates Coordinate {
+					point [
+						-0.5 0 -0.5,
+						-0.5 0 0.5,
+						0.5 0 0.5,
+						0.5 0 -0.5,
+					]
+				}
+				normal DEF ObjNormals Normal {
+					vector 0 0 1
+				}
+				texCoord MultiTextureCoordinate {
+					texCoord [
+						DEF ObjFrontTextureCoordinates TextureCoordinate {
+							point [
+								5 0,
+								5 5,
+								0 5,
+								0 0,
+							]
+						}
+						DEF LightNode_TexGen_generated_by_ProcessShadowMapsReceivers ProjectedTextureCoordinate {
+							projector USE LightNode
+						}
+					]
+				}
+				solid FALSE
+				convex FALSE
+				coordIndex [
+					3, 2, 1, 0, -1,
+				]
+				creaseAngle 0.5
+				normalIndex [
+					0, 0, 0, 0, -1,
+				]
+				texCoordIndex [
+					0, 1, 2, 3, -1,
+				]
+			}
+		}
+	}
+	scale 20 1 20
+	translation 0 -1 0
+}

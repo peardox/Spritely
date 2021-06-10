@@ -59,7 +59,7 @@ type
     fSceneNode:  TX3DRootNode;
     fTransform: TTransformNode;
     fDebug: TDebugTransformBox;
-    fBaseRotation: TVector3;
+    fBaseRotation: TVector3Single;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -298,7 +298,7 @@ begin
       fModelName := AURL;
 
       AddAllAnimations;
-      fDebug := TDebugTransformBox.Create(Self);
+      fDebug := TDebugTransformBox.Create(fScene);
       fDebug.Parent := fScene;
       fDebug.BoxColor := Vector4(0,0,0, 1);
       fDebug.Exists := False;
@@ -419,16 +419,8 @@ destructor TCastleModel.Destroy;
 begin
   FreeAllAnimations;
   FreeAndNil(fActions);
+  fDebug.Exists := False;
   FreeAndNil(fDebug);
-  //  FreeAndNIl(fTransform);
-{
-    if not(fScene = nil) then
-      if not(fScene.OwnsRootNode) then
-        FreeAndNil(fScene);
-}
-//  FreeAndNil(fTransform);
-//  FreeAndNil(fRootNode);
-
   inherited;
 end;
 

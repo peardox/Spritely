@@ -17,7 +17,7 @@ It is especially notable that 2D Animated Character Sprites are hard to find. Th
 
 Of course, this process also works perfectly with inanimate models as well so objects to fill your new world work exactly the same way.
 
-Spritely is pre-configured to cater for all 2D art styles whether you're creating Flat 2D, JRPG, Isometric or Military (like Utima 7) viewpoints. ***
+Spritely is pre-configured to cater for all 2D art styles whether you're creating Flat 2D, JRPG, Isometric or Military (like Ultima 7) viewpoints. ***
 
 
 ##### To compile with Lazarus
@@ -26,9 +26,11 @@ Load SpritelyLaz.lpi into Lazarus + compile
 
 ##### Credits
 
-Michalis Kamburelis for the wonderful Castle Game Engine - https://castle-engine.io/  
+Michalis Kamburelis for the amazing Castle Game Engine - https://castle-engine.io/  
 
 Quaternius for his superb 3D models - https://quaternius.com/
+
+PVGames for their wonderful 2.5D art, the inspiration for Spritely - https://pvgames.itch.io/
 
 Andrzej Kilijanski for his CGE Sprite code - https://digitalkarabela.com/
 
