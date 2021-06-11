@@ -19,7 +19,7 @@ uses
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  multimodel, staging;
+  CastleGLUtils, multimodel, staging;
 
 type
   { TViewMode }
@@ -41,11 +41,17 @@ type
     procedure Update(const SecondsPassed: Single; var HandleInput: boolean); override; // TUIState
   private
     fViewMode: Cardinal;
+    fOverSample: Cardinal;
+    fSpriteWidth: Cardinal;
+    fSpriteHeight: Cardinal;
+
     fStretchMultiplier: Single;
     LabelFPS: TCastleLabel;
     LabelRender: TCastleLabel;
     LabelSpare: TCastleLabel;
   public
+    VPMax: TVector2Integer;
+
     Viewport: TCastleViewport;
     TestModel: TCastleModel;
     Stage: TCastleStage;
@@ -53,6 +59,7 @@ type
     ModelRotation: Single;
     CameraElevation: Single;
     iScale: Single;
+    iScaleMultiplier: Single;
     BoundRadius: Single;
     LabelMode: TCastleLabel;
     ModelRotationCheck: Boolean;
@@ -75,6 +82,9 @@ type
 
     property  StretchMultiplier: Single read fStretchMultiplier write SetStretchMultiplier default 0;
     property  ViewMode: Cardinal read fViewMode write SetViewMode default 0;
+    property  OverSample: Cardinal read fOverSample write fOverSample;
+    property  SpriteWidth: Cardinal read fSpriteWidth write fSpriteWidth;
+    property  SpriteHeight: Cardinal read fSpriteHeight write fSpriteHeight;
 end;
 
 var
@@ -82,12 +92,6 @@ var
   PrepDone: Boolean;
   RenderReady: Boolean;
   CastleApp: TCastleApp;
-  MaxVP: TVector2Integer;
-
-const
-  SpriteWidth: Integer = 64;
-  SpriteHeight: Integer = 64;
-  Margin = 0.1;
 
 implementation
 {$ifdef cgeapp}
@@ -132,12 +136,13 @@ var
   DesiredAspect: Single;
   ActualAspect: Single;
 begin
+  inherited;
+
   DesiredAspect := SpriteWidth / SpriteHeight;
   ActualAspect := Container.Width / Container.Height;
 
   if DesiredAspect <= ActualAspect then
     begin
-      WriteLnLog('DesiredAspect <= ActualAspect');
       if Container.Width <= (Container.Height / DesiredAspect) then
         begin
           LabelMode.Caption := '1 = Aspect Switch';
@@ -153,7 +158,6 @@ begin
     end
   else
     begin
-      WriteLnLog('DesiredAspect > ActualAspect');
       if Container.Width <= (Container.Height / DesiredAspect) then
         begin
           LabelMode.Caption := '3 = Aspect Switch';
@@ -167,8 +171,12 @@ begin
           Viewport.Height := Container.Width / DesiredAspect;
         end;
     end;
-  LabelMode.Caption := LabelMode.Caption + '1 = Aspect Switch' + ' => ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
-  inherited;
+
+  Viewport.Left := Trunc((Container.Width - Viewport.Width) / 2);
+  Viewport.Bottom := Trunc((Container.Height - Viewport.Height) / 2);
+
+  LabelMode.Caption := LabelMode.Caption + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
+
   UpdateScale;
 end;
 
@@ -176,10 +184,9 @@ procedure TCastleApp.BootStrap;
 var
   ProcTimer: Int64;
 begin
-  ProcTimer := CastleGetTickCount64;
+  SpriteWidth := 1024;
+  SpriteHeight := 1024;
   LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
-  ProcTimer := CastleGetTickCount64 - ProcTimer;
-  WriteLnLog('ProcTimer (LoadModel) = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
   ShowModel(TestModel);
   if TestModel.HasAnimations then
     TestModel.SelectAnimation(TestModel.Actions[0]);
@@ -275,10 +282,9 @@ begin
     ModelRotationCheck := False;
     ModelRotationDone := False;
     CameraElevation := 0;
-    ViewMode := 2;
     BoundRadius := 1.0;
     iScale := 1.0;
-
+    iScaleMultiplier := 1.0;
     TestModel := TCastleModel.Create(Application);
     TestModel.Load(filename);
 
@@ -315,6 +321,12 @@ begin
   LogTextureCache := True;
   TestModel := nil;
   LoadViewport;
+  ViewMode := 2;
+  OverSample := 64;
+  SpriteWidth := 256;
+  SpriteHeight := 256;
+
+  VPMax := GLFeatures.MaxViewportDimensions;
   PrepDone := True;
 end;
 
@@ -440,11 +452,12 @@ begin
               BoundRadius := 1.0;
 
             iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
+            iScaleMultiplier := 1.0;
             TestModel.LockedScale := iScale;
             TestModel.IsLocked := True;
           end;
 
-        Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
+        Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / (iScale * iScaleMultiplier);
 
         if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
           begin
@@ -515,8 +528,13 @@ begin
             end;
 
           SourceViewport.Camera.Orthographic.Scale := (2 * BoundRadius) /
-            Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight);
+          (Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight) * iScaleMultiplier);
 
+//          SourceViewport.Camera.Orthographic.Scale := Viewport.Camera.Orthographic.Scale / (iScale);
+//          SourceViewport.Camera.Orthographic.Scale := (2 * BoundRadius) / Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight);
+//          SourceViewport.Camera.Orthographic.Scale := ((2 * BoundRadius) / (iScale * OverSample));
+
+          WriteLnLog(FloatToStr(iScale) + ' vs ' + FloatToStr(TestModel.LockedScale));
           SourceViewport.Items := ViewPort.Items;
           ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);
             {$ifndef cgeapp}CastleForm.{$endif}Window.Container.RenderControl(SourceViewport,ViewportRect);

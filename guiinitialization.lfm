@@ -32,9 +32,9 @@ object CastleForm: TCastleForm
       Height = 416
       Top = 1
       Width = 393
-      ActivePage = TabSheet1
+      ActivePage = TabSheet3
       Align = alClient
-      TabIndex = 0
+      TabIndex = 2
       TabOrder = 1
       object TabSheet1: TTabSheet
         Caption = 'Sprite Builder'
@@ -98,12 +98,32 @@ object CastleForm: TCastleForm
       ClientHeight = 343
       ClientWidth = 300
       TabOrder = 0
+      object TreeView1: TTreeView
+        Left = 0
+        Height = 153
+        Top = 0
+        Width = 300
+        Align = alClient
+        ScrollBars = ssAutoBoth
+        TabOrder = 1
+        OnClick = TreeView1Click
+        OnContextPopup = TreeView1ContextPopup
+      end
+      object Splitter2: TSplitter
+        Cursor = crVSplit
+        Left = 0
+        Height = 5
+        Top = 153
+        Width = 300
+        Align = alBottom
+        ResizeAnchor = akBottom
+      end
       object ListView1: TListView
         Left = 0
         Height = 185
         Top = 158
         Width = 300
-        Align = alClient
+        Align = alBottom
         AutoSort = False
         Columns = <        
           item
@@ -118,26 +138,6 @@ object CastleForm: TCastleForm
         TabOrder = 0
         ViewStyle = vsReport
         OnClick = ListView1Click
-      end
-      object TreeView1: TTreeView
-        Left = 0
-        Height = 153
-        Top = 0
-        Width = 300
-        Align = alTop
-        ScrollBars = ssAutoBoth
-        TabOrder = 1
-        OnClick = TreeView1Click
-        OnContextPopup = TreeView1ContextPopup
-      end
-      object Splitter2: TSplitter
-        Cursor = crVSplit
-        Left = 0
-        Height = 5
-        Top = 153
-        Width = 300
-        Align = alTop
-        ResizeAnchor = akTop
       end
     end
     object Panel4: TPanel

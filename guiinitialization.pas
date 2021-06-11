@@ -1,7 +1,7 @@
 unit GUIInitialization;
 
 {$mode objfpc}{$H+}
- {$define disableMap}
+// {$define disableMap}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 // DG - 838383, LG B2B2B2
@@ -13,7 +13,7 @@ uses
   CastleControls, CastleColors, CastleUIControls, CastleTriangles, CastleShapes,
   CastleVectors, CastleSceneCore, CastleScene, CastleTransform, CastleViewport,
   CastleCameras, X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages,
-  CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleGLUtils,
+  CastleFilesUtils, CastleURIUtils, MiscFunctions,
   CastleLCLUtils, CastleDialogs, CastleApplicationProperties, CastleLog,
   CastleTimeUtils, CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
   CastleQuaternions, SpritelyLog, staging, multimodel;
@@ -118,10 +118,10 @@ begin
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
 {$else}
-//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
-  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
-  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
+  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + '_bike_animations.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
 //  MapFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'Thief-animations-list.txt';
@@ -142,6 +142,8 @@ begin
   TabSheet3.TabVisible := True;
 
   ModeOrientation := True;
+  Applog.Clear;
+
   {$ifdef darwin}
 //  WindowState := wsFullScreen;
   {$endif}
@@ -157,6 +159,8 @@ begin
   Trackbar1.Max := 100000;
   Button1.Caption := 'Create Sprite';
   Button2.Caption := 'Change ViewMode';
+  Listview1.Visible := False;
+  Splitter2.Visible := False;
 end;
 
 procedure TCastleForm.DebugBoxMenuClick(Sender: TObject);
@@ -165,7 +169,9 @@ begin
     begin
       Exists := not Exists;
       DebugBoxMenu.Checked := Exists;
-//      TabSheet3.TabVisible := Exists;
+      Listview1.Visible := Exists;
+      Splitter2.Visible := Exists;
+      // TabSheet3.TabVisible := Exists;
     end;
 end;
 
@@ -342,14 +348,21 @@ var
   SName: String;
 begin
   Button1.Enabled := False;
-  if not (CastleApp.TestModel.Scene = nil) then
+  with CastleApp do
     begin
-      Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, 8192, 8192);
-      if not(Sprite = nil) then
+      if not (TestModel.Scene = nil) then
         begin
-          SName := FileNameAutoInc('grab_%4.4d.jpg');
-          SaveImage(Sprite, SName);
-          FreeAndNil(Sprite);
+          Sprite := CastleApp.CreateSpriteImage(CastleApp.TestModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample);
+          if not(Sprite = nil) then
+            begin
+              if (OverSample > 1) then
+                begin
+                  Sprite.Resize(SpriteWidth, SpriteHeight, riLanczos); // Mitchel);
+                end;
+              SName := FileNameAutoInc('grab_%4.4d.jpg');
+              SaveImage(Sprite, SName);
+              FreeAndNil(Sprite);
+            end;
         end;
     end;
   Button1.Enabled := True;
@@ -388,7 +401,6 @@ procedure TCastleForm.WindowOpen(Sender: TObject);
 begin
   WriteLnLog('WindowOpen : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
   RenderReady := False;
-  MaxVP := GLFeatures.MaxViewportDimensions;
   TCastleControlBase.MainControl := Window;
   CastleApp := TCastleApp.Create(Application);
   TUIState.Current := CastleApp;
@@ -473,9 +485,9 @@ begin
                   ModelRotationDone := False;
                 end;
               if Event.Key = keyNumpadPlus then
-                iScale := iScale + (iScale * 0.1);
+                CastleApp.iScaleMultiplier := CastleApp.iScaleMultiplier + (CastleApp.iScaleMultiplier * 0.1);
               if Event.Key = keyNumpadMinus then
-                iScale := iScale - (iScale * 0.1);
+                CastleApp.iScaleMultiplier := CastleApp.iScaleMultiplier - (CastleApp.iScaleMultiplier * 0.1);
               if Event.Key = keyPageUp then
                 TestModel.BaseRotation.Z := TestModel.BaseRotation.Z + (Pi / OrientationStepSize);
               if Event.Key = keyPageDown then
@@ -539,11 +551,12 @@ begin
           AddInfo('Center', TestModel.Scene.Center.ToString);
           AddInfo('Rotation', TestModel.Scene.Rotation.ToString);
           AddInfo('iScale', CastleApp.iScale.ToString);
+          AddInfo('iScaleMultiplier', CastleApp.iScaleMultiplier.ToString);
           AddInfo('BoundRadius', CastleApp.BoundRadius.ToString);
           AddInfo('Pos A', '');
           AddInfo('Pos B', '');
           AddInfo('Size', TestModel.Scene.BoundingBox.Size.ToString);
-          AddInfo('Max Viewport', MaxVP.ToString);
+          AddInfo('Max Viewport', VPMax.ToString);
           AddInfo('Translation', TestModel.Transform.Translation.ToString);
           AddInfo('Center', TestModel.Transform.Center.ToString);
           AddInfo('Rotation', TestModel.Transform.Rotation.ToString);
@@ -571,6 +584,7 @@ begin
           UpdateInfo('Center', TestModel.Scene.Center.ToString);
           UpdateInfo('Rotation', TestModel.Scene.Rotation.ToString);
           UpdateInfo('iScale', CastleApp.iScale.ToString);
+          UpdateInfo('iScaleMultiplier', CastleApp.iScaleMultiplier.ToString);
           UpdateInfo('BoundRadius', CastleApp.BoundRadius.ToString);
           UpdateInfo('Pos A', Pos2DTo3D(0, 0));
           UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
