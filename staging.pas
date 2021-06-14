@@ -173,7 +173,6 @@ begin
     StageRootNode.AddChildren(fLightNode);
     StageRootNode.AddChildren(fGroundTransformNode);
     Load(StageRootNode, True);
-            SaveNode(StageRootNode, 'test.x3dv');
 
     ReceiveShadowVolumes:=True;
     Spatial := [ssDynamicCollisions, ssRendering];

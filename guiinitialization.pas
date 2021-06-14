@@ -156,7 +156,7 @@ begin
   {$endif}
   WriteLnLog('FormCreate : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
   {$ifdef darwin}
-  WindowState := wsFullScreen;
+//  WindowState := wsFullScreen;
   {$endif}
   AppTime := CastleGetTickCount64;
   PrepDone := False;
