@@ -305,8 +305,9 @@ begin
     if (Stage = nil) then
       begin
         Stage := TCastleStage.Create(Self);
+        Stage.LoadStage(-1);
 //        Stage.LoadStage('castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png', -1);
-      Stage.LoadStage('castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg', -1);
+//      Stage.LoadStage('castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
 //        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
