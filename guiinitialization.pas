@@ -9,14 +9,15 @@ interface
 
 uses
   Classes, SysUtils, Math, CastleUIState, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, ComCtrls, Menus, CastleControl, MainGameUnit,
+  ExtCtrls, StdCtrls, ComCtrls, Menus, Spin, Arrow, CastleControl, MainGameUnit,
   CastleControls, CastleColors, CastleUIControls, CastleTriangles, CastleShapes,
   CastleVectors, CastleSceneCore, CastleScene, CastleTransform, CastleViewport,
   CastleCameras, X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages,
-  CastleFilesUtils, CastleURIUtils, MiscFunctions,
-  CastleLCLUtils, CastleDialogs, CastleApplicationProperties, CastleLog,
-  CastleTimeUtils, CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, SpritelyLog, staging, multimodel, usplashabout;
+  CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleLCLUtils,
+  CastleDialogs, CastleApplicationProperties, CastleLog, CastleTimeUtils,
+  CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
+  CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels,
+  usplashabout, uPoweredby;
 
 type
   { TCastleForm }
@@ -27,6 +28,7 @@ type
     Button3: TButton;
     CastleOpenDialog1: TCastleOpenDialog;
     ComboBox1: TComboBox;
+    FloatSpinEdit1: TFloatSpinEdit;
     Label1: TLabel;
     ListView1: TListView;
     MainMenu1: TMainMenu;
@@ -36,15 +38,21 @@ type
     DebugBoxMenu: TMenuItem;
     CreateSpriteMenu: TMenuItem;
     ExitMenu: TMenuItem;
+    MyRollOut1: TMyRollOut;
+    MyRollOut2: TMyRollOut;
     PageControl1: TPageControl;
     Panel1: TPanel;
-    Panel2: TPanel;
+    PanelLeft: TPanel;
     Panel3: TPanel;
-    Panel4: TPanel;
+    PanelLeftBottom: TPanel;
     Panel5: TPanel;
+    PanelRight: TPanel;
+    SpinEdit1: TSpinEdit;
+    SpinEdit2: TSpinEdit;
     SplashAbout1: TSplashAbout;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
+    Splitter3: TSplitter;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
@@ -133,6 +141,8 @@ begin
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 {$endif}
+  LogShaders := true;
+
   LogHandler := TLogHandler.Create(Application);
 
   ApplicationProperties.ApplicationName := 'Spritely';

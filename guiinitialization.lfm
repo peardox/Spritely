@@ -2,24 +2,24 @@ object CastleForm: TCastleForm
   Left = 632
   Height = 738
   Top = 239
-  Width = 1043
+  Width = 1275
   Caption = 'CastleApp'
   ClientHeight = 718
-  ClientWidth = 1043
+  ClientWidth = 1275
   Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel
-    Left = 300
+    Left = 200
     Height = 718
     Top = 0
-    Width = 743
+    Width = 870
     Align = alClient
     Caption = 'Panel1'
     ClientHeight = 718
-    ClientWidth = 743
+    ClientWidth = 870
     TabOrder = 0
     object Splitter1: TSplitter
       Left = 1
@@ -31,7 +31,7 @@ object CastleForm: TCastleForm
       Left = 6
       Height = 716
       Top = 1
-      Width = 736
+      Width = 863
       ActivePage = TabSheet3
       Align = alClient
       TabIndex = 2
@@ -60,12 +60,12 @@ object CastleForm: TCastleForm
       object TabSheet3: TTabSheet
         Caption = 'Log Output'
         ClientHeight = 688
-        ClientWidth = 728
+        ClientWidth = 855
         object AppLog: TMemo
           Left = 0
           Height = 661
           Top = 0
-          Width = 728
+          Width = 855
           Align = alClient
           Lines.Strings = (
             'AppLog'
@@ -78,11 +78,11 @@ object CastleForm: TCastleForm
           Left = 0
           Height = 27
           Top = 661
-          Width = 728
+          Width = 855
           Align = alBottom
           AutoSize = True
           ClientHeight = 27
-          ClientWidth = 728
+          ClientWidth = 855
           Color = clBtnFace
           ParentColor = False
           TabOrder = 1
@@ -120,32 +120,32 @@ object CastleForm: TCastleForm
       end
     end
   end
-  object Panel2: TPanel
+  object PanelLeft: TPanel
     Left = 0
     Height = 718
     Top = 0
-    Width = 300
+    Width = 200
     Align = alLeft
     BevelOuter = bvNone
-    Caption = 'Panel2'
+    Caption = 'PanelLeft'
     ClientHeight = 718
-    ClientWidth = 300
+    ClientWidth = 200
     TabOrder = 1
     object Panel3: TPanel
       Left = 0
       Height = 643
       Top = 0
-      Width = 300
+      Width = 200
       Align = alClient
       BevelOuter = bvNone
       ClientHeight = 643
-      ClientWidth = 300
+      ClientWidth = 200
       TabOrder = 0
       object TreeView1: TTreeView
         Left = 0
         Height = 453
         Top = 0
-        Width = 300
+        Width = 200
         Align = alClient
         ScrollBars = ssAutoBoth
         TabOrder = 1
@@ -157,7 +157,7 @@ object CastleForm: TCastleForm
         Left = 0
         Height = 5
         Top = 453
-        Width = 300
+        Width = 200
         Align = alBottom
         ResizeAnchor = akBottom
       end
@@ -165,7 +165,7 @@ object CastleForm: TCastleForm
         Left = 0
         Height = 185
         Top = 458
-        Width = 300
+        Width = 200
         Align = alBottom
         AutoSort = False
         Columns = <        
@@ -183,20 +183,20 @@ object CastleForm: TCastleForm
         OnClick = ListView1Click
       end
     end
-    object Panel4: TPanel
+    object PanelLeftBottom: TPanel
       Left = 0
       Height = 75
       Top = 643
-      Width = 300
+      Width = 200
       Align = alBottom
       ClientHeight = 75
-      ClientWidth = 300
+      ClientWidth = 200
       TabOrder = 1
       object Button1: TButton
         Left = 1
         Height = 25
         Top = 49
-        Width = 298
+        Width = 198
         Align = alBottom
         Caption = 'Button1'
         OnClick = Button1Click
@@ -207,7 +207,7 @@ object CastleForm: TCastleForm
         Left = 1
         Height = 25
         Top = 1
-        Width = 298
+        Width = 198
         Max = 1
         OnChange = TrackBar1Change
         Position = 0
@@ -219,7 +219,7 @@ object CastleForm: TCastleForm
         Left = 1
         Height = 25
         Top = 24
-        Width = 298
+        Width = 198
         Align = alBottom
         Caption = 'Button2'
         OnClick = Button2Click
@@ -227,6 +227,99 @@ object CastleForm: TCastleForm
         TabStop = False
       end
     end
+  end
+  object PanelRight: TPanel
+    Left = 1075
+    Height = 718
+    Top = 0
+    Width = 200
+    Align = alRight
+    ClientHeight = 718
+    ClientWidth = 200
+    TabOrder = 2
+    object MyRollOut1: TMyRollOut
+      Left = 1
+      Height = 200
+      Top = 1
+      Width = 198
+      Align = alTop
+      Caption = 'MyRollOut1'
+      ClientHeight = 200
+      ClientWidth = 198
+      Enabled = True
+      TabOrder = 0
+      CollapseKind = akTop
+      ExpandedSize = 200
+      ButtonPosition = akTop
+      ButtonSize = 27
+      Button.Left = 0
+      Button.Height = 27
+      Button.Top = 0
+      Button.Width = 198
+      Button.Caption = 'Caption'
+      Button.Color = clSkyBlue
+      Button.ColorExpanded = 16287767
+      AnimationSpeed = 20
+      object SpinEdit1: TSpinEdit
+        Left = 112
+        Height = 23
+        Top = 136
+        Width = 50
+        MaxValue = 1024
+        MinValue = 16
+        TabOrder = 0
+        Value = 16
+      end
+      object SpinEdit2: TSpinEdit
+        Left = 115
+        Height = 23
+        Top = 169
+        Width = 50
+        MaxValue = 1024
+        MinValue = 16
+        TabOrder = 1
+        Value = 16
+      end
+    end
+    object MyRollOut2: TMyRollOut
+      Left = 1
+      Height = 200
+      Top = 201
+      Width = 198
+      Align = alTop
+      Caption = 'MyRollOut2'
+      ClientHeight = 200
+      ClientWidth = 198
+      Enabled = True
+      TabOrder = 1
+      CollapseKind = akTop
+      ExpandedSize = 200
+      ButtonPosition = akTop
+      ButtonSize = 27
+      Button.Left = 0
+      Button.Height = 27
+      Button.Top = 0
+      Button.Width = 198
+      Button.Caption = 'Caption'
+      Button.Color = clSkyBlue
+      Button.ColorExpanded = 16287767
+      AnimationSpeed = 20
+      object FloatSpinEdit1: TFloatSpinEdit
+        Left = 9
+        Height = 23
+        Top = 164
+        Width = 82
+        TabOrder = 0
+      end
+    end
+  end
+  object Splitter3: TSplitter
+    Left = 1070
+    Height = 718
+    Top = 0
+    Width = 5
+    Align = alRight
+    ResizeAnchor = akRight
   end
   object MainMenu1: TMainMenu
     Left = 373
@@ -264,7 +357,7 @@ object CastleForm: TCastleForm
     PoweredBy.About.Description.Strings = (
       'Component that shows a Powered By graphic.'#13#10'Use method ShowPoweredByForm in your form.create()'#13#10'to use the component'
     )
-    PoweredBy.About.Title = 'About PoweredBy component'
+    PoweredBy.About.Title = 'About About About About About PoweredBy component'
     PoweredBy.About.Height = 280
     PoweredBy.About.Width = 400
     PoweredBy.About.Font.Color = clNavy
