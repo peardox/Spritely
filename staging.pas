@@ -30,6 +30,7 @@ type
     function  CreateGroundPlane(AFileName: String; const AScale: Single = 1.0): TX3DRootNode;
 
     property  LightNode: TDirectionalLightNode read fLightNode write fLightNode;
+    property  GroundModelRoot: TX3DRootNode read fGroundModelRoot;
   end;
 
 function CreatePointLight: TPointLightNode;
@@ -96,7 +97,7 @@ var
   Light: TDirectionalLightNode;
 begin
   Light := TDirectionalLightNode.Create;
-  Light.Direction := Vector3(-0.5, -2.0, 0.5);
+  Light.Direction := Vector3(-0.5, -2.0, 0.5).Normalize;
   Light.Color := Vector3(1, 1, 1);
   Light.Intensity := 1;
   Light.FdOn.Value := true;
@@ -194,15 +195,26 @@ var
   TextureCoordinateNode: TTextureCoordinateNode;
   NewCoords: array[0..3] of TVector2;
 begin
-  // Find the texture
-  TextureCoordinateNode := Model3D.FindNodeByName(TTextureCoordinateNode, 'ObjFrontTextureCoordinates', false) as TTextureCoordinateNode;
-  // Set new texture coordinates so each tile maps to the whole image
-  NewCoords[0] := Vector2(AScale, 0);
-  NewCoords[1] := Vector2(AScale, AScale);
-  NewCoords[2] := Vector2(0, AScale);
-  NewCoords[3] := Vector2(0, 0);
+  if (AScale = 0) then
+    begin
+      WriteLnLog('Trying to change ground texture scale to zero - ignoring');
+      Exit;
+    end;
 
-  TextureCoordinateNode.SetPoint(NewCoords);
+  // Find the texture
+  TextureCoordinateNode := Model3D.TryFindNodeByName(TTextureCoordinateNode, 'ObjFrontTextureCoordinates', false) as TTextureCoordinateNode;
+  if not (TextureCoordinateNode = nil) then
+    begin
+      // Set new texture coordinates
+      NewCoords[0] := Vector2(AScale, 0);
+      NewCoords[1] := Vector2(AScale, AScale);
+      NewCoords[2] := Vector2(0, AScale);
+      NewCoords[3] := Vector2(0, 0);
+
+      TextureCoordinateNode.SetPoint(NewCoords);
+    end
+  else
+    WriteLnLog('Failed to change ground texture scale to ' + FloatToStr(AScale));
 end;
 
 function TCastleStage.ChangeTexture(const ANode: TX3DRootNode; const TextureUrl: String): TVector3Cardinal;
@@ -216,7 +228,9 @@ begin
     TextureNode.SetUrl(TextureUrl);
     if TextureNode.IsTextureImage then
       Result := TextureNode.TextureImage.Dimensions;
-  end;
+  end
+  else
+    WriteLnLog('Failed to change ground texture to ' + TextureUrl);
 end;
 
 function TCastleStage.CreateGroundPlane(AFileName: String; const AScale: Single = 1.0): TX3DRootNode;

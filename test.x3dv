@@ -12,7 +12,7 @@ DEF LightNode DirectionalLight {
 		light USE LightNode
 	}
 	shadows TRUE
-	direction -0.5 -2 0.5
+	direction -0.235702276229858 -0.942809104919434 0.235702276229858
 	projectionRectangle -8 -16 24 16
 	projectionLocation 11 12 1
 }
@@ -23,7 +23,7 @@ DEF GroundTransformNode Transform {
 				texture MultiTexture {
 					texture [
 						DEF ObjFrontTexture ImageTexture {
-							url "castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png"
+							url "castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg"
 						}
 						USE LightNode_ShadowMap_generated_by_ProcessShadowMapsReceivers
 					]

@@ -35,6 +35,7 @@ type
   { TCastleApp }
 
   TCastleApp = class(TUIState)
+    constructor Create(AOwner: TComponent); override;
     procedure BeforeRender; override; // TCastleUserInterface
     procedure Render; override; // TCastleUserInterface
     procedure Resize; override; // TCastleUserInterface
@@ -101,6 +102,21 @@ uses GUIInitialization;
 {$endif}
 
 { TCastleApp }
+
+constructor TCastleApp.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LogTextureCache := True;
+  TestModel := nil;
+  LoadViewport;
+  ViewMode := 2;
+  OverSample := 8;
+  SpriteWidth := 256;
+  SpriteHeight := 256;
+
+  VPMax := GLFeatures.MaxViewportDimensions;
+  PrepDone := True;
+end;
 
 procedure TCastleApp.SetStretchMultiplier(const AStretch: Single);
 begin
@@ -181,8 +197,6 @@ begin
 end;
 
 procedure TCastleApp.BootStrap;
-var
-  ProcTimer: Int64;
 begin
   SpriteWidth := 1024;
   SpriteHeight := 1024;
@@ -291,7 +305,10 @@ begin
     if (Stage = nil) then
       begin
         Stage := TCastleStage.Create(Self);
-        Stage.LoadStage('castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png', -1);
+//        Stage.LoadStage('castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png', -1);
+      Stage.LoadStage('castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg', -1);
+//      Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
+//      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
 //        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
         Stage.Add(TestModel.Scene);
         Viewport.Items.Add(Stage);
@@ -318,16 +335,6 @@ end;
 procedure TCastleApp.Start;
 begin
   inherited;
-  LogTextureCache := True;
-  TestModel := nil;
-  LoadViewport;
-  ViewMode := 2;
-  OverSample := 64;
-  SpriteWidth := 256;
-  SpriteHeight := 256;
-
-  VPMax := GLFeatures.MaxViewportDimensions;
-  PrepDone := True;
 end;
 
 procedure TCastleApp.Stop;

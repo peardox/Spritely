@@ -1,0 +1,47 @@
+#X3D V3.2 utf8
+
+PROFILE Interchange
+
+META "generator" "view3dscene, https://castle-engine.io/view3dscene.php"
+META "source" "plane.obj"
+
+Shape {
+	appearance DEF Material_PlaneFace Appearance {
+		texture DEF ObjFrontTexture ImageTexture {
+      url "myfreetextures/tilesf2.jpg"
+		}
+	}
+	geometry IndexedFaceSet {
+		coord DEF ObjCoordinates Coordinate {
+			point [
+				-0.5 0 -0.5,
+				-0.5 0 0.5,
+				0.5 0 0.5,
+				0.5 0 -0.5,
+			]
+		}
+		normal DEF ObjNormals Normal {
+			vector 0 0 1
+		}
+		texCoord DEF ObjFrontTextureCoordinates TextureCoordinate {
+			point [
+				1.25 0.25,
+				1.25 1.25,
+				0.25 1.25,
+				0.25 0.25,
+			]
+		}
+		solid FALSE
+		convex FALSE
+		coordIndex [
+			3, 2, 1, 0, -1,
+		]
+		creaseAngle 0.5
+		normalIndex [
+			0, 0, 0, 0, -1,
+		]
+		texCoordIndex [
+			0, 1, 2, 3, -1,
+		]
+	}
+}

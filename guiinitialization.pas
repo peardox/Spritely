@@ -16,7 +16,7 @@ uses
   CastleFilesUtils, CastleURIUtils, MiscFunctions,
   CastleLCLUtils, CastleDialogs, CastleApplicationProperties, CastleLog,
   CastleTimeUtils, CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, SpritelyLog, staging, multimodel;
+  CastleQuaternions, SpritelyLog, staging, multimodel, usplashabout;
 
 type
   { TCastleForm }
@@ -24,7 +24,10 @@ type
   TCastleForm = class(TForm)
     Button1: TButton;
     Button2: TButton;
+    Button3: TButton;
     CastleOpenDialog1: TCastleOpenDialog;
+    ComboBox1: TComboBox;
+    Label1: TLabel;
     ListView1: TListView;
     MainMenu1: TMainMenu;
     AppLog: TMemo;
@@ -38,6 +41,8 @@ type
     Panel2: TPanel;
     Panel3: TPanel;
     Panel4: TPanel;
+    Panel5: TPanel;
+    SplashAbout1: TSplashAbout;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     TabSheet1: TTabSheet;
@@ -138,6 +143,8 @@ begin
 
   InitializeLog;
 
+  SplashAbout1.ShowSplash;
+
   PageControl1.ActivePage := TabSheet1;
   TabSheet3.TabVisible := True;
 
@@ -156,7 +163,8 @@ begin
   KeyPreview := True;
   Caption := 'Spritely';
   Tracking := False;
-  Trackbar1.Max := 100000;
+  Trackbar1.Position := 20;
+  Trackbar1.Max := 100;
   Button1.Caption := 'Create Sprite';
   Button2.Caption := 'Change ViewMode';
   Listview1.Visible := False;
@@ -186,10 +194,19 @@ begin
 end;
 
 procedure TCastleForm.TrackBar1Change(Sender: TObject);
+var
+  ProcTimer: Int64;
 begin
   if Tracking then
     begin
-    CastleApp.CameraRotation := (2 * Pi) * (Trackbar1.Position / 100000);
+    ProcTimer := CastleGetTickCount64;
+    CastleApp.Stage.ChangeTextureCoordinates(CastleApp.Stage.GroundModelRoot, Trackbar1.Position);
+//    CastleApp.Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
+
+//    CastleApp.CameraRotation := (2 * Pi) * (Trackbar1.Position / 100000);
+      ProcTimer := CastleGetTickCount64 - ProcTimer;
+      WriteLnLog('ProcTimer = ' + FormatFloat('####0.000', ProcTimer / 1000) + ' seconds');
+
     end;
 end;
 
@@ -336,7 +353,6 @@ begin
           modelNode.Selected := True;
           TestModel.ResetAnimationState;
         end;
-      Trackbar1.Position := 0;
       Tracking := True;
     end;
   AddInfoPanel;
@@ -373,7 +389,9 @@ procedure TCastleForm.Button2Click(Sender: TObject);
 begin
   with CastleApp do
     begin
-      ViewMode := ViewMode + 1;
+      Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
+
+//      ViewMode := ViewMode + 1;
       //  if not(CastleApp.TestModel.CurrentAnimation = -1) then
       //    begin
       //      CastleApp.TestModel.Pause;

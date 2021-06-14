@@ -6,25 +6,19 @@ Prepare Banner Morph Frames
 Dialog Windows + Controls
 Texture Atlas Builder
 Limit CreateSpriteImage to MaxWindowSize
-Convert "Take 001" to Separate Animations
-Extend ViewFromRadius to handle rotation around origin
 User Defined Menu Options
 Load / Save Settings
 Load / Save Model Meta
-Export Portrait
 Export Sprite Sheet
-Portrait Capture Facility
 
 [Via other people]
-Build sheets using internal sheet code (@kagamma)
-Oblique perspective (@michalis)
 Transparent ground (@michalis)
 Lighting + Camera positioning (@michalis)
 
 [Styling Features]
 Recolor skin
 Skin swapping
-User-defined Color Palettes - https://lospec.com/palettes/api
+User-defined Color Palettes
 Pixelation
 
 [Exploration]
