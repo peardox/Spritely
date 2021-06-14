@@ -353,26 +353,4 @@ object CastleForm: TCastleForm
     Left = 426
     Top = 50
   end
-  object SplashAbout1: TSplashAbout
-    PoweredBy.About.Description.Strings = (
-      'Component that shows a Powered By graphic.'#13#10'Use method ShowPoweredByForm in your form.create()'#13#10'to use the component'
-    )
-    PoweredBy.About.Title = 'About About About About About About PoweredBy component'
-    PoweredBy.About.Height = 280
-    PoweredBy.About.Width = 400
-    PoweredBy.About.Font.Color = clNavy
-    PoweredBy.About.Font.Height = -13
-    PoweredBy.About.Font.Name = 'Arial'
-    PoweredBy.About.BackGroundColor = clWindow
-    PoweredBy.About.Version = '1.0.4.0'
-    PoweredBy.About.Authorname = 'Gordon Bamber'
-    PoweredBy.About.Organisation = 'Public Domain'
-    PoweredBy.About.AuthorEmail = 'minesadorada@charcodelvalle.com'
-    PoweredBy.About.ComponentName = 'PoweredBy component'
-    PoweredBy.About.LicenseType = abModifiedGPL
-    UserTitle = 'My Application'
-    ShowDescription = False
-    Left = 515
-    Top = 55
-  end
 end

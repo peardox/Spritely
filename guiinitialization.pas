@@ -17,7 +17,7 @@ uses
   CastleDialogs, CastleApplicationProperties, CastleLog, CastleTimeUtils,
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
   CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels,
-  CastleGLShaders, usplashabout, uPoweredby;
+  CastleGLShaders;
 
 type
   { TCastleForm }
@@ -49,7 +49,6 @@ type
     PanelRight: TPanel;
     SpinEdit1: TSpinEdit;
     SpinEdit2: TSpinEdit;
-    SplashAbout1: TSplashAbout;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     Splitter3: TSplitter;
@@ -152,8 +151,6 @@ begin
   ApplicationProperties.OnLog.Add(@LogHandler.LogCallback);
 
   InitializeLog;
-
-  SplashAbout1.ShowSplash;
 
   PageControl1.ActivePage := TabSheet1;
   TabSheet3.TabVisible := True;
