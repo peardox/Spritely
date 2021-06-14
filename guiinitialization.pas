@@ -17,7 +17,7 @@ uses
   CastleDialogs, CastleApplicationProperties, CastleLog, CastleTimeUtils,
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
   CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels,
-  usplashabout, uPoweredby;
+  CastleGLShaders, usplashabout, uPoweredby;
 
 type
   { TCastleForm }
