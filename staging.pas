@@ -102,12 +102,13 @@ begin
   Light.Color := Vector3(1, 1, 1);
   Light.Intensity := 1;
   Light.FdOn.Value := true;
-  Light.Global := true;
-  Light.Shadows := true;
   Light.projectionNear := 1.00;
   Light.projectionFar := 40.00;
 
   {$ifndef darwin}
+  Light.Global := true;
+  Light.Shadows := true;
+
   Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
   Light.DefaultShadowMap.Update := upAlways;
   Light.DefaultShadowMap.Size := 4096;
