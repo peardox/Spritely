@@ -54,12 +54,13 @@ type
     fIsLocked: Boolean;
     fLockedScale: Single;
     fModelName: String;
+    fSpotNode: TSpotLightNode;
     fRootNode: TX3DRootNode;
     fScene: TCastleScene;
     fSceneNode:  TX3DRootNode;
     fTransform: TTransformNode;
     fDebug: TDebugTransformBox;
-    fBaseRotation: TVector3Single;
+    fBaseRotation: TVector3;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -86,6 +87,7 @@ type
     property  Transform: TTransformNode read fTransform write fTransform;
     property  Spatial: TSceneSpatialStructures read GetSpatial write SetSpatial default [];
     property  IsLooped: Boolean read GetIsLooped write SetIsLooped default True;
+    property  SpotNode: TSpotLightNode read fSpotNode write fSpotNode;
 
     procedure ResetAnimationState(const IgnoreAffectedBy: TTimeSensorNode = nil);
     procedure PrepareResources(const Options: TPrepareResourcesOptions;
@@ -112,7 +114,29 @@ type
     procedure SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
   end;
 
+function CreateSpotLight: TSpotLightNode;
+
 implementation
+
+function CreateSpotLight: TSpotLightNode;
+var
+  Light: TSpotLightNode;
+begin
+  Light := TSpotLightNode.Create;
+
+  Light.Location := Vector3(0.0, 1.0, 3.0);
+  Light.Direction := Vector3(0.0, 0.0, -1.0);
+  Light.Color := Vector3(1, 1, 1);
+  Light.FdOn.Value := true;
+  Light.Intensity := 1;
+  Light.Radius := -1;
+
+  Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
+  Light.DefaultShadowMap.Update := upAlways;
+  Light.DefaultShadowMap.Size := 4096;
+
+  Result := Light;
+end;
 
 { TAnimationInfo }
 
@@ -291,6 +315,10 @@ begin
 
       fTransform.AddChildren(fSceneNode);
       fRootNode.AddChildren(fTransform);
+
+      fSpotNode := CreateSpotLight;
+//      fScene.ShadowMaps := True;
+      fRootNode.AddChildren(fSpotNode);
 
       fScene := TCastleScene.Create(Self);
       fScene.Load(fRootNode, True, AOptions);
@@ -656,7 +684,7 @@ begin
               PNode.IsPaused := True;
               ANode.IsPaused := True;
               PNode.AnimNode.FakeTime(PNode.AnimLast, False, True, fScene.NextEventTime);
-              Start;
+//              Start;
             end;
         end
       else

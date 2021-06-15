@@ -16,8 +16,8 @@ uses
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleLCLUtils,
   CastleDialogs, CastleApplicationProperties, CastleLog, CastleTimeUtils,
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels,
-  CastleGLShaders;
+  CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels, ECSwitch,
+  ECSlider, ECSpinCtrls, CastleGLShaders, X3DLoad;
 
 type
   { TCastleForm }
@@ -28,9 +28,15 @@ type
     Button3: TButton;
     CastleOpenDialog1: TCastleOpenDialog;
     ComboBox1: TComboBox;
+    ECSlider1: TECSlider;
+    ECSwitch1: TECSwitch;
     FloatSpinEdit1: TFloatSpinEdit;
+    FloatSpinEdit2: TFloatSpinEdit;
+    ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
     ListView1: TListView;
     ListView2: TListView;
     MainMenu1: TMainMenu;
@@ -46,6 +52,7 @@ type
     PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
+    Panel4: TPanel;
     PanelLeft: TPanel;
     Panel3: TPanel;
     PanelLeftBottom: TPanel;
@@ -64,6 +71,7 @@ type
     Window: TCastleControlBase;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure ECSlider1Change(Sender: TObject);
     procedure ExitMenuClick(Sender: TObject);
     procedure FileOpenMenuClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -336,6 +344,7 @@ end;
 
 procedure TCastleForm.GuiBootStrap;
 begin
+//  Treeview1.Items.Clear;
   LoadGuiModel(ModelFile);
 end;
 
@@ -401,15 +410,22 @@ procedure TCastleForm.Button2Click(Sender: TObject);
 begin
   with CastleApp do
     begin
-      Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
+//      SaveNode(CastleApp.Stage.RootNode, 'testscene.x3dv');
+      // Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
 
-//      ViewMode := ViewMode + 1;
+      ViewMode := ViewMode + 1;
       //  if not(CastleApp.TestModel.CurrentAnimation = -1) then
       //    begin
       //      CastleApp.TestModel.Pause;
       //    end;
     end;
   ActiveControl := Window;
+end;
+
+procedure TCastleForm.ECSlider1Change(Sender: TObject);
+begin
+  FloatSpinEdit2.Value := ECSlider1.Position;
+  CastleApp.TestModel.Transform.Translation := Vector3(0, ECSlider1.Position, 0);
 end;
 
 procedure TCastleForm.ExitMenuClick(Sender: TObject);

@@ -131,6 +131,8 @@ begin
   Light.Global := true;
   Light.Shadows := true;
   Light.Radius := -1;
+  Light.projectionNear := 1.00;
+  Light.projectionFar := 40.00;
   Result := Light;
 end;
 
@@ -168,10 +170,13 @@ begin
       end;
     fGroundTransformNode.X3DName := 'GroundTransformNode';
 
+    {$ifndef darwin}
     fLightNode := CreateDirectionalLight;
-    fLightNode.X3DName := 'LightNode';
+//    fLightNode.X3DName := 'StageLightNode';
 
     StageRootNode.AddChildren(fLightNode);
+    {$endif}
+
     StageRootNode.AddChildren(fGroundTransformNode);
     Load(StageRootNode, True);
 

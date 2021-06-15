@@ -2,19 +2,28 @@
 
 PROFILE Interchange
 
-DEF LightNode DirectionalLight {
+DirectionalLight {
 	global TRUE
 	projectionNear 1
 	projectionFar 40
-	defaultShadowMap DEF LightNode_ShadowMap_generated_by_ProcessShadowMapsReceivers GeneratedShadowMap {
+	defaultShadowMap DEF Light467286_ShadowMap_generated_by_ProcessShadowMapsReceivers GeneratedShadowMap {
 		update "ALWAYS"
 		size 4096
-		light USE LightNode
+		light DirectionalLight {
+			global TRUE
+			projectionNear 1
+			projectionFar 40
+			defaultShadowMap USE Light467286_ShadowMap_generated_by_ProcessShadowMapsReceivers
+			shadows TRUE
+			direction -0.5 -1 0.5
+			projectionRectangle -8 -16 24 16
+			projectionLocation -11 12 1
+		}
 	}
 	shadows TRUE
-	direction -0.235702276229858 -0.942809104919434 0.235702276229858
+	direction -0.5 -1 0.5
 	projectionRectangle -8 -16 24 16
-	projectionLocation 11 12 1
+	projectionLocation -11 12 1
 }
 DEF GroundTransformNode Transform {
 	children Group {
@@ -23,9 +32,9 @@ DEF GroundTransformNode Transform {
 				texture MultiTexture {
 					texture [
 						DEF ObjFrontTexture ImageTexture {
-							url "castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg"
+							url "castle-data:/ground/myfreetextures/tilesf2.jpg"
 						}
-						USE LightNode_ShadowMap_generated_by_ProcessShadowMapsReceivers
+						USE Light467286_ShadowMap_generated_by_ProcessShadowMapsReceivers
 					]
 				}
 			}
@@ -51,8 +60,17 @@ DEF GroundTransformNode Transform {
 								0 0,
 							]
 						}
-						DEF LightNode_TexGen_generated_by_ProcessShadowMapsReceivers ProjectedTextureCoordinate {
-							projector USE LightNode
+						DEF Light467286_TexGen_generated_by_ProcessShadowMapsReceivers ProjectedTextureCoordinate {
+							projector DirectionalLight {
+								global TRUE
+								projectionNear 1
+								projectionFar 40
+								defaultShadowMap USE Light467286_ShadowMap_generated_by_ProcessShadowMapsReceivers
+								shadows TRUE
+								direction -0.5 -1 0.5
+								projectionRectangle -8 -16 24 16
+								projectionLocation -11 12 1
+							}
 						}
 					]
 				}

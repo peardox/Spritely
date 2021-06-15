@@ -243,7 +243,6 @@ object CastleForm: TCastleForm
       Top = 1
       Width = 198
       Align = alTop
-      Caption = 'MyRollOut1'
       ClientHeight = 200
       ClientWidth = 198
       Enabled = True
@@ -256,29 +255,49 @@ object CastleForm: TCastleForm
       Button.Height = 27
       Button.Top = 0
       Button.Width = 198
-      Button.Caption = 'Caption'
+      Button.Caption = 'Sprite Sheey Details'
       Button.Color = clSkyBlue
       Button.ColorExpanded = 16287767
       AnimationSpeed = 20
       object SpinEdit1: TSpinEdit
-        Left = 112
+        Left = 120
         Height = 23
-        Top = 136
-        Width = 50
+        Top = 35
+        Width = 70
+        Alignment = taRightJustify
+        Increment = 16
         MaxValue = 1024
         MinValue = 16
         TabOrder = 0
-        Value = 16
+        Value = 256
       end
       object SpinEdit2: TSpinEdit
-        Left = 115
+        Left = 120
         Height = 23
-        Top = 169
-        Width = 50
+        Top = 64
+        Width = 70
+        Alignment = taRightJustify
+        Increment = 16
         MaxValue = 1024
         MinValue = 16
         TabOrder = 1
-        Value = 16
+        Value = 256
+      end
+      object Label3: TLabel
+        Left = 5
+        Height = 15
+        Top = 35
+        Width = 65
+        Caption = 'Sprite Width'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 5
+        Height = 15
+        Top = 62
+        Width = 69
+        Caption = 'Sprite Height'
+        ParentColor = False
       end
     end
     object MyRollOut2: TMyRollOut
@@ -333,12 +352,77 @@ object CastleForm: TCastleForm
       end
       object ListView2: TListView
         Left = 1
-        Height = 304
-        Top = 28
-        Width = 196
+        Height = 276
+        Top = 56
+        Width = 106
         Align = alClient
         Columns = <>
         TabOrder = 1
+      end
+      object ECSwitch1: TECSwitch
+        Left = 13
+        Height = 28
+        Top = 28
+        Width = 184
+        Align = alTop
+        AutoSize = False
+        BorderSpacing.Left = 12
+        Caption = 'Enable Ground'
+        CaptionPos = eopLeft
+        Checked = True
+        GrooveCheckedClr = clLime
+        ParentBiDiMode = False
+        State = cbChecked
+        TabOrder = 2
+      end
+      object Panel4: TPanel
+        Left = 107
+        Height = 276
+        Top = 56
+        Width = 90
+        Align = alRight
+        ClientHeight = 276
+        ClientWidth = 90
+        TabOrder = 3
+        object ECSlider1: TECSlider
+          Left = 1
+          Height = 251
+          Top = 24
+          Width = 88
+          Align = alClient
+          BevelOuter = bvNone
+          Caption = 'Ground Level'
+          CaptionPos = eopBottom
+          DiscreteChange = 0.01
+          Increment = 0.01
+          PageSize = 10
+          RelativeScaleLength = -1
+          Reversed = True
+          Scale.DateTimeFormat = 'hh:nn:ss'
+          Scale.LogarithmBase = 10
+          Scale.Max = 2
+          Scale.Min = -2
+          Scale.TickLongValue = 10
+          Scale.TickMiddleValue = 5
+          Scale.TickShortValue = 1
+          ScaleFontOptions.FontSize = 7
+          ScaleFontOptions.FontStyles = []
+          TabOrder = 0
+          OnChange = ECSlider1Change
+        end
+        object FloatSpinEdit2: TFloatSpinEdit
+          Left = 1
+          Height = 23
+          Top = 1
+          Width = 88
+          Align = alTop
+          Alignment = taRightJustify
+          DecimalPlaces = 4
+          Increment = 0.0001
+          MaxValue = 1
+          MinValue = -1
+          TabOrder = 1
+        end
       end
     end
     object MyRollOut3: TMyRollOut
@@ -405,5 +489,9 @@ object CastleForm: TCastleForm
   object CastleOpenDialog1: TCastleOpenDialog
     Left = 426
     Top = 50
+  end
+  object ImageList1: TImageList
+    Left = 1119
+    Top = 354
   end
 end
