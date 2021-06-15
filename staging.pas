@@ -107,6 +107,7 @@ begin
   Light.projectionNear := 1.00;
   Light.projectionFar := 40.00;
 
+  {$ifndef darwin}
   Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
   Light.DefaultShadowMap.Update := upAlways;
   Light.DefaultShadowMap.Size := 4096;
@@ -114,6 +115,7 @@ begin
   Light.ShadowVolumes := False;
   Light.ProjectionRectangle := FloatRectangle(-8.0, -16.0, 32.0, 32.0).ToX3DVector;
   Light.ProjectionLocation := Vector3(-11.0, 12.0, 1.0);
+  {$endif}
 
   Result := Light;
 end;
@@ -170,12 +172,10 @@ begin
       end;
     fGroundTransformNode.X3DName := 'GroundTransformNode';
 
-    {$ifndef darwin}
     fLightNode := CreateDirectionalLight;
 //    fLightNode.X3DName := 'StageLightNode';
 
     StageRootNode.AddChildren(fLightNode);
-    {$endif}
 
     StageRootNode.AddChildren(fGroundTransformNode);
     Load(StageRootNode, True);
