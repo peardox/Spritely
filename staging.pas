@@ -98,7 +98,7 @@ var
   Light: TDirectionalLightNode;
 begin
   Light := TDirectionalLightNode.Create;
-  Light.Direction := Vector3(-0.5, -2.0, 0.5).Normalize;
+  Light.Direction := Vector3(-0.5, -1.0, 0.5);
   Light.Color := Vector3(1, 1, 1);
   Light.Intensity := 1;
   Light.FdOn.Value := true;
@@ -113,7 +113,7 @@ begin
   Light.ShadowVolumesMain := False;
   Light.ShadowVolumes := False;
   Light.ProjectionRectangle := FloatRectangle(-8.0, -16.0, 32.0, 32.0).ToX3DVector;
-  Light.ProjectionLocation := Vector3(11.0, 12.0, 1.0);
+  Light.ProjectionLocation := Vector3(-11.0, 12.0, 1.0);
 
   Result := Light;
 end;
