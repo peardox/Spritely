@@ -20,6 +20,7 @@ type
     fLightNode: TDirectionalLightNode;
     fGroundModelRoot: TX3DRootNode;
   public
+    GroundTexture: String;
     procedure LoadStage(const GroundModel: String; const GroundLevel: Single = 0);
     procedure LoadStage(const GroundLevel: Single = 0);
     procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3);
@@ -226,7 +227,10 @@ begin
   begin
     TextureNode.SetUrl(TextureUrl);
     if TextureNode.IsTextureImage then
-      Result := TextureNode.TextureImage.Dimensions;
+      begin
+        Result := TextureNode.TextureImage.Dimensions;
+        GroundTexture := TextureUrl;
+      end;
   end
   else
     WriteLnLog('Failed to change ground texture to ' + TextureUrl);

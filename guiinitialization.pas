@@ -30,7 +30,9 @@ type
     ComboBox1: TComboBox;
     FloatSpinEdit1: TFloatSpinEdit;
     Label1: TLabel;
+    Label2: TLabel;
     ListView1: TListView;
+    ListView2: TListView;
     MainMenu1: TMainMenu;
     AppLog: TMemo;
     MenuItem1: TMenuItem;
@@ -40,8 +42,10 @@ type
     ExitMenu: TMenuItem;
     MyRollOut1: TMyRollOut;
     MyRollOut2: TMyRollOut;
+    MyRollOut3: TMyRollOut;
     PageControl1: TPageControl;
     Panel1: TPanel;
+    Panel2: TPanel;
     PanelLeft: TPanel;
     Panel3: TPanel;
     PanelLeftBottom: TPanel;
@@ -140,7 +144,7 @@ begin
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
 {$endif}
-  LogShaders := true;
+//  LogShaders := true;
 
   LogHandler := TLogHandler.Create(Application);
 
@@ -206,9 +210,10 @@ var
 begin
   if Tracking then
     begin
-    ProcTimer := CastleGetTickCount64;
-    CastleApp.Stage.ChangeTextureCoordinates(CastleApp.Stage.GroundModelRoot, Trackbar1.Position);
-//    CastleApp.Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
+      ProcTimer := CastleGetTickCount64;
+
+      CastleApp.Stage.ChangeTextureCoordinates(CastleApp.Stage.GroundModelRoot, Trackbar1.Position);
+      CastleApp.Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, CastleApp.Stage.GroundTexture);
 
 //    CastleApp.CameraRotation := (2 * Pi) * (Trackbar1.Position / 100000);
       ProcTimer := CastleGetTickCount64 - ProcTimer;
@@ -396,9 +401,9 @@ procedure TCastleForm.Button2Click(Sender: TObject);
 begin
   with CastleApp do
     begin
-//      Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
+      Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
 
-      ViewMode := ViewMode + 1;
+//      ViewMode := ViewMode + 1;
       //  if not(CastleApp.TestModel.CurrentAnimation = -1) then
       //    begin
       //      CastleApp.TestModel.Pause;
