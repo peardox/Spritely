@@ -105,9 +105,7 @@ begin
   Light.projectionNear := 1.00;
   Light.projectionFar := 40.00;
 
-  {$ifndef darwin}
   Light.Global := true;
-  Light.Shadows := true;
 
   Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
   Light.DefaultShadowMap.Update := upAlways;
@@ -116,6 +114,9 @@ begin
   Light.ShadowVolumes := False;
   Light.ProjectionRectangle := FloatRectangle(-8.0, -16.0, 32.0, 32.0).ToX3DVector;
   Light.ProjectionLocation := Vector3(-11.0, 12.0, 1.0);
+
+  {$ifndef darwin}
+  Light.Shadows := true;
   {$endif}
 
   Result := Light;

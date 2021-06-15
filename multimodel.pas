@@ -131,6 +131,8 @@ begin
   Light.Intensity := 1;
   Light.Radius := -1;
 
+  Light.Shadows := true;
+
   Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
   Light.DefaultShadowMap.Update := upAlways;
   Light.DefaultShadowMap.Size := 4096;
