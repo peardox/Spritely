@@ -104,17 +104,14 @@ type
     function  AddAnimation(const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30): TAnimationInfo;
     function  CurrentFrame: TFloatTime;
     function  TotalFrames: TFloatTime;
-    procedure GoToFrame(const AFrame: TFloatTime);
-    procedure GoToFrame(const AName: String; const AFrame: TFloatTime);
     function  IsPaused: Boolean;
     procedure Normalize;
+
+    procedure GoToFrame(const AFrame: TFloatTime);
     procedure Pause;
-    procedure Pause(const AName: String);
     procedure Resume;
     procedure Start;
-    procedure Start(const AName: String);
     procedure Stop;
-    procedure Stop(const AName: String);
     procedure SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
   end;
 
@@ -436,21 +433,6 @@ begin
   inherited;
 end;
 
-procedure TCastleModel.Start(const AName: String);
-var
-  I: Integer;
-  ANode: TAnimationInfo;
-begin
-  if (fCurrentAnimation = -1) then
-    begin
-      if fActions.Find(AName, I) then
-        begin
-          fCurrentAnimation := I;
-          Start;
-        end;
-    end;
-end;
-
 procedure TCastleModel.Resume;
 var
  ANode: TAnimationInfo;
@@ -500,20 +482,6 @@ begin
     end;
 end;
 
-procedure TCastleModel.Stop(const AName: String);
-var
-  I: Integer;
-begin
-  if (fCurrentAnimation = -1) then
-    begin
-      if fActions.Find(AName, I) then
-        begin
-          fCurrentAnimation := I;
-          Stop;
-        end;
-    end;
-end;
-
 procedure TCastleModel.Stop;
 var
   ANode: TAnimationInfo;
@@ -533,19 +501,6 @@ begin
         begin
           ANode.AnimNode.Stop;
           ANode.IsPaused := True;
-        end;
-    end;
-end;
-
-procedure TCastleModel.Pause(const AName: String);
-var
-  I: Integer;
-begin
-  if fActions.Find(AName, I) then
-    begin
-      if (fCurrentAnimation = I) then
-        begin
-          Pause;
         end;
     end;
 end;
@@ -583,19 +538,6 @@ begin
               ANode.AnimLast := ANode.AnimNode.ElapsedTimeInCycle;
               ANode.IsPaused := True;
             end;
-        end;
-    end;
-end;
-
-procedure TCastleModel.GoToFrame(const AName: String; const AFrame: TFloatTime);
-var
-  I: Integer;
-begin
-  if fActions.Find(AName, I) then
-    begin
-      if (fCurrentAnimation = I) then
-        begin
-          GotoFrame(AFrame);
         end;
     end;
 end;
