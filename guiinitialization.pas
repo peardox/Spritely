@@ -33,11 +33,11 @@ type
     ComboBox1: TComboBox;
     ComboBox2: TComboBox;
     ComboBox3: TComboBox;
-    ECSlider1: TECSlider;
-    ECSlider2: TECSlider;
+    GroundHeightSlider: TECSlider;
+    GroundScaleSlider: TECSlider;
     ECSwitch1: TECSwitch;
-    FloatSpinEdit2: TFloatSpinEdit;
-    FloatSpinEdit3: TFloatSpinEdit;
+    GroundHeightEdit: TFloatSpinEdit;
+    GroundScaleEdit: TFloatSpinEdit;
     ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
@@ -83,8 +83,8 @@ type
     procedure BGRAKnob1ValueChanged(Sender: TObject; Value: single);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-    procedure ECSlider1Change(Sender: TObject);
-    procedure ECSlider2Change(Sender: TObject);
+    procedure GroundHeightSliderChange(Sender: TObject);
+    procedure GroundScaleSliderChange(Sender: TObject);
     procedure ExitMenuClick(Sender: TObject);
     procedure FileOpenMenuClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -485,17 +485,16 @@ begin
   FocusViewport;
 end;
 
-procedure TCastleForm.ECSlider1Change(Sender: TObject);
+procedure TCastleForm.GroundHeightSliderChange(Sender: TObject);
 begin
-  FloatSpinEdit2.Value := ECSlider1.Position;
-  CastleApp.WorkingModel.Transform.Translation := Vector3(0, ECSlider1.Position, 0);
+  GroundHeightEdit.Value := GroundHeightSlider.Position;
+  CastleApp.WorkingModel.Transform.Translation := Vector3(0, GroundHeightSlider.Position, 0);
 end;
 
-procedure TCastleForm.ECSlider2Change(Sender: TObject);
+procedure TCastleForm.GroundScaleSliderChange(Sender: TObject);
 begin
-  FloatSpinEdit2.Value := ECSlider2.Position;
-  CastleApp.Stage.ChangeTextureCoordinates(CastleApp.Stage.GroundModelRoot, ECSlider2.Position);
-  CastleApp.Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, CastleApp.Stage.GroundTexture);
+  GroundScaleEdit.Value := GroundScaleSlider.Position;
+  CastleApp.Stage.ChangeTextureCoordinates(CastleApp.Stage.GroundModelRoot, GroundScaleSlider.Position);
 end;
 
 procedure TCastleForm.ExitMenuClick(Sender: TObject);

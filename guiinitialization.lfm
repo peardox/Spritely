@@ -464,7 +464,7 @@ object CastleForm: TCastleForm
           ClientHeight = 198
           ClientWidth = 97
           TabOrder = 0
-          object ECSlider1: TECSlider
+          object GroundHeightSlider: TECSlider
             Left = 1
             Height = 173
             Top = 24
@@ -487,9 +487,9 @@ object CastleForm: TCastleForm
             ScaleFontOptions.FontSize = 7
             ScaleFontOptions.FontStyles = []
             TabOrder = 0
-            OnChange = ECSlider1Change
+            OnChange = GroundHeightSliderChange
           end
-          object FloatSpinEdit2: TFloatSpinEdit
+          object GroundHeightEdit: TFloatSpinEdit
             Left = 1
             Height = 23
             Top = 1
@@ -511,7 +511,7 @@ object CastleForm: TCastleForm
           ClientHeight = 198
           ClientWidth = 97
           TabOrder = 1
-          object ECSlider2: TECSlider
+          object GroundScaleSlider: TECSlider
             Left = 1
             Height = 173
             Top = 24
@@ -536,9 +536,9 @@ object CastleForm: TCastleForm
             ScaleFontOptions.FontSize = 7
             ScaleFontOptions.FontStyles = []
             TabOrder = 0
-            OnChange = ECSlider2Change
+            OnChange = GroundScaleSliderChange
           end
-          object FloatSpinEdit3: TFloatSpinEdit
+          object GroundScaleEdit: TFloatSpinEdit
             Left = 1
             Height = 23
             Top = 1
