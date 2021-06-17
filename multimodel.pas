@@ -14,7 +14,7 @@ uses
   CastleImages, CastleGLImages, CastleDebugTransform,
   CastleTextureImages, CastleCompositeImage, CastleClassUtils,
   CastleLog, CastleTimeUtils, CastleRectangles, CastleRenderOptions,
-  CastleQuaternions, AniTakeUtils;
+  CastleQuaternions, AniTakeUtils, MiscFunctions;
 
 type
   { TAnimationInfo }
@@ -22,7 +22,7 @@ type
   TAnimationInfo = Class(TComponent)
     private
       AnimNode: TTimeSensorNode;
-      AnimName: String;
+      fAnimName: String;
       AnimStart: TFloatTime; // Time the animation starts, may be after AnimLow
       AnimStop: TFloatTime; // Time the animation ends, may be before AnimHigh
       AnimLow: TFloatTime; // Always Zero
@@ -34,6 +34,7 @@ type
       IsUserDefined: Boolean;
       IsHidden: Boolean;
       fParentAnim: TAnimationInfo;
+      fIsMapped: Boolean;
       procedure ReceivedIsActive(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
       procedure ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
     public
@@ -42,6 +43,9 @@ type
       constructor Create(AOwner: TComponent; const ATake: TAniTake; const ASensor: TTimeSensorNode; const AParent: TAnimationInfo; const AIsLooped: Boolean = True; const ATakeFPS: Single = 30);
       property Sensor: TTimeSensorNode read AnimNode write AnimNode;
       property ParentAnim: TAnimationInfo read fParentAnim write fParentAnim;
+      property IsMapped: Boolean read fIsMapped write fIsMapped;
+      property AnimName: String read fAnimName write fAnimName;
+
   end;
   TAnimationInfoArray = Array of TAnimationInfo;
 
@@ -114,31 +118,7 @@ type
     procedure SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
   end;
 
-function CreateSpotLight: TSpotLightNode;
-
 implementation
-
-function CreateSpotLight: TSpotLightNode;
-var
-  Light: TSpotLightNode;
-begin
-  Light := TSpotLightNode.Create;
-
-  Light.Location := Vector3(0.0, 1.0, 3.0);
-  Light.Direction := Vector3(0.0, 0.0, -1.0);
-  Light.Color := Vector3(1, 1, 1);
-  Light.FdOn.Value := true;
-  Light.Intensity := 1;
-  Light.Radius := -1;
-
-  Light.Shadows := true;
-{
-  Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
-  Light.DefaultShadowMap.Update := upAlways;
-  Light.DefaultShadowMap.Size := 4096;
-}
-  Result := Light;
-end;
 
 { TAnimationInfo }
 
@@ -159,6 +139,7 @@ begin
   AnimLast := 0;
   IsLooped := AIsLooped;
   IsTakeOne := False;
+  IsMapped := False;
   ParentAnim := Self;
   IsUserDefined := False;
   IsHidden := False;
@@ -179,6 +160,7 @@ begin
   AnimLast := 0;
   IsLooped := AIsLooped;
   IsTakeOne := True;
+  IsMapped := False;
   ParentAnim := AParent;
   IsUserDefined := True;
   IsHidden := False;

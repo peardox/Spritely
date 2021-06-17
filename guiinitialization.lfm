@@ -15,11 +15,11 @@ object CastleForm: TCastleForm
     Left = 200
     Height = 718
     Top = 0
-    Width = 870
+    Width = 875
     Align = alClient
     Caption = 'Panel1'
     ClientHeight = 718
-    ClientWidth = 870
+    ClientWidth = 875
     TabOrder = 0
     object Splitter1: TSplitter
       Left = 1
@@ -31,7 +31,7 @@ object CastleForm: TCastleForm
       Left = 6
       Height = 716
       Top = 1
-      Width = 863
+      Width = 868
       ActivePage = TabSheet3
       Align = alClient
       TabIndex = 2
@@ -60,12 +60,13 @@ object CastleForm: TCastleForm
       object TabSheet3: TTabSheet
         Caption = 'Log Output'
         ClientHeight = 688
-        ClientWidth = 855
+        ClientWidth = 860
+        OnShow = TabSheet3Show
         object AppLog: TMemo
           Left = 0
           Height = 661
           Top = 0
-          Width = 855
+          Width = 860
           Align = alClient
           Lines.Strings = (
             'AppLog'
@@ -78,11 +79,11 @@ object CastleForm: TCastleForm
           Left = 0
           Height = 27
           Top = 661
-          Width = 855
+          Width = 860
           Align = alBottom
           AutoSize = True
           ClientHeight = 27
-          ClientWidth = 855
+          ClientWidth = 860
           Color = clBtnFace
           ParentColor = False
           TabOrder = 1
@@ -203,18 +204,6 @@ object CastleForm: TCastleForm
         TabOrder = 0
         TabStop = False
       end
-      object TrackBar1: TTrackBar
-        Left = 1
-        Height = 25
-        Top = 1
-        Width = 198
-        Max = 1
-        OnChange = TrackBar1Change
-        Position = 0
-        TabStop = False
-        Align = alTop
-        TabOrder = 1
-      end
       object Button2: TButton
         Left = 1
         Height = 25
@@ -223,8 +212,17 @@ object CastleForm: TCastleForm
         Align = alBottom
         Caption = 'Button2'
         OnClick = Button2Click
-        TabOrder = 2
+        TabOrder = 1
         TabStop = False
+      end
+      object Button4: TButton
+        Left = 1
+        Height = 25
+        Top = 1
+        Width = 198
+        Align = alTop
+        Caption = 'Button4'
+        TabOrder = 2
       end
     end
   end
@@ -239,30 +237,31 @@ object CastleForm: TCastleForm
     TabOrder = 2
     object MyRollOut1: TMyRollOut
       Left = 1
-      Height = 200
+      Height = 256
       Top = 1
       Width = 198
       Align = alTop
-      ClientHeight = 200
+      ClientHeight = 256
       ClientWidth = 198
       Enabled = True
       TabOrder = 0
       CollapseKind = akTop
-      ExpandedSize = 200
+      ExpandedSize = 256
       ButtonPosition = akTop
       ButtonSize = 27
       Button.Left = 0
       Button.Height = 27
       Button.Top = 0
       Button.Width = 198
-      Button.Caption = 'Sprite Sheey Details'
+      Button.Caption = 'Sprite Default Settings'
       Button.Color = clSkyBlue
       Button.ColorExpanded = 16287767
       AnimationSpeed = 20
+      Animated = False
       object SpinEdit1: TSpinEdit
-        Left = 120
+        Left = 118
         Height = 23
-        Top = 35
+        Top = 38
         Width = 70
         Alignment = taRightJustify
         Increment = 16
@@ -272,9 +271,9 @@ object CastleForm: TCastleForm
         Value = 256
       end
       object SpinEdit2: TSpinEdit
-        Left = 120
+        Left = 118
         Height = 23
-        Top = 64
+        Top = 67
         Width = 70
         Alignment = taRightJustify
         Increment = 16
@@ -284,35 +283,126 @@ object CastleForm: TCastleForm
         Value = 256
       end
       object Label3: TLabel
-        Left = 5
+        Left = 7
         Height = 15
-        Top = 35
+        Top = 39
         Width = 65
         Caption = 'Sprite Width'
         ParentColor = False
       end
       object Label4: TLabel
-        Left = 5
+        Left = 8
         Height = 15
-        Top = 62
+        Top = 67
         Width = 69
         Caption = 'Sprite Height'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 8
+        Height = 15
+        Top = 96
+        Width = 53
+        Caption = 'Directions'
+        ParentColor = False
+      end
+      object ComboBox2: TComboBox
+        Left = 120
+        Height = 23
+        Top = 96
+        Width = 70
+        AutoComplete = True
+        AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+        ItemHeight = 15
+        ItemIndex = 4
+        Items.Strings = (
+          '1'
+          '2'
+          '4'
+          '6'
+          '8'
+          '12'
+          '16'
+          '32'
+          '64'
+        )
+        TabOrder = 2
+        Text = '8'
+      end
+      object Label5: TLabel
+        Left = 8
+        Height = 15
+        Top = 126
+        Width = 69
+        Caption = 'Frame Count'
+        ParentColor = False
+      end
+      object ComboBox3: TComboBox
+        Left = 120
+        Height = 23
+        Top = 126
+        Width = 70
+        ItemHeight = 15
+        ItemIndex = 7
+        Items.Strings = (
+          '1'
+          '2'
+          '3'
+          '4'
+          '5'
+          '6'
+          '7'
+          '8'
+          '9'
+          '10'
+          '11'
+          '12'
+        )
+        TabOrder = 3
+        Text = '8'
+      end
+      object BGRAKnob1: TBGRAKnob
+        Left = 27
+        Height = 50
+        Top = 184
+        Width = 50
+        CurveExponent = 0.200000002980232
+        KnobColor = clBtnFace
+        LightIntensity = 300
+        PositionColor = clBtnText
+        PositionWidth = 4
+        PositionOpacity = 192
+        PositionMargin = 4
+        PositionType = kptLineSquareCap
+        UsePhongLighting = True
+        MinValue = 30
+        MaxValue = 360
+        Value = 270
+        OnValueChanged = BGRAKnob1ValueChanged
+        StartFromBottom = True
+      end
+      object LightLabel: TLabel
+        Left = 128
+        Height = 15
+        Top = 185
+        Width = 55
+        Caption = 'LightLabel'
         ParentColor = False
       end
     end
     object MyRollOut2: TMyRollOut
       Left = 1
-      Height = 360
-      Top = 201
+      Height = 578
+      Top = 257
       Width = 198
       Align = alTop
       Caption = 'Ground'
-      ClientHeight = 360
+      ClientHeight = 578
       ClientWidth = 198
       Enabled = True
       TabOrder = 1
       CollapseKind = akTop
-      ExpandedSize = 360
+      ExpandedSize = 578
       ButtonPosition = akTop
       ButtonSize = 27
       Button.Left = 0
@@ -323,121 +413,168 @@ object CastleForm: TCastleForm
       Button.Color = clSkyBlue
       Button.ColorExpanded = 16287767
       AnimationSpeed = 20
-      object Panel2: TPanel
+      Animated = False
+      object GPPanel1: TPanel
         Left = 1
-        Height = 27
-        Top = 332
+        Height = 30
+        Top = 28
         Width = 196
-        Align = alBottom
-        ClientHeight = 27
+        AutoSize = True
+        ClientHeight = 30
         ClientWidth = 196
-        TabOrder = 0
-        object FloatSpinEdit1: TFloatSpinEdit
-          Left = 120
-          Height = 23
-          Top = 0
-          Width = 82
-          Alignment = taRightJustify
-          DecimalPlaces = 4
+        TabOrder = 2
+        object ECSwitch1: TECSwitch
+          Left = 1
+          Height = 28
+          Top = 1
+          Width = 137
+          Caption = 'Use Ground'
+          CaptionPos = eopLeft
+          Checked = True
+          GrooveCheckedClr = clLime
+          ParentBiDiMode = False
+          State = cbChecked
           TabOrder = 0
         end
-        object Label2: TLabel
-          Left = 14
-          Height = 15
-          Top = 5
-          Width = 70
-          Caption = 'Ground Scale'
-          ParentColor = False
+        object Button5: TButton
+          Left = 141
+          Height = 25
+          Top = 1
+          Width = 54
+          AutoSize = True
+          Caption = 'Reset'
+          TabOrder = 1
+        end
+      end
+      object GPPanel2: TPanel
+        Left = 1
+        Height = 200
+        Top = 28
+        Width = 196
+        Align = alTop
+        Caption = 'GPPanel2'
+        ClientHeight = 200
+        ClientWidth = 196
+        TabOrder = 1
+        object Panel4: TPanel
+          Left = 98
+          Height = 198
+          Top = 1
+          Width = 97
+          ClientHeight = 198
+          ClientWidth = 97
+          TabOrder = 0
+          object ECSlider1: TECSlider
+            Left = 1
+            Height = 173
+            Top = 24
+            Width = 80
+            BevelOuter = bvNone
+            Caption = 'Ground Level'
+            CaptionPos = eopBottom
+            DiscreteChange = 0.01
+            Increment = 0.01
+            PageSize = 10
+            RelativeScaleLength = -1
+            Reversed = True
+            Scale.DateTimeFormat = 'hh:nn:ss'
+            Scale.LogarithmBase = 10
+            Scale.Max = 2
+            Scale.Min = -2
+            Scale.TickLongValue = 10
+            Scale.TickMiddleValue = 5
+            Scale.TickShortValue = 1
+            ScaleFontOptions.FontSize = 7
+            ScaleFontOptions.FontStyles = []
+            TabOrder = 0
+            OnChange = ECSlider1Change
+          end
+          object FloatSpinEdit2: TFloatSpinEdit
+            Left = 1
+            Height = 23
+            Top = 1
+            Width = 95
+            Alignment = taRightJustify
+            DecimalPlaces = 4
+            Increment = 0.0001
+            MaxValue = 1
+            MinValue = -1
+            TabOrder = 1
+          end
+        end
+        object Panel7: TPanel
+          Left = 1
+          Height = 198
+          Top = 1
+          Width = 97
+          Caption = 'Panel7'
+          ClientHeight = 198
+          ClientWidth = 97
+          TabOrder = 1
+          object ECSlider2: TECSlider
+            Left = 1
+            Height = 173
+            Top = 24
+            Width = 80
+            BevelOuter = bvNone
+            Caption = 'Ground Scale'
+            CaptionPos = eopBottom
+            DiscreteChange = 0.01
+            Increment = 0.01
+            PageSize = 10
+            Position = 0.02
+            RelativeScaleLength = -1
+            Reversed = True
+            Scale.DateTimeFormat = 'hh:nn:ss'
+            Scale.LogarithmBase = 10
+            Scale.Max = 50
+            Scale.Min = 0.02
+            Scale.ScaleType = estLogarithmic
+            Scale.TickLongValue = 10
+            Scale.TickMiddleValue = 5
+            Scale.TickShortValue = 1
+            ScaleFontOptions.FontSize = 7
+            ScaleFontOptions.FontStyles = []
+            TabOrder = 0
+            OnChange = ECSlider2Change
+          end
+          object FloatSpinEdit3: TFloatSpinEdit
+            Left = 1
+            Height = 23
+            Top = 1
+            Width = 95
+            Alignment = taRightJustify
+            DecimalPlaces = 4
+            Increment = 0.0001
+            MaxValue = 1
+            MinValue = -1
+            TabOrder = 1
+          end
         end
       end
       object ListView2: TListView
         Left = 1
-        Height = 276
-        Top = 56
-        Width = 106
+        Height = 349
+        Top = 228
+        Width = 196
         Align = alClient
         Columns = <>
-        TabOrder = 1
-      end
-      object ECSwitch1: TECSwitch
-        Left = 13
-        Height = 28
-        Top = 28
-        Width = 184
-        Align = alTop
-        AutoSize = False
-        BorderSpacing.Left = 12
-        Caption = 'Enable Ground'
-        CaptionPos = eopLeft
-        Checked = True
-        GrooveCheckedClr = clLime
-        ParentBiDiMode = False
-        State = cbChecked
-        TabOrder = 2
-      end
-      object Panel4: TPanel
-        Left = 107
-        Height = 276
-        Top = 56
-        Width = 90
-        Align = alRight
-        ClientHeight = 276
-        ClientWidth = 90
-        TabOrder = 3
-        object ECSlider1: TECSlider
-          Left = 1
-          Height = 251
-          Top = 24
-          Width = 88
-          Align = alClient
-          BevelOuter = bvNone
-          Caption = 'Ground Level'
-          CaptionPos = eopBottom
-          DiscreteChange = 0.01
-          Increment = 0.01
-          PageSize = 10
-          RelativeScaleLength = -1
-          Reversed = True
-          Scale.DateTimeFormat = 'hh:nn:ss'
-          Scale.LogarithmBase = 10
-          Scale.Max = 2
-          Scale.Min = -2
-          Scale.TickLongValue = 10
-          Scale.TickMiddleValue = 5
-          Scale.TickShortValue = 1
-          ScaleFontOptions.FontSize = 7
-          ScaleFontOptions.FontStyles = []
-          TabOrder = 0
-          OnChange = ECSlider1Change
-        end
-        object FloatSpinEdit2: TFloatSpinEdit
-          Left = 1
-          Height = 23
-          Top = 1
-          Width = 88
-          Align = alTop
-          Alignment = taRightJustify
-          DecimalPlaces = 4
-          Increment = 0.0001
-          MaxValue = 1
-          MinValue = -1
-          TabOrder = 1
-        end
+        TabOrder = 0
       end
     end
     object MyRollOut3: TMyRollOut
       Left = 1
-      Height = 156
-      Top = 561
+      Height = 56
+      Top = 717
       Width = 198
-      Align = alClient
+      Align = alTop
       Caption = 'MyRollOut3'
-      ClientHeight = 156
+      ClientHeight = 56
       ClientWidth = 198
       Enabled = True
       TabOrder = 2
       CollapseKind = akTop
-      ExpandedSize = 156
+      ExpandedSize = 56
       ButtonPosition = akTop
       ButtonSize = 27
       Button.Left = 0
@@ -448,15 +585,8 @@ object CastleForm: TCastleForm
       Button.Color = clSkyBlue
       Button.ColorExpanded = 16287767
       AnimationSpeed = 20
+      Animated = False
     end
-  end
-  object Splitter3: TSplitter
-    Left = 1070
-    Height = 718
-    Top = 0
-    Width = 5
-    Align = alRight
-    ResizeAnchor = akRight
   end
   object MainMenu1: TMainMenu
     Left = 373
@@ -468,6 +598,10 @@ object CastleForm: TCastleForm
         Caption = 'Open'
         ShortCut = 16463
         OnClick = FileOpenMenuClick
+      end
+      object SelectDirectoryMenuItem: TMenuItem
+        Caption = 'Open Directory'
+        OnClick = SelectDirectoryMenuItemClick
       end
       object DebugBoxMenu: TMenuItem
         Caption = 'Debug'
@@ -487,11 +621,21 @@ object CastleForm: TCastleForm
     end
   end
   object CastleOpenDialog1: TCastleOpenDialog
-    Left = 426
-    Top = 50
+    Options = [ofAllowMultiSelect, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Left = 373
+    Top = 112
   end
   object ImageList1: TImageList
-    Left = 1119
-    Top = 354
+    Left = 376
+    Top = 232
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 378
+    Top = 307
+  end
+  object SelectDirectoryDialog1: TSelectDirectoryDialog
+    Options = [ofPathMustExist, ofEnableSizing, ofViewDetail]
+    Left = 375
+    Top = 176
   end
 end

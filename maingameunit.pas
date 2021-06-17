@@ -1,6 +1,7 @@
 unit MainGameUnit;
 
 {$mode objfpc}{$H+}
+{$define multimodel}
 
 interface
 
@@ -65,6 +66,7 @@ type
     LabelMode: TCastleLabel;
     ModelRotationCheck: Boolean;
     ModelRotationDone: Boolean;
+    AppLogLevel: Boolean;
     procedure UpdateModelRotation;
     procedure BootStrap;
     procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
@@ -107,13 +109,15 @@ constructor TCastleApp.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   LogTextureCache := True;
+  AppLogLevel := False;
   TestModel := nil;
   LoadViewport;
   ViewMode := 2;
   OverSample := 8;
   SpriteWidth := 256;
   SpriteHeight := 256;
-
+  StretchMultiplier := 1;
+  BoundRadius := 1.0;
   VPMax := GLFeatures.MaxViewportDimensions;
   PrepDone := True;
 end;
@@ -143,8 +147,13 @@ begin
       Viewport.Camera.Orthographic.Width := Viewport.EffectiveWidth / StretchMultiplier;
       Viewport.Camera.Orthographic.Height := Viewport.EffectiveHeight;
       iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
-      Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
+      if not(iScale = 0) then
+        Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / iScale;
+      WriteLnLog('UpdateScale : ' + FloatToStr(Viewport.EffectiveWidth) + ' x ' + FloatToStr(Viewport.EffectiveHeight));
     end
+  else
+    WriteLnLog('Skipped UpdateScale');
+
 end;
 
 procedure TCastleApp.Resize;
@@ -152,48 +161,50 @@ var
   DesiredAspect: Single;
   ActualAspect: Single;
 begin
+  WriteLnLog('Start State Resize');
   inherited;
 
   DesiredAspect := SpriteWidth / SpriteHeight;
-  ActualAspect := Container.Width / Container.Height;
+  ActualAspect := StateContainer.Width / StateContainer.Height;
 
   if DesiredAspect <= ActualAspect then
     begin
-      if Container.Width <= (Container.Height / DesiredAspect) then
+      if StateContainer.Width <= (StateContainer.Height / DesiredAspect) then
         begin
           LabelMode.Caption := '1 = Aspect Switch';
-          Viewport.Height := Container.Height;
-          Viewport.Width := Container.Height * DesiredAspect;
+          Viewport.Height := StateContainer.Height;
+          Viewport.Width := StateContainer.Height * DesiredAspect;
         end
       else
         begin
           LabelMode.Caption := '2 = Aspect Switch';
-          Viewport.Height := Container.Height;
-          Viewport.Width := Container.Height * DesiredAspect;
+          Viewport.Height := StateContainer.Height;
+          Viewport.Width := StateContainer.Height * DesiredAspect;
         end;
     end
   else
     begin
-      if Container.Width <= (Container.Height / DesiredAspect) then
+      if StateContainer.Width <= (StateContainer.Height / DesiredAspect) then
         begin
           LabelMode.Caption := '3 = Aspect Switch';
-          Viewport.Width := Container.Width;
-          Viewport.Height := Container.Width / DesiredAspect;
+          Viewport.Width := StateContainer.Width;
+          Viewport.Height := StateContainer.Width / DesiredAspect;
         end
       else
         begin
           LabelMode.Caption := '4 = Aspect Switch';
-          Viewport.Width := Container.Width;
-          Viewport.Height := Container.Width / DesiredAspect;
+          Viewport.Width := StateContainer.Width;
+          Viewport.Height := StateContainer.Width / DesiredAspect;
         end;
     end;
 
-  Viewport.Left := Trunc((Container.Width - Viewport.Width) / 2);
-  Viewport.Bottom := Trunc((Container.Height - Viewport.Height) / 2);
+  Viewport.Left := Trunc((StateContainer.Width - Viewport.Width) / 2);
+  Viewport.Bottom := Trunc((StateContainer.Height - Viewport.Height) / 2);
 
   LabelMode.Caption := LabelMode.Caption + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
 
   UpdateScale;
+  WriteLnLog('End State Resize : LeftTop = ' + FloatToStr(Viewport.Left) + ' ' + FloatToStr(Viewport.Height) + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height));
 end;
 
 procedure TCastleApp.BootStrap;
@@ -249,8 +260,7 @@ end;
 
 procedure TCastleApp.LoadViewport;
 begin
-  WriteLnLog('LoadViewport');
-  StretchMultiplier := 1;
+  WriteLnLog('Start LoadViewport');
 
   Viewport := TCastleViewport.Create(Application);
   Viewport.FullSize := False;
@@ -259,6 +269,8 @@ begin
   Viewport.BackgroundColor := Vector4(1, 1, 1, 1);
   Viewport.NavigationType := ntNone;
   Viewport.AssignDefaultCamera;
+  Viewport.Width := StateContainer.Width;
+  Viewport.Height := StateContainer.Height;
   Viewport.Camera.Orthographic.Width := SpriteWidth;
   Viewport.Camera.Orthographic.Height := SpriteHeight;
   Viewport.Camera.Orthographic.Origin := Vector2(0.5, 0.5);
@@ -289,12 +301,14 @@ begin
       begin
         Stage.Remove(TestModel.Scene);
         FreeAndNil(TestModel);
+//        {$ifdef multimodel}
+//        {$endif}
       end;
 
     CameraRotation := 2 * Pi * (5/8);
     ModelRotation := 0;
     ModelRotationCheck := False;
-    ModelRotationDone := False;
+    ModelRotationDone := True;
     CameraElevation := 0;
     BoundRadius := 1.0;
     iScale := 1.0;
@@ -335,20 +349,23 @@ end;
 
 procedure TCastleApp.Start;
 begin
+  WriteLnLog('Start MainState');
   inherited;
 end;
 
 procedure TCastleApp.Stop;
 begin
   inherited;
-  WriteLnLog('Stop : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
+  WriteLnLog('Stop MainState: ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 
 procedure TCastleApp.BeforeRender;
 begin
   inherited;
-  LabelFPS.Caption := 'FPS = ' + FormatFloat('####0.00', Container.Fps.RealFps);
-  LabelRender.Caption := 'Render = ' + FormatFloat('####0.00', Container.Fps.OnlyRenderFps);
+  if AppLogLevel then
+    WriteLnLog('Start BeforeRender');
+  LabelFPS.Caption := 'FPS = ' + FormatFloat('####0.00', StateContainer.Fps.RealFps);
+  LabelRender.Caption := 'Render = ' + FormatFloat('####0.00', StateContainer.Fps.OnlyRenderFps);
 end;
 
 procedure TCastleApp.UpdateModelRotation;
@@ -372,6 +389,8 @@ end;
 
 procedure TCastleApp.Render;
 begin
+  if AppLogLevel then
+    WriteLnLog('Start Render');
   inherited;
 
   if PrepDone and GLInitialized and RenderReady then
@@ -391,6 +410,8 @@ var
   sc: TVector3;
   sr: Single;
 begin
+  if AppLogLevel then
+    WriteLnLog('Start Update');
   if ModelRotationCheck or not ModelRotationDone then
     begin
       UpdateModelRotation;
@@ -465,7 +486,8 @@ begin
             TestModel.IsLocked := True;
           end;
 
-        Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / (iScale * iScaleMultiplier);
+        if not(iScale = 0) then
+          Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / (iScale * iScaleMultiplier);
 
         if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
           begin
