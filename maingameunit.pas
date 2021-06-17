@@ -55,7 +55,7 @@ type
     VPMax: TVector2Integer;
 
     Viewport: TCastleViewport;
-    TestModel: TCastleModel;
+    WorkingModel: TCastleModel;
     Stage: TCastleStage;
     CameraRotation: Single;
     ModelRotation: Single;
@@ -110,7 +110,7 @@ begin
   inherited Create(AOwner);
   LogTextureCache := True;
   AppLogLevel := False;
-  TestModel := nil;
+  WorkingModel := nil;
   LoadViewport;
   ViewMode := 2;
   OverSample := 8;
@@ -212,9 +212,9 @@ begin
   SpriteWidth := 1024;
   SpriteHeight := 1024;
   LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
-  ShowModel(TestModel);
-  if TestModel.HasAnimations then
-    TestModel.SelectAnimation(TestModel.Actions[0]);
+  ShowModel(WorkingModel);
+  if WorkingModel.HasAnimations then
+    WorkingModel.SelectAnimation(WorkingModel.Actions[0]);
 end;
 
 procedure TCastleApp.CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
@@ -297,10 +297,10 @@ end;
 procedure TCastleApp.LoadModel(filename: String);
 begin
   try
-    if not(TestModel = nil) then
+    if not(WorkingModel = nil) then
       begin
-        Stage.Remove(TestModel.Scene);
-        FreeAndNil(TestModel);
+        Stage.Remove(WorkingModel.Scene);
+        FreeAndNil(WorkingModel);
 //        {$ifdef multimodel}
 //        {$endif}
       end;
@@ -313,8 +313,8 @@ begin
     BoundRadius := 1.0;
     iScale := 1.0;
     iScaleMultiplier := 1.0;
-    TestModel := TCastleModel.Create(Application);
-    TestModel.Load(filename);
+    WorkingModel := TCastleModel.Create(Application);
+    WorkingModel.Load(filename);
 
     if (Stage = nil) then
       begin
@@ -325,17 +325,17 @@ begin
       Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
 //        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
-        Stage.Add(TestModel.Scene);
+        Stage.Add(WorkingModel.Scene);
         Viewport.Items.Add(Stage);
         Viewport.Items.MainScene := Stage;
     end
     else
       begin
-        Stage.Add(TestModel.Scene);
+        Stage.Add(WorkingModel.Scene);
       end;
 {
-    TestModel.Spatial := [ssDynamicCollisions, ssRendering];
-    TestModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
+    WorkingModel.Spatial := [ssDynamicCollisions, ssRendering];
+    WorkingModel.PrepareResources([prSpatial, prRenderSelf, prRenderClones, prScreenEffects],
         True,
         Viewport.PrepareParams);
 }
@@ -468,13 +468,13 @@ begin
         ViewFromRadius(2, CameraElevation, CameraRotation);
       end;
 
-    if not(TestModel = nil) then
+    if not(WorkingModel = nil) then
       begin
-        if not(TestModel.IsLocked) then
+        if not(WorkingModel.IsLocked) then
           begin
             sc := Vector3(0, 0, 0);
             sr := 0;
-            TestModel.Scene.BoundingBox.BoundingSphere(sc, sr);
+            WorkingModel.Scene.BoundingBox.BoundingSphere(sc, sr);
             if not(sr = 0) then
               BoundRadius := sqrt(sr)
             else
@@ -482,19 +482,19 @@ begin
 
             iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
             iScaleMultiplier := 1.0;
-            TestModel.LockedScale := iScale;
-            TestModel.IsLocked := True;
+            WorkingModel.LockedScale := iScale;
+            WorkingModel.IsLocked := True;
           end;
 
         if not(iScale = 0) then
           Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / (iScale * iScaleMultiplier);
 
-        if(TestModel.CurrentAnimation >= 0) and (TestModel.CurrentAnimation < TestModel.Actions.Count) then
+        if(WorkingModel.CurrentAnimation >= 0) and (WorkingModel.CurrentAnimation < WorkingModel.Actions.Count) then
           begin
-            if TestModel.IsPaused then
-              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames) + ' (Paused)'
+            if WorkingModel.IsPaused then
+              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames) + ' (Paused)'
             else
-              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', TestModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', TestModel.TotalFrames);
+              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames);
           end;
 
       end;
@@ -564,7 +564,7 @@ begin
 //          SourceViewport.Camera.Orthographic.Scale := (2 * BoundRadius) / Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight);
 //          SourceViewport.Camera.Orthographic.Scale := ((2 * BoundRadius) / (iScale * OverSample));
 
-          WriteLnLog(FloatToStr(iScale) + ' vs ' + FloatToStr(TestModel.LockedScale));
+          WriteLnLog(FloatToStr(iScale) + ' vs ' + FloatToStr(WorkingModel.LockedScale));
           SourceViewport.Items := ViewPort.Items;
           ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);
             {$ifndef cgeapp}CastleForm.{$endif}Window.Container.RenderControl(SourceViewport,ViewportRect);
