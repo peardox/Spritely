@@ -58,7 +58,7 @@ type
     fIsLocked: Boolean;
     fLockedScale: Single;
     fModelName: String;
-    fSpotNode: TSpotLightNode;
+    fSpotNode: Array[0..5] of TSpotLightNode;
     fRootNode: TX3DRootNode;
     fScene: TCastleScene;
     fSceneNode:  TX3DRootNode;
@@ -91,7 +91,7 @@ type
     property  Transform: TTransformNode read fTransform write fTransform;
     property  Spatial: TSceneSpatialStructures read GetSpatial write SetSpatial default [];
     property  IsLooped: Boolean read GetIsLooped write SetIsLooped default True;
-    property  SpotNode: TSpotLightNode read fSpotNode write fSpotNode;
+//    property  SpotNode: TSpotLightNode read fSpotNode write fSpotNode;
 
     procedure ResetAnimationState(const IgnoreAffectedBy: TTimeSensorNode = nil);
     procedure PrepareResources(const Options: TPrepareResourcesOptions;
@@ -297,9 +297,23 @@ begin
       fTransform.AddChildren(fSceneNode);
       fRootNode.AddChildren(fTransform);
 
-      fSpotNode := CreateSpotLight;
-//      fScene.ShadowMaps := True;
-      fRootNode.AddChildren(fSpotNode);
+      fSpotNode[0] := CreateSpotLight(Vector3(0.0, 1.0, 3.0), Vector3(0.0, 0.0, -1.0));
+      fRootNode.AddChildren(fSpotNode[0]);
+
+      fSpotNode[1] := CreateSpotLight(Vector3(0.0, 1.0, -3.0), Vector3(0.0, 0.0, 1.0));
+      fRootNode.AddChildren(fSpotNode[1]);
+
+      fSpotNode[2] := CreateSpotLight(Vector3(3.0, 1.0, 0.0), Vector3(-1.0, 0.0, 0.0));
+      fRootNode.AddChildren(fSpotNode[2]);
+
+      fSpotNode[3] := CreateSpotLight(Vector3(-3.0, 1.0, 0.0), Vector3(1.0, 0.0, 0.0));
+      fRootNode.AddChildren(fSpotNode[3]);
+
+      fSpotNode[4] := CreateSpotLight(Vector3(0.0, 3.0, 0.0), Vector3(0.0, -1.0, 0.0));
+      fRootNode.AddChildren(fSpotNode[4]);
+
+      fSpotNode[5] := CreateSpotLight(Vector3(0.0, -3.0, 0.0), Vector3(0.0, 1.0, 0.0));
+      fRootNode.AddChildren(fSpotNode[5]);
 
       fScene := TCastleScene.Create(Self);
       fScene.Load(fRootNode, True, AOptions);
@@ -409,6 +423,8 @@ begin
 end;
 
 constructor TCastleModel.Create(AOwner: TComponent);
+var
+  i: Integer;
 begin
   inherited;
   fActions := nil;
@@ -422,6 +438,8 @@ begin
   fTransform := nil;
   fSceneNode := nil;
   fScene := nil;
+  for i := 0 to High(fSpotNode) do
+    fSpotNode[i] := nil;
 end;
 
 destructor TCastleModel.Destroy;

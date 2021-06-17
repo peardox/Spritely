@@ -13,6 +13,7 @@ function RadsToFace(const AValue: Single): Cardinal;
 
 function CreateSpotLight: TSpotLightNode;
 function CreateSpotLight(const APosition: TVector3): TSpotLightNode;
+function CreateSpotLight(const APosition: TVector3; const ADirection: TVector3): TSpotLightNode;
 function CreatePointLight: TPointLightNode;
 function CreateDirectionalLight: TDirectionalLightNode;
 
@@ -126,13 +127,18 @@ begin
 end;
 
 function CreateSpotLight(const APosition: TVector3): TSpotLightNode;
+begin
+  Result := CreateSpotLight(APosition, Vector3(0.0, 0.0, -1.0));
+end;
+
+function CreateSpotLight(const APosition: TVector3; const ADirection: TVector3): TSpotLightNode;
 var
   Light: TSpotLightNode;
 begin
   Light := TSpotLightNode.Create;
 
   Light.Location := APosition;
-  Light.Direction := Vector3(0.0, 0.0, -1.0);
+  Light.Direction := ADirection;
   Light.Color := Vector3(1, 1, 1);
   Light.FdOn.Value := true;
   Light.Intensity := 1;
@@ -161,6 +167,17 @@ begin
   if(I >= 0) then
     Result := S.Remove(I);
 end;
+
+function MakeTransparentLayerGrid(const ACellSize: Cardinal; const AWidth: Cardinal; const AHeight: Cardinal): TRGBImage;
+var
+  img: TRGBImage;
+begin
+  img := TRGBImage.Create(AWidth, AHeight);
+  img.Clear(Vector4Byte(255, 255, 255, 255));
+  img.FillRectangle(0, 0, ACellSize - 1, ACellSize - 1, Vector4(0.75, 0.75, 0.75, 1.00));
+  Result := img;
+end;
+
 
 end.
 
