@@ -522,13 +522,13 @@ object CastleForm: TCastleForm
             DiscreteChange = 0.01
             Increment = 0.01
             PageSize = 10
-            Position = 0.02
+            Position = 0.1
             RelativeScaleLength = -1
             Reversed = True
             Scale.DateTimeFormat = 'hh:nn:ss'
             Scale.LogarithmBase = 10
             Scale.Max = 50
-            Scale.Min = 0.02
+            Scale.Min = 0.1
             Scale.ScaleType = estLogarithmic
             Scale.TickLongValue = 10
             Scale.TickMiddleValue = 5
@@ -546,9 +546,10 @@ object CastleForm: TCastleForm
             Alignment = taRightJustify
             DecimalPlaces = 4
             Increment = 0.0001
-            MaxValue = 1
-            MinValue = -1
+            MaxValue = 50
+            MinValue = 0.1
             TabOrder = 1
+            Value = 0.1
           end
         end
       end

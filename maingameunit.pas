@@ -95,6 +95,7 @@ var
   PrepDone: Boolean;
   RenderReady: Boolean;
   CastleApp: TCastleApp;
+  ModelArray: TCastleModelArray;
 
 implementation
 {$ifdef cgeapp}
@@ -111,6 +112,7 @@ begin
   LogTextureCache := True;
   AppLogLevel := False;
   WorkingModel := nil;
+  ModelArray := nil;
   LoadViewport;
   ViewMode := 2;
   OverSample := 8;
@@ -300,9 +302,10 @@ begin
     if not(WorkingModel = nil) then
       begin
         Stage.Remove(WorkingModel.Scene);
+        {$ifdef multimodel}
+        {$else}
         FreeAndNil(WorkingModel);
-//        {$ifdef multimodel}
-//        {$endif}
+        {$endif}
       end;
 
     CameraRotation := 2 * Pi * (5/8);
@@ -314,6 +317,9 @@ begin
     iScale := 1.0;
     iScaleMultiplier := 1.0;
     WorkingModel := TCastleModel.Create(Application);
+    SetLength(ModelArray, Length(ModelArray) + 1);
+    ModelArray[Length(ModelArray) - 1] := WorkingModel;
+
     WorkingModel.Load(filename);
 
     if (Stage = nil) then

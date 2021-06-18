@@ -114,6 +114,7 @@ type
     procedure Stop;
     procedure SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
   end;
+  TCastleModelArray = Array of TCastleModel;
 
 implementation
 

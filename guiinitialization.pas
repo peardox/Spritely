@@ -254,6 +254,7 @@ procedure TCastleForm.TreeView1Click(Sender: TObject);
 var
   Node: TTreeNode;
   NodeParent: TTreeNode;
+  ClickedModel: TCastleModel;
 begin
   Node := Treeview1.Selected;
   if (Node = nil) then // Nothing to do
@@ -262,19 +263,32 @@ begin
   NodeParent := Node.Parent;
   if (NodeParent = nil) then // User clicked on a Model
     begin
-      CastleApp.WorkingModel.ResetAnimationState;
+      if TObject(Node.Data).ClassName = 'TCastleModel' then
+        begin
+          ClickedModel := TCastleModel(Node.Data);
+          With CastleApp do
+            begin
+              if not(ClickedModel = WorkingModel) then
+                begin
+                  Stage.Remove(WorkingModel.Scene);
+                  WorkingModel := ClickedModel;
+                  Stage.Add(WorkingModel.Scene);
+                end;
+              WorkingModel.ResetAnimationState;
+            end;
+        end;
       Exit;
     end;
 
   if (NodeParent.Parent = nil) then  // User clicked on an Animation
     begin // A proper animation node
-      CastleApp.WorkingModel.BaseRotation := Vector3(0, 0, 0);
-      CastleApp.WorkingModel.SelectAnimation(Node.Text);
+//      CastleApp.WorkingModel.BaseRotation := Vector3(0, 0, 0);
+//      CastleApp.WorkingModel.SelectAnimation(Node.Text);
     end
   else
     begin // A TakeOne Node
-      CastleApp.WorkingModel.BaseRotation := Vector3(0, 0, 0);
-      CastleApp.WorkingModel.SelectAnimation(Node.Text);
+//      CastleApp.WorkingModel.BaseRotation := Vector3(0, 0, 0);
+//      CastleApp.WorkingModel.SelectAnimation(Node.Text);
     end;
 
     FocusViewport;
