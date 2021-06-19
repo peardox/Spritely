@@ -17,7 +17,8 @@ uses
   CastleDialogs, CastleApplicationProperties, CastleLog, CastleTimeUtils,
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
   CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels, BGRAKnob,
-  BCLabel, ECSwitch, ECSlider, ECSpinCtrls, CastleGLShaders, X3DLoad;
+  BCLabel, ECSwitch, ECSlider, ECSpinCtrls, CastleGLShaders, X3DLoad,
+  Overlays;
 
 type
   { TCastleForm }
@@ -83,6 +84,7 @@ type
     procedure BGRAKnob1ValueChanged(Sender: TObject; Value: single);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
     procedure GroundHeightSliderChange(Sender: TObject);
     procedure GroundScaleSliderChange(Sender: TObject);
     procedure ExitMenuClick(Sender: TObject);
@@ -97,6 +99,8 @@ type
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
       var Handled: Boolean);
+    procedure TreeView1EditingEnd(Sender: TObject; Node: TTreeNode;
+      Cancel: Boolean);
     procedure WindowClose(Sender: TObject);
     procedure WindowMotion(Sender: TObject; const Event: TInputMotion);
     procedure WindowOpen(Sender: TObject);
@@ -115,6 +119,7 @@ type
     procedure UpdateInfoPanel;
     procedure LoadGuiModel(const AModel: String);
     procedure FocusViewport;
+    function  SyncModelFromNode(const Node: Pointer): TCastleModel;
   private
     Tracking: Boolean;
     ModeOrientation: Boolean;
@@ -156,6 +161,7 @@ begin
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
+//  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'generic_cliff_2_mobile_rhe' + PathDelim + 'scene.gltf';
 {$else}
   MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'Elong_anim.txt';
   ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'gltf' + PathDelim + 'ElongataGreen.glb';
@@ -250,48 +256,60 @@ begin
   WriteLnLog('FormDestroy : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 
+function TCastleForm.SyncModelFromNode(const Node: Pointer): TCastleModel;
+var
+  ClickedModel: TCastleModel;
+begin
+  Result := nil;
+
+  ClickedModel := TCastleModel(Node);
+  With CastleApp do
+    begin
+      if not(ClickedModel = WorkingModel) then
+        begin
+          Stage.Remove(WorkingModel.Scene);
+          WorkingModel := ClickedModel;
+          Stage.Add(WorkingModel.Scene);
+        end;
+      Result := ClickedModel;
+    end;
+end;
+
 procedure TCastleForm.TreeView1Click(Sender: TObject);
 var
   Node: TTreeNode;
   NodeParent: TTreeNode;
-  ClickedModel: TCastleModel;
 begin
   Node := Treeview1.Selected;
   if (Node = nil) then // Nothing to do
     exit;
 
   NodeParent := Node.Parent;
-  if (NodeParent = nil) then // User clicked on a Model
+  if (NodeParent = nil) then // User clicked on a root node
     begin
-      if TObject(Node.Data).ClassName = 'TCastleModel' then
+      if (TObject(Node.Data).ClassName = 'TCastleModel') then
         begin
-          ClickedModel := TCastleModel(Node.Data);
           With CastleApp do
             begin
-              if not(ClickedModel = WorkingModel) then
-                begin
-                  Stage.Remove(WorkingModel.Scene);
-                  WorkingModel := ClickedModel;
-                  Stage.Add(WorkingModel.Scene);
-                end;
+              WorkingModel := SyncModelFromNode(Node.Data);
               WorkingModel.ResetAnimationState;
             end;
         end;
-      Exit;
-    end;
-
-  if (NodeParent.Parent = nil) then  // User clicked on an Animation
-    begin // A proper animation node
-//      CastleApp.WorkingModel.BaseRotation := Vector3(0, 0, 0);
-//      CastleApp.WorkingModel.SelectAnimation(Node.Text);
     end
-  else
-    begin // A TakeOne Node
-//      CastleApp.WorkingModel.BaseRotation := Vector3(0, 0, 0);
-//      CastleApp.WorkingModel.SelectAnimation(Node.Text);
+  else if (NodeParent.Parent = nil) then  // User clicked on an 2nd level
+    begin
+      if ((TObject(Node.Data).ClassName = 'TAnimationInfo') and (TObject(NodeParent.Data).ClassName = 'TCastleModel')) then
+        begin
+          With CastleApp do
+            begin
+              WorkingModel := SyncModelFromNode(NodeParent.Data);
+              WorkingModel.BaseRotation := Vector3(0, 0, 0);
+              WorkingModel.SelectAnimation(Node.Text);
+            end;
+        end;
     end;
 
-    FocusViewport;
+  FocusViewport;
 end;
 
 procedure TCastleForm.FocusViewport;
@@ -307,6 +325,8 @@ var
   AnimNode: TAnimationInfo;
   ModelNode: TCastleModel;
 begin
+//  Exit;
+
   Node := TreeView1.GetNodeAt(MousePos.X, MousePos.Y);
   if not Assigned (Node) then
     begin
@@ -321,7 +341,10 @@ begin
         begin
           AnimNode := TAnimationInfo(Node.Data);
           if not(AnimNode.IsMapped) then
-            MapAnims(Node, AnimNode);
+            begin
+              CastleApp.WorkingModel := SyncModelFromNode(Node.Parent.Data);
+              MapAnims(Node, AnimNode);
+            end;
         end
       else if(TObject(Node.Data).ClassName = 'TCastleModel') then
         begin
@@ -330,6 +353,15 @@ begin
         end;
     end;
   FocusViewport;
+end;
+
+procedure TCastleForm.TreeView1EditingEnd(Sender: TObject; Node: TTreeNode;
+  Cancel: Boolean);
+begin
+  if not(Cancel) then
+    begin
+      WriteLnLog('Commited TreeView1EditingEnd : ' + Node.Text)
+    end;
 end;
 
 procedure TCastleForm.MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
@@ -342,6 +374,7 @@ var
   dupe: Integer;
   NewName: String;
   DupeSuffix: Integer;
+  newNode: TTreeNode;
 begin
   if (modelNode.Data = nil) then
     begin
@@ -382,13 +415,17 @@ begin
                   Anis[I].TakeName := NewName;
                 end;
               NewAnimNode := Model.AddAnimation(Anis[I], AnimNode.Sensor, AnimNode.ParentAnim);
-              Treeview1.Items.AddChildObject(modelNode, Anis[I].TakeName, NewAnimNode);
+              newNode := Treeview1.Items.AddChildObject(modelNode, Anis[I].TakeName, NewAnimNode);
+              newNode.ImageIndex := 4;
+              newNode.SelectedIndex := 4;
             end;
         end;
       SetLength(Anis, 0);
       Json.Free;
       AnimNode.IsMapped := True;
       modelNode.Expand(False);
+      modelNode.ImageIndex := 1;
+      modelNode.SelectedIndex := 1;
     end;
 end;
 
@@ -402,6 +439,7 @@ procedure TCastleForm.LoadGuiModel(const AModel: String);
 var
   I: Integer;
   modelNode: TTreeNode;
+  newNode: TTreeNode;
 begin
   with CastleApp do
     begin
@@ -417,9 +455,18 @@ begin
             begin
             for I := 0 to WorkingModel.Actions.Count - 1 do
               begin
-                Treeview1.Items.AddChildObject(modelNode, WorkingModel.Actions[I], WorkingModel.Animations[I]);
+                newNode := Treeview1.Items.AddChildObject(modelNode, WorkingModel.Actions[I], WorkingModel.Animations[I]);
+                newNode.ImageIndex := 4;
+                newNode.SelectedIndex := 4;
               end;
             modelNode.Expand(False);
+            modelNode.ImageIndex := 2;
+            modelNode.SelectedIndex := 2;
+            end
+          else
+            begin
+              modelNode.ImageIndex := 3;
+              modelNode.SelectedIndex := 3;
             end;
           modelNode.Selected := True;
           WorkingModel.ResetAnimationState;
@@ -499,6 +546,12 @@ begin
   FocusViewport;
 end;
 
+procedure TCastleForm.Button4Click(Sender: TObject);
+begin
+  CastleOverlay := TCastleOverlay.Create(Window);
+  TUIState.Push(CastleOverlay);
+end;
+
 procedure TCastleForm.GroundHeightSliderChange(Sender: TObject);
 begin
   GroundHeightEdit.Value := GroundHeightSlider.Position;
@@ -545,13 +598,15 @@ begin
   WriteLnLog('WindowOpen : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
   RenderReady := False;
   TCastleControlBase.MainControl := Window;
-  CastleApp := TCastleApp.Create(Application);
+  CastleApp := TCastleApp.Create(Window);
   TUIState.Current := CastleApp;
   Window.Container.UIScaling := usNone;
 end;
 
 procedure TCastleForm.WindowClose(Sender: TObject);
 begin
+  TUIState.Current := nil;
+  CastleApp.Free;
   WriteLnLog('WindowClose : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
 end;
 

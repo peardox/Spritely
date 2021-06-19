@@ -20,7 +20,7 @@ uses
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging;
+  CastleGLUtils, multimodel, staging, Overlays;
 
 type
   { TViewMode }
@@ -95,6 +95,7 @@ var
   PrepDone: Boolean;
   RenderReady: Boolean;
   CastleApp: TCastleApp;
+  CastleOverlay: TCastleOverlay;
   ModelArray: TCastleModelArray;
 
 implementation

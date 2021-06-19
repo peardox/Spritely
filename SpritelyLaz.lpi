@@ -59,7 +59,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="SpritelyLaz.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -111,6 +111,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="SpritelyLog"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="overlays.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Overlays"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
