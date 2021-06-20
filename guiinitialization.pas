@@ -1,5 +1,10 @@
 unit GUIInitialization;
+{
+  Buglist
 
+  Right Click Action
+  Badly Formatted Anitxt
+}
 {$mode objfpc}{$H+}
 // {$define disableMap}
 
@@ -340,7 +345,7 @@ begin
       if(TObject(Node.Data).ClassName = 'TAnimationInfo') then
         begin
           AnimNode := TAnimationInfo(Node.Data);
-          if not(AnimNode.IsMapped) then
+          if not(AnimNode.IsMapped) and (TObject(Node.Parent.Data).ClassName = 'TCastleModel') then
             begin
               CastleApp.WorkingModel := SyncModelFromNode(Node.Parent.Data);
               MapAnims(Node, AnimNode);
@@ -555,7 +560,8 @@ end;
 procedure TCastleForm.GroundHeightSliderChange(Sender: TObject);
 begin
   GroundHeightEdit.Value := GroundHeightSlider.Position;
-  CastleApp.WorkingModel.Transform.Translation := Vector3(0, GroundHeightSlider.Position, 0);
+//  CastleApp.WorkingModel.Transform.Translation := Vector3(0, GroundHeightSlider.Position, 0);
+  CastleApp.Stage.GroundTransformNode.Translation := Vector3(0, GroundHeightSlider.Position, 0);
 end;
 
 procedure TCastleForm.GroundScaleSliderChange(Sender: TObject);
