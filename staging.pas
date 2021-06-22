@@ -97,11 +97,11 @@ begin
     fLightNode := CreateDirectionalLight;
     {$endif}
     StageRootNode.AddChildren(fLightNode);
-{
+
     fShadowNode := CreateSpotLight;
     fShadowNode.Shadows := True;
     StageRootNode.AddChildren(fShadowNode);
-}
+
     StageRootNode.AddChildren(fGroundTransformNode);
     Load(StageRootNode, True);
 
