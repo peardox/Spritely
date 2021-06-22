@@ -122,7 +122,7 @@ type
     function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
     procedure AddInfoPanel;
     procedure UpdateInfoPanel;
-    procedure LoadGuiModel(const AModel: String; const doExpand: Boolean);
+    procedure LoadGuiModel(const AModel: String);
     procedure FocusViewport;
     function  SyncModelFromNode(const Node: Pointer): TCastleModel;
     function  IdentifyNode(const Node: TTreeNode): Cardinal;
@@ -131,6 +131,7 @@ type
     ModeOrientation: Boolean;
   public
     procedure GuiBootStrap;
+    procedure AddModelToTree(const AModel: TCastleModel; const doExpand: Boolean);
   end;
 
 var
@@ -480,50 +481,63 @@ end;
 procedure TCastleForm.GuiBootStrap;
 begin
 //  Treeview1.Items.Clear;
-  LoadGuiModel(ModelFile, True);
+  LoadGuiModel(ModelFile);
 end;
 
-procedure TCastleForm.LoadGuiModel(const AModel: String; const doExpand: Boolean);
+procedure TCastleForm.AddModelToTree(const AModel: TCastleModel; const doExpand: Boolean);
 var
   I: Integer;
   modelNode: TTreeNode;
   newNode: TTreeNode;
 begin
+  if not(AModel = nil) then
+    begin
+      modelNode := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(AModel.ModelName)), AModel);
+      if AModel.HasAnimations then
+        begin
+        for I := 0 to AModel.Actions.Count - 1 do
+          begin
+            newNode := Treeview1.Items.AddChildObject(modelNode, AModel.Actions[I], AModel.Animations[I]);
+            newNode.ImageIndex := 4;
+            newNode.SelectedIndex := 4;
+          end;
+        if doExpand then
+          modelNode.Expand(False);
+        modelNode.ImageIndex := 2;
+        modelNode.SelectedIndex := 2;
+        end
+      else
+        begin
+          modelNode.ImageIndex := 3;
+          modelNode.SelectedIndex := 3;
+        end;
+      modelNode.Selected := True;
+      AModel.ResetAnimationState;
+    end;
+end;
+
+procedure TCastleForm.LoadGuiModel(const AModel: String);
+begin
   if not(URIFileExists(AModel)) then
     Exit;
 
-//  TUIState.Push(CastleOverlay);
-//  WriteLnLog('Push UI');
+  if not(TUIState.CurrentTop = CastleOverlay) then
+    begin
+      TUIState.Push(CastleOverlay);
+      CastleOverlay.AddNote('Adding Models...');
+      WriteLnLog('Push UI');
+    end;
+
   with CastleApp do
     begin
-//      FileToLoad.Add(URIToFilenameSafe(AModel));
-//      WaitForRenderAndCall(@LoadModel);
-      LoadModel(URIToFilenameSafe(AModel));
-
-      if not(WorkingModel = nil) then
+      if FileToLoadList.Count = 0 then
         begin
-          modelNode := Treeview1.Items.AddObject(nil, StripExtension(ExtractURIName(WorkingModel.ModelName)), WorkingModel);
-          if WorkingModel.HasAnimations then
-            begin
-            for I := 0 to WorkingModel.Actions.Count - 1 do
-              begin
-                newNode := Treeview1.Items.AddChildObject(modelNode, WorkingModel.Actions[I], WorkingModel.Animations[I]);
-                newNode.ImageIndex := 4;
-                newNode.SelectedIndex := 4;
-              end;
-            if doExpand then
-              modelNode.Expand(False);
-            modelNode.ImageIndex := 2;
-            modelNode.SelectedIndex := 2;
-            end
-          else
-            begin
-              modelNode.ImageIndex := 3;
-              modelNode.SelectedIndex := 3;
-            end;
-          modelNode.Selected := True;
-          WorkingModel.ResetAnimationState;
-        end;
+          FileToLoadList.Add(URIToFilenameSafe(AModel));
+          WaitForRenderAndCall(@LoadModel);
+        end
+      else
+        FileToLoadList.Add(URIToFilenameSafe(AModel));
+//      LoadModel(URIToFilenameSafe(AModel));
       Tracking := True;
     end;
   AddInfoPanel;
@@ -602,7 +616,7 @@ end;
 
 procedure TCastleForm.Button4Click(Sender: TObject);
 begin
-  TUIState.Push(CastleOverlay);
+//  TUIState.Push(CastleOverlay);
 end;
 
 procedure TCastleForm.GroundHeightSliderChange(Sender: TObject);
@@ -633,7 +647,7 @@ begin
       if CastleOpenDialog1.Files.Count = 1 then
         begin
           WriteLnLog(CastleOpenDialog1.Files[0]);
-          LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Filename), True);
+          LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Filename));
           Caption := 'Spritely : ' + CastleOpenDialog1.Filename;
         end
       else
@@ -641,7 +655,7 @@ begin
           for i := 0 to CastleOpenDialog1.Files.Count - 1 do
             begin
               WriteLnLog(CastleOpenDialog1.Files[i]);
-              LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Files[i]), False);
+              LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Files[i]));
             end;
         end;
     end;

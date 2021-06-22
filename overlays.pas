@@ -15,7 +15,7 @@ uses
   CastleTriangles, CastleShapes, CastleVectors,
   CastleSceneCore, CastleScene, CastleTransform,
   CastleViewport, CastleCameras, CastleProjection,
-  X3DNodes, X3DFields, X3DTIme,
+  X3DNodes, X3DFields, X3DTIme, CastleNotifications,
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
@@ -31,11 +31,13 @@ type
     procedure Resize; override; // TCastleUserInterface
     procedure Update(const SecondsPassed: Single; var HandleInput: boolean); override; // TUIState
   private
+    stateNotifications: TCastleNotifications;
     Overlay: TCastleRectangleControl;
     Screen: TCastleRectangleControl;
   public
     procedure Start; override; // TUIState
     procedure Stop; override; // TUIState
+    procedure AddNote(const AMsg: String);
   end;
 
 implementation
@@ -51,11 +53,6 @@ begin
   Overlay.Color := Vector4(0, 0, 0, 0.25);
 
   InsertFront(Overlay);
-end;
-
-procedure TCastleOverlay.Start;
-begin
-  inherited;
 
   Screen := TCastleRectangleControl.Create(Overlay);
   Screen.HorizontalAnchorParent := hpMiddle;
@@ -66,7 +63,24 @@ begin
   Screen.Height := Trunc(StateContainer.Height * 0.75);
   Screen.Color := HexToColor('C8C8C8');
 
-  InsertFront(Screen);
+  Overlay.InsertFront(Screen);
+
+  stateNotifications := TCastleNotifications.Create(Screen);
+  stateNotifications.MaxMessages := 12;
+  stateNotifications.Anchor(hpLeft, 10);
+  stateNotifications.Anchor(vpBottom, 10);
+
+  Screen.InsertFront(stateNotifications);
+end;
+
+procedure TCastleOverlay.AddNote(const AMsg: String);
+begin
+  stateNotifications.Show(AMsg);
+end;
+
+procedure TCastleOverlay.Start;
+begin
+  inherited;
 end;
 
 procedure TCastleOverlay.Stop;

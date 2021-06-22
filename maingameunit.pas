@@ -78,8 +78,8 @@ type
     procedure Start; override; // TUIState
     procedure Stop; override; // TUIState
     procedure LoadViewport;
-//    procedure LoadModel(Sender: TObject);
-    procedure LoadModel(filename: String);
+    procedure LoadModel(Sender: TObject);
+    procedure LoadModel(FileName: String);
     procedure ShowModel(AModel: TCastleModel);
     procedure SetStretchMultiplier(const AStretch: Single);
     procedure SetViewMode(const AViewMode: Cardinal);
@@ -293,22 +293,22 @@ begin
   Viewport.Items.Add(AModel.Scene);
   Viewport.Items.MainScene := AModel.Scene;
 end;
-{
+
 procedure TCastleApp.LoadModel(Sender: TObject);
 begin
-  WriteLnLog('LoadModel ' + FileToLoad[0]  + ' at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
-  if FileToLoad.Count > 0 then
-    LoadModel(FileToLoad.Pop);
+  WriteLnLog('LoadModel ' + FileToLoadList[0]  + ' at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
+  if FileToLoadList.Count > 0 then
+    LoadModel(FileToLoadList.Pop);
   WriteLnLog('LoadMode Done at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
 
-  if FileToLoad.Count = 0 then
+  if FileToLoadList.Count = 0 then
     begin
       WriteLnLog('Pop UI');
-//      TUIState.Pop(CastleOverlay);
+      TUIState.Pop(CastleOverlay);
     end;
 end;
-}
-procedure TCastleApp.LoadModel(filename: String);
+
+procedure TCastleApp.LoadModel(FileName: String);
 begin
   try
     if not(WorkingModel = nil) then
@@ -332,7 +332,7 @@ begin
     SetLength(ModelArray, Length(ModelArray) + 1);
     ModelArray[Length(ModelArray) - 1] := WorkingModel;
 
-    WorkingModel.Load(filename);
+    WorkingModel.Load(FileName);
 
     if (Stage = nil) then
       begin
@@ -364,6 +364,14 @@ begin
         WriteLnLog('Oops #1' + LineEnding + E.ClassName + LineEnding + E.Message);
        end;
   end;
+  {$ifndef cgeapp}
+  CastleOverlay.AddNote('Loaded Model : ' + FileName);
+  CastleForm.AddModelToTree(WorkingModel, False);
+  if FileToLoadList.Count > 0 then
+    begin
+      WaitForRenderAndCall(@LoadModel);
+    end;
+  {$endif}
 end;
 
 procedure TCastleApp.Start;

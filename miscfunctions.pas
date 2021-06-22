@@ -7,7 +7,15 @@ interface
 uses
   Classes, SysUtils, Math, X3DNodes, CastleImages, CastleVectors,
   CastleUIState, CastleControls, CastleUIControls, CastleColors,
-  CastleUtils;
+  CastleNotifications, CastleUtils;
+
+type
+  { TUIStateHelper }
+  TUIStateHelper = class helper for TUIState
+  public
+    procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
+    procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
+  end;
 
 function StripExtension(S: String): String;
 function WrapRadians(const AValue: Single): Single;
@@ -21,14 +29,6 @@ function CreateDirectionalLight: TDirectionalLightNode;
 
 function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 1.0; const LayerDepth: Single = 0): TTransformNode;
 function CreateColorPlane(const imWidth: Single; const imHeight: Single; const LayerDepth: Single; const AColor: TVector3): TTransformNode;
-
-type
-  { TUIStateHelper }
-  TUIStateHelper = class helper for TUIState
-  public
-    procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
-    procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
-  end;
 
 implementation
 
