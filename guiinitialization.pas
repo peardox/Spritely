@@ -122,7 +122,7 @@ type
     function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
     procedure AddInfoPanel;
     procedure UpdateInfoPanel;
-    procedure LoadGuiModel(const AModel: String);
+    procedure LoadGuiModel(const AModel: String; const doExpand: Boolean);
     procedure FocusViewport;
     function  SyncModelFromNode(const Node: Pointer): TCastleModel;
   private
@@ -168,10 +168,10 @@ begin
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'generic_cliff_2_mobile_rhe' + PathDelim + 'scene.gltf';
 {$else}
-  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'Elong_anim.txt';
-  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'gltf' + PathDelim + 'ElongataGreen.glb';
-//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'Elong_anim.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'gltf' + PathDelim + 'ElongataGreen.glb';
+  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
 //  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + '_bike_animations.txt';
@@ -311,6 +311,17 @@ begin
               WorkingModel.BaseRotation := Vector3(0, 0, 0);
               WorkingModel.SelectAnimation(Node.Text);
             end;
+        end
+      else if ((TObject(Node.Data).ClassName = 'TAnimationInfo') and
+               (TObject(NodeParent.Data).ClassName = 'TAnimationInfo') and
+               (TObject(NodeParent.Parent.Data).ClassName = 'TCastleModel')) then
+        begin
+          With CastleApp do
+            begin
+              WorkingModel := SyncModelFromNode(NodeParent.Parent.Data);
+              WorkingModel.BaseRotation := Vector3(0, 0, 0);
+              WorkingModel.SelectAnimation(Node.Text);
+            end;
         end;
     end;
 
@@ -437,20 +448,24 @@ end;
 procedure TCastleForm.GuiBootStrap;
 begin
 //  Treeview1.Items.Clear;
-  LoadGuiModel(ModelFile);
+  LoadGuiModel(ModelFile, True);
 end;
 
-procedure TCastleForm.LoadGuiModel(const AModel: String);
+procedure TCastleForm.LoadGuiModel(const AModel: String; const doExpand: Boolean);
 var
   I: Integer;
   modelNode: TTreeNode;
   newNode: TTreeNode;
 begin
+  if not(URIFileExists(AModel)) then
+    Exit;
+
+//  TUIState.Push(CastleOverlay);
+//  WriteLnLog('Push UI');
   with CastleApp do
     begin
-      if not(URIFileExists(AModel)) then
-        Exit;
-
+//      FileToLoad.Add(URIToFilenameSafe(AModel));
+//      WaitForRenderAndCall(@LoadModel);
       LoadModel(URIToFilenameSafe(AModel));
 
       if not(WorkingModel = nil) then
@@ -464,7 +479,8 @@ begin
                 newNode.ImageIndex := 4;
                 newNode.SelectedIndex := 4;
               end;
-            modelNode.Expand(False);
+            if doExpand then
+              modelNode.Expand(False);
             modelNode.ImageIndex := 2;
             modelNode.SelectedIndex := 2;
             end
@@ -479,6 +495,7 @@ begin
       Tracking := True;
     end;
   AddInfoPanel;
+
 end;
 
 procedure TCastleForm.Button1Click(Sender: TObject);
@@ -553,7 +570,6 @@ end;
 
 procedure TCastleForm.Button4Click(Sender: TObject);
 begin
-  CastleOverlay := TCastleOverlay.Create(Window);
   TUIState.Push(CastleOverlay);
 end;
 
@@ -585,7 +601,7 @@ begin
       if CastleOpenDialog1.Files.Count = 1 then
         begin
           WriteLnLog(CastleOpenDialog1.Files[0]);
-          LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Filename));
+          LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Filename), True);
           Caption := 'Spritely : ' + CastleOpenDialog1.Filename;
         end
       else
@@ -593,7 +609,7 @@ begin
           for i := 0 to CastleOpenDialog1.Files.Count - 1 do
             begin
               WriteLnLog(CastleOpenDialog1.Files[i]);
-              LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Files[i]));
+              LoadGuiModel(URIToFilenameSafe(CastleOpenDialog1.Files[i]), False);
             end;
         end;
     end;

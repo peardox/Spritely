@@ -23,16 +23,16 @@ type
     {$elseif defined(pointlight)}
     fLightNode: TPointLightNode;
     {$else}
-    fLightNode: TDirectionalLightNode;
+*    fLightNode: TDirectionalLightNode;
     {$endif}
     fShadowNode: TSpotLightNode;
     fGroundModelRoot: TX3DRootNode;
   public
     GroundTexture: String;
-    procedure LoadStage(const GroundModel: String; const GroundLevel: Single = 0);
+    procedure LoadStage(const GroundModel: String; const GroundLevel: Single = 0; const GroundScale: Single = 5;  const GroundSize: Single = 20);
     procedure LoadStage(const GroundLevel: Single = 0);
     procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3);
-    procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String);
+    procedure LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String; const GroundScale: Single = 5;  const GroundSize: Single = 20);
     property  GroundTransformNode: TTransformNode read fGroundTransformNode write fGroundTransformNode;
     procedure ChangeTextureCoordinates(const Model3D: TX3DRootNode; const AScale: Single = 1.0);
     function  ChangeTexture(const ANode: TX3DRootNode; const TextureUrl: String): TVector3Cardinal;
@@ -51,9 +51,9 @@ type
 
 implementation
 
-procedure TCastleStage.LoadStage(const GroundModel: String; const GroundLevel: Single = 0);
+procedure TCastleStage.LoadStage(const GroundModel: String; const GroundLevel: Single = 0; const GroundScale: Single = 5;  const GroundSize: Single = 20);
 begin
-  LoadStage(GroundLevel, Vector3(1,1,1), GroundModel);
+  LoadStage(GroundLevel, Vector3(1,1,1), GroundModel, GroundScale, GroundSize);
 end;
 
 procedure TCastleStage.LoadStage(const GroundLevel: Single = 0);
@@ -67,20 +67,20 @@ begin
 end;
 
 
-procedure TCastleStage.LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String);
+procedure TCastleStage.LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String; const GroundScale: Single = 5;  const GroundSize: Single = 20);
 var
   StageRootNode: TX3DRootNode;
 begin
   try
     StageRootNode := TX3DRootNode.Create;
     if (GroundModel = EmptyStr) or not(URIFileExists(GroundModel)) then
-      fGroundTransformNode := CreateColorPlane(20, 20, GroundLevel, GroundColor)
+      fGroundTransformNode := CreateColorPlane(GroundSize, GroundSize, GroundLevel, GroundColor)
     else
       begin
-        fGroundModelRoot := CreateGroundPlane(GroundModel, 5);
+        fGroundModelRoot := CreateGroundPlane(GroundModel, GroundScale);
         fGroundTransformNode := TTransformNode.Create;
         fGroundTransformNode.Translation := Vector3(0, GroundLevel, 0);
-        fGroundTransformNode.Scale := Vector3(20, 1, 20);
+        fGroundTransformNode.Scale := Vector3(GroundSize, 1, GroundSize);
         fGroundTransformNode.AddChildren(fGroundModelRoot);
       end;
     fGroundTransformNode.X3DName := 'GroundTransformNode';

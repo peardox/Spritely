@@ -20,7 +20,7 @@ uses
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging, Overlays;
+  CastleGLUtils, multimodel, staging, Overlays, MiscFunctions;
 
 type
   { TViewMode }
@@ -36,7 +36,6 @@ type
   { TCastleApp }
 
   TCastleApp = class(TUIState)
-    constructor Create(AOwner: TComponent); override;
     procedure BeforeRender; override; // TCastleUserInterface
     procedure Render; override; // TCastleUserInterface
     procedure Resize; override; // TCastleUserInterface
@@ -54,7 +53,9 @@ type
   public
     VPMax: TVector2Integer;
 
+    FileToLoadList: TStringList;
     Viewport: TCastleViewport;
+    IsTransparent: Boolean;
     WorkingModel: TCastleModel;
     Stage: TCastleStage;
     CameraRotation: Single;
@@ -67,20 +68,23 @@ type
     ModelRotationCheck: Boolean;
     ModelRotationDone: Boolean;
     AppLogLevel: Boolean;
+
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
     procedure UpdateModelRotation;
     procedure BootStrap;
-    procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
-    procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
     procedure Start; override; // TUIState
     procedure Stop; override; // TUIState
     procedure LoadViewport;
+//    procedure LoadModel(Sender: TObject);
     procedure LoadModel(filename: String);
     procedure ShowModel(AModel: TCastleModel);
     procedure SetStretchMultiplier(const AStretch: Single);
     procedure SetViewMode(const AViewMode: Cardinal);
     procedure ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
     procedure ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
-    function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isTransparent: Boolean = False): TCastleImage;
+    function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
     procedure UpdateScale;
 
     property  StretchMultiplier: Single read fStretchMultiplier write SetStretchMultiplier default 0;
@@ -110,19 +114,33 @@ uses GUIInitialization;
 constructor TCastleApp.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  WriteLnLog('TCastleApp Created');
   LogTextureCache := True;
   AppLogLevel := False;
   WorkingModel := nil;
   ModelArray := nil;
-  LoadViewport;
   ViewMode := 2;
   OverSample := 8;
   SpriteWidth := 256;
   SpriteHeight := 256;
   StretchMultiplier := 1;
   BoundRadius := 1.0;
+  IsTransparent := True;
   VPMax := GLFeatures.MaxViewportDimensions;
   PrepDone := True;
+
+  FileToLoadList := TStringList.Create;
+  FileToLoadList.OwnsObjects := False;
+  FileToLoadList.Duplicates := dupAccept;
+
+  CastleOverlay := TCastleOverlay.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
+  LoadViewport;
+end;
+
+destructor TCastleApp.Destroy;
+begin
+  FileToLoadList.Free;
+  inherited;
 end;
 
 procedure TCastleApp.SetStretchMultiplier(const AStretch: Single);
@@ -220,35 +238,6 @@ begin
     WorkingModel.SelectAnimation(WorkingModel.Actions[0]);
 end;
 
-procedure TCastleApp.CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
-begin
-  objButton := TCastleButton.Create(Application);
-  objButton.Caption := ButtonText;
-  objButton.Anchor(hpMiddle, 10);
-  objButton.Anchor(vpBottom, 10 + (Line * 35));
-  objButton.onClick := ButtonCode;
-  InsertFront(objButton);
-end;
-
-procedure TCastleApp.CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
-begin
-  objLabel := TCastleLabel.Create(Application);
-  objLabel.Padding := 5;
-  objLabel.Color := White;
-  objLabel.Frame := True;
-  objLabel.FrameColor := Black;
-  objLabel.Anchor(hpLeft, 10);
-  if RightAlign then
-    objLabel.Anchor(hpRight, -10)
-  else
-    objLabel.Anchor(hpLeft, 10);
-  if BottomUp then
-    objLabel.Anchor(vpBottom, 10 + (Line * 35))
-  else
-    objLabel.Anchor(vpTop, -(10 + (Line * 35)));
-  InsertFront(objLabel);
-end;
-
 procedure TCastleApp.ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
 begin
   ViewFromRadius(ARadius, Vector3(sqrt(ARadius) * Cos(ATheta), AElevation, sqrt(ARadius) * Sin(ATheta)));
@@ -269,7 +258,10 @@ begin
   Viewport.FullSize := False;
   Viewport.AutoCamera := False;
   Viewport.Setup2D;
-  Viewport.BackgroundColor := Vector4(1, 1, 1, 1);
+  if isTransparent then
+    Viewport.Transparent := True
+  else
+    Viewport.BackgroundColor := Vector4(1,1,1,1);
   Viewport.NavigationType := ntNone;
   Viewport.AssignDefaultCamera;
   Viewport.Width := StateContainer.Width;
@@ -296,7 +288,21 @@ begin
   Viewport.Items.Add(AModel.Scene);
   Viewport.Items.MainScene := AModel.Scene;
 end;
+{
+procedure TCastleApp.LoadModel(Sender: TObject);
+begin
+  WriteLnLog('LoadModel ' + FileToLoad[0]  + ' at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
+  if FileToLoad.Count > 0 then
+    LoadModel(FileToLoad.Pop);
+  WriteLnLog('LoadMode Done at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
 
+  if FileToLoad.Count = 0 then
+    begin
+      WriteLnLog('Pop UI');
+//      TUIState.Pop(CastleOverlay);
+    end;
+end;
+}
 procedure TCastleApp.LoadModel(filename: String);
 begin
   try
@@ -330,6 +336,7 @@ begin
 //        Stage.LoadStage('castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png', -1);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg', -1);
       Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
+//      Stage.LoadStage('castle-data:/ground/grid16.png', 0, 1000, 1000);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
 //        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
         Stage.Add(WorkingModel.Scene);
@@ -524,7 +531,7 @@ begin
 {$endif}
 end;
 
-function TCastleApp.CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isTransparent: Boolean = False): TCastleImage;
+function TCastleApp.CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
 var
   SourceViewport: TCastleViewport;
   GrabScene: TCastleScene;
@@ -545,7 +552,7 @@ begin
           SourceViewport := TCastleViewport.Create(nil);
           SourceViewport.Width := TextureWidth;
           SourceViewport.Height := TextureHeight;
-          if isTransparent then
+          if isSpriteTransparent then
             SourceViewport.Transparent := True
           else
             SourceViewport.BackgroundColor := Vector4(1,1,1,1);

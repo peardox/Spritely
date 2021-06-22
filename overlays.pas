@@ -19,7 +19,7 @@ uses
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging;
+  CastleGLUtils, multimodel, staging, MiscFunctions;
 
 type
   { TCastleOverlay }

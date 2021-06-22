@@ -5,7 +5,9 @@ unit MiscFunctions;
 interface
 
 uses
-  Classes, SysUtils, Math, X3DNodes, CastleImages, CastleVectors, CastleUtils;
+  Classes, SysUtils, Math, X3DNodes, CastleImages, CastleVectors,
+  CastleUIState, CastleControls, CastleUIControls, CastleColors,
+  CastleUtils;
 
 function StripExtension(S: String): String;
 function WrapRadians(const AValue: Single): Single;
@@ -20,8 +22,44 @@ function CreateDirectionalLight: TDirectionalLightNode;
 function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 1.0; const LayerDepth: Single = 0): TTransformNode;
 function CreateColorPlane(const imWidth: Single; const imHeight: Single; const LayerDepth: Single; const AColor: TVector3): TTransformNode;
 
+type
+  { TUIStateHelper }
+  TUIStateHelper = class helper for TUIState
+  public
+    procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
+    procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
+  end;
 
 implementation
+
+procedure TUIStateHelper.CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
+begin
+  objButton := TCastleButton.Create(Self);
+  objButton.Caption := ButtonText;
+  objButton.Anchor(hpMiddle, 10);
+  objButton.Anchor(vpBottom, 10 + (Line * 35));
+  objButton.onClick := ButtonCode;
+  InsertFront(objButton);
+end;
+
+procedure TUIStateHelper.CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
+begin
+  objLabel := TCastleLabel.Create(Self);
+  objLabel.Padding := 5;
+  objLabel.Color := White;
+  objLabel.Frame := True;
+  objLabel.FrameColor := Black;
+  objLabel.Anchor(hpLeft, 10);
+  if RightAlign then
+    objLabel.Anchor(hpRight, -10)
+  else
+    objLabel.Anchor(hpLeft, 10);
+  if BottomUp then
+    objLabel.Anchor(vpBottom, 10 + (Line * 35))
+  else
+    objLabel.Anchor(vpTop, -(10 + (Line * 35)));
+  InsertFront(objLabel);
+end;
 
 function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 1.0; const LayerDepth: Single = 0): TTransformNode;
 begin
