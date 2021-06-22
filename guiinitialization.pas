@@ -125,6 +125,7 @@ type
     procedure LoadGuiModel(const AModel: String; const doExpand: Boolean);
     procedure FocusViewport;
     function  SyncModelFromNode(const Node: Pointer): TCastleModel;
+    function  IdentifyNode(const Node: TTreeNode): Cardinal;
   private
     Tracking: Boolean;
     ModeOrientation: Boolean;
@@ -280,6 +281,28 @@ begin
     end;
 end;
 
+function TCastleForm.IdentifyNode(const Node: TTreeNode): Cardinal;
+var
+  NodeLevel: Cardinal;
+  ParentNode: TTreeNode;
+begin
+  NodeLevel:= 0;
+  if not(Node.Parent = nil) then
+    begin
+      ParentNode := Node.Parent;
+      while not(ParentNode = nil) do
+        begin
+          Inc(NodeLevel);
+          if NodeLevel > 20 then
+            begin
+              raise Exception.Create('NodeIdentify too deep : ' + IntToStr(NodeLevel));
+            end;
+          ParentNode := ParentNode.Parent;
+        end;
+    end;
+  Result := NodeLevel;
+end;
+
 procedure TCastleForm.TreeView1Click(Sender: TObject);
 var
   Node: TTreeNode;
@@ -289,11 +312,14 @@ begin
   if (Node = nil) then // Nothing to do
     exit;
 
+  WriteLnLog('*** Node Level : ' + IntToStr(IdentifyNode(Node)));
+
   NodeParent := Node.Parent;
   if (NodeParent = nil) then // User clicked on a root node
     begin
       if (TObject(Node.Data).ClassName = 'TCastleModel') then
         begin
+          WriteLnLog('Branch Level 1');
           With CastleApp do
             begin
               WorkingModel := SyncModelFromNode(Node.Data);
@@ -301,21 +327,27 @@ begin
             end;
         end;
     end
-  else if (NodeParent.Parent = nil) then  // User clicked on an 2nd level
+  else if (NodeParent.Parent = nil) then // User clicked on 2nd level
+      begin
+        if ((TObject(Node.Data).ClassName = 'TAnimationInfo') and
+            (TObject(NodeParent.Data).ClassName = 'TCastleModel')) then
+          begin
+            WriteLnLog('Branch Level 2');
+            With CastleApp do
+              begin
+                WorkingModel := SyncModelFromNode(NodeParent.Data);
+                WorkingModel.BaseRotation := Vector3(0, 0, 0);
+                WorkingModel.SelectAnimation(Node.Text);
+              end;
+          end
+      end
+  else if (NodeParent.Parent.Parent = nil) then // User clicked on 3rd level
     begin
-      if ((TObject(Node.Data).ClassName = 'TAnimationInfo') and (TObject(NodeParent.Data).ClassName = 'TCastleModel')) then
-        begin
-          With CastleApp do
-            begin
-              WorkingModel := SyncModelFromNode(NodeParent.Data);
-              WorkingModel.BaseRotation := Vector3(0, 0, 0);
-              WorkingModel.SelectAnimation(Node.Text);
-            end;
-        end
-      else if ((TObject(Node.Data).ClassName = 'TAnimationInfo') and
+      if ((TObject(Node.Data).ClassName = 'TAnimationInfo') and
                (TObject(NodeParent.Data).ClassName = 'TAnimationInfo') and
                (TObject(NodeParent.Parent.Data).ClassName = 'TCastleModel')) then
         begin
+          WriteLnLog('Branch Level 3');
           With CastleApp do
             begin
               WorkingModel := SyncModelFromNode(NodeParent.Parent.Data);

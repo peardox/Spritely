@@ -1,7 +1,7 @@
 object CastleForm: TCastleForm
-  Left = 632
+  Left = 636
   Height = 738
-  Top = 239
+  Top = 270
   Width = 1275
   Caption = 'CastleApp'
   ClientHeight = 718

@@ -45,6 +45,7 @@ type
     fOverSample: Cardinal;
     fSpriteWidth: Cardinal;
     fSpriteHeight: Cardinal;
+    fControlWidth: Cardinal;
 
     fStretchMultiplier: Single;
     LabelFPS: TCastleLabel;
@@ -87,6 +88,7 @@ type
     function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
     procedure UpdateScale;
 
+    property  ControlWidth: Cardinal read fControlWidth write fControlWidth;
     property  StretchMultiplier: Single read fStretchMultiplier write SetStretchMultiplier default 0;
     property  ViewMode: Cardinal read fViewMode write SetViewMode default 0;
     property  OverSample: Cardinal read fOverSample write fOverSample;
@@ -121,6 +123,7 @@ begin
   ModelArray := nil;
   ViewMode := 2;
   OverSample := 8;
+  ControlWidth := 300;
   SpriteWidth := 256;
   SpriteHeight := 256;
   StretchMultiplier := 1;
@@ -181,16 +184,18 @@ procedure TCastleApp.Resize;
 var
   DesiredAspect: Single;
   ActualAspect: Single;
+  ViewWidth: Single;
 begin
   WriteLnLog('Start State Resize');
   inherited;
 
+  ViewWidth := StateContainer.Width - ControlWidth;
   DesiredAspect := SpriteWidth / SpriteHeight;
-  ActualAspect := StateContainer.Width / StateContainer.Height;
+  ActualAspect := ViewWidth / StateContainer.Height;
 
   if DesiredAspect <= ActualAspect then
     begin
-      if StateContainer.Width <= (StateContainer.Height / DesiredAspect) then
+      if ViewWidth <= (StateContainer.Height / DesiredAspect) then
         begin
           LabelMode.Caption := '1 = Aspect Switch';
           Viewport.Height := StateContainer.Height;
@@ -205,21 +210,21 @@ begin
     end
   else
     begin
-      if StateContainer.Width <= (StateContainer.Height / DesiredAspect) then
+      if ViewWidth <= (StateContainer.Height / DesiredAspect) then
         begin
           LabelMode.Caption := '3 = Aspect Switch';
-          Viewport.Width := StateContainer.Width;
-          Viewport.Height := StateContainer.Width / DesiredAspect;
+          Viewport.Width := ViewWidth;
+          Viewport.Height := ViewWidth / DesiredAspect;
         end
       else
         begin
           LabelMode.Caption := '4 = Aspect Switch';
-          Viewport.Width := StateContainer.Width;
-          Viewport.Height := StateContainer.Width / DesiredAspect;
+          Viewport.Width := ViewWidth;
+          Viewport.Height := ViewWidth / DesiredAspect;
         end;
     end;
 
-  Viewport.Left := Trunc((StateContainer.Width - Viewport.Width) / 2);
+  Viewport.Left := Trunc((ViewWidth - Viewport.Width) / 2);
   Viewport.Bottom := Trunc((StateContainer.Height - Viewport.Height) / 2);
 
   LabelMode.Caption := LabelMode.Caption + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
