@@ -1,7 +1,7 @@
 unit RGBAlphaImageHelp;
 
 {$mode objfpc}{$H+}
-// {$define usedword} // Comment out to use pixel-based approach
+{$define usedword} // Comment out to use pixel-based approach
 
 interface
 

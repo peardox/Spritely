@@ -209,7 +209,7 @@ begin
   ApplicationProperties.ApplicationName := 'Spritely';
   ApplicationProperties.Caption := 'Spritely';
   ApplicationProperties.Version := '0.1';
-  ApplicationProperties.LimitFPS := 30;
+//  ApplicationProperties.LimitFPS := 30;
   ApplicationProperties.OnLog.Add(@LogHandler.LogCallback);
 
   InitializeLog;

@@ -2,7 +2,7 @@ unit MainGameUnit;
 
 {$mode objfpc}{$H+}
 {$define multimodel}
-// {$define usebackcontrol}
+{$define usebackcontrol}
 
 interface
 
@@ -189,8 +189,6 @@ var
   DesiredAspect: Single;
   ActualAspect: Single;
   ViewWidth: Single;
-  ProcTimer: Int64;
-  rgb: TCastleImage;
 begin
   WriteLnLog('Start State Resize');
   inherited;
@@ -236,22 +234,11 @@ begin
   if (TUIState.CurrentTop = CastleApp) then
     begin
       {$ifdef usebackcontrol}
-      ProcTimer := CastleGetTickCount64;
-      rgb :=  MakeTransparentLayerGrid(SpriteWidth, SpriteHeight, Trunc(Viewport.Width), Trunc(Viewport.Height), 8);
-      ProcTimer := CastleGetTickCount64 - ProcTimer;
-      WriteLnLog('Backimage create took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
-      {$endif}
-
-      {$ifdef usebackcontrol}
-      ProcTimer := CastleGetTickCount64;
-      VPBackImage.Image :=  rgb;
+      VPBackImage.Image :=  MakeTransparentLayerGrid(SpriteWidth, SpriteHeight, Trunc(Viewport.Width), Trunc(Viewport.Height), 8);
       VPBackImage.Left := Viewport.Left;
       VPBackImage.Bottom := Viewport.Bottom;
       VPBackImage.Width := Viewport.Width;
       VPBackImage.Height := Viewport.Height;
-      ProcTimer := CastleGetTickCount64 - ProcTimer;
-
-      WriteLnLog('Backimage write took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
       {$endif}
   end;
 
