@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Math, X3DNodes, CastleImages, CastleVectors,
   CastleUIState, CastleControls, CastleUIControls, CastleColors,
-  CastleNotifications, CastleUtils;
+  CastleLog, CastleNotifications, CastleUtils, RGBAlphaImageHelp;
 
 type
   { TUIStateHelper }
@@ -29,8 +29,10 @@ function CreateDirectionalLight: TDirectionalLightNode;
 
 function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 1.0; const LayerDepth: Single = 0): TTransformNode;
 function CreateColorPlane(const imWidth: Single; const imHeight: Single; const LayerDepth: Single; const AColor: TVector3): TTransformNode;
+function MakeTransparentLayerGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8): TCastleImage;
 
 implementation
+  uses MainGameUnit;
 
 procedure TUIStateHelper.CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
 begin
@@ -126,13 +128,13 @@ begin
   Light.projectionFar := 40.00;
 
   Light.Global := true;
-
+  {
   Light.DefaultShadowMap := TGeneratedShadowMapNode.Create;
   Light.DefaultShadowMap.Update := upAlways;
   Light.DefaultShadowMap.Size := 4096;
   Light.ShadowVolumesMain := False;
   Light.ShadowVolumes := False;
-{
+
   Light.ProjectionRectangle := FloatRectangle(-8.0, -16.0, 32.0, 32.0).ToX3DVector;
   Light.ProjectionLocation := Vector3(-11.0, 12.0, 1.0);
 }
@@ -206,16 +208,58 @@ begin
     Result := S.Remove(I);
 end;
 
-function MakeTransparentLayerGrid(const ACellSize: Cardinal; const AWidth: Cardinal; const AHeight: Cardinal): TRGBImage;
+// TCastleImageControl DG - 838383, LG B2B2B2
+
+function MakeTransparentLayerGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8): TCastleImage;
 var
-  img: TRGBImage;
+  img: TRGBAlphaImage;
+  XPos: Cardinal;
+  YPos: Cardinal;
+  XGrid: Single;
+  YGrid: Single;
+  Skip: Integer;
+  LightGrey: TVector4Byte;
 begin
-  img := TRGBImage.Create(AWidth, AHeight);
-  img.Clear(Vector4Byte(255, 255, 255, 255));
-  img.FillRectangle(0, 0, ACellSize - 1, ACellSize - 1, Vector4(0.75, 0.75, 0.75, 1.00));
+  if((AViewWidth < GridSize) or (AViewHeight < GridSize)) then
+    Exit;
+
+  img := TRGBAlphaImage.Create(AViewWidth, AViewHeight);
+
+  LightGrey := Vector4Byte($B2, $B2, $B2, $FF); // Vector4Byte(255, 0, 0, 255);
+  img.Clear(HexToColor('838383'));
+
+  XGrid := AViewWidth / ASpriteWidth;
+  YGrid := AViewHeight / ASpriteHeight;
+
+  WriteLnLog('Image : ' + IntToStr(img.Width) + ' x ' + IntToStr(img.Height) +
+    ', GridMult : ' + FloatToStr(XGrid) + ' x ' + FloatToStr(XGrid) +
+    ', GridSize : ' + IntToStr(GridSize));
+
+  if (((GridSize * XGrid) < 1) or ((GridSize * YGrid) < 1)) then
+    begin
+      img.Clear(HexToColor('000000'));
+    end
+  else
+    begin
+      for YPos := 0 to (ASpriteHeight div GridSize) - 1 do
+        begin
+          Skip := YPos Mod 2;
+          for XPos := 0 to (ASpriteWidth div GridSize) - 1 do
+            begin
+              if (((Skip + XPos) Mod 2) = 0) then
+                begin
+                  img.FastFillRect(Trunc(XPos * GridSize * XGrid), Trunc(YPos * GridSize * YGrid),
+                    Trunc(((XPos + 1) * GridSize * XGrid)) - 1, Trunc(((YPos + 1) * GridSize * YGrid)) - 1,
+                    LightGrey);
+                end;
+            end;
+        end;
+    end;
+
+  SaveImage(img, 'testgrid.png');
+  WriteLnLog('Done');
   Result := img;
 end;
-
 
 end.
 

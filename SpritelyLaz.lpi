@@ -59,7 +59,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="SpritelyLaz.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -116,6 +116,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Overlays"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="rgbalphaimagehelp.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RGBAlphaImageHelp"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

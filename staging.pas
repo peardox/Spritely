@@ -1,7 +1,7 @@
 unit Staging;
 
 {$mode objfpc}{$H+}
-{$define pointlight}
+ {$define pointlight}
 // {$define spotlight}
 interface
 // "uri" : "Tileable Brick Ground Textures - Set 1/Ground_01_Nrm.png"
@@ -23,7 +23,7 @@ type
     {$elseif defined(pointlight)}
     fLightNode: TPointLightNode;
     {$else}
-*    fLightNode: TDirectionalLightNode;
+    fLightNode: TDirectionalLightNode;
     {$endif}
     fShadowNode: TSpotLightNode;
     fGroundModelRoot: TX3DRootNode;
@@ -88,13 +88,17 @@ begin
     {$if defined(spotlight)}
     fLightNode := CreateSpotLight(Vector3(0, 30, 30));
     fLightNode.Shadows := True;
+{
     fLightNode.DefaultShadowMap := TGeneratedShadowMapNode.Create;
     fLightNode.DefaultShadowMap.Update := upAlways;
     fLightNode.DefaultShadowMap.Size := 4096;
+}
     {$elseif defined(pointlight)}
     fLightNode := CreatePointLight;
+//    fLightNode.Shadows := True;
     {$else}
     fLightNode := CreateDirectionalLight;
+    fLightNode.Shadows := True;
     {$endif}
     StageRootNode.AddChildren(fLightNode);
 {

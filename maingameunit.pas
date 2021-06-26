@@ -2,6 +2,7 @@ unit MainGameUnit;
 
 {$mode objfpc}{$H+}
 {$define multimodel}
+// {$define usebackcontrol}
 
 interface
 
@@ -55,6 +56,9 @@ type
     VPMax: TVector2Integer;
 
     FileToLoadList: TStringList;
+    {$ifdef usebackcontrol}
+    VPBackImage: TCastleImageControl;
+    {$endif}
     Viewport: TCastleViewport;
     IsTransparent: Boolean;
     WorkingModel: TCastleModel;
@@ -121,11 +125,11 @@ begin
   AppLogLevel := False;
   WorkingModel := nil;
   ModelArray := nil;
-  ViewMode := 2;
+  ViewMode := 0;
   OverSample := 8;
   ControlWidth := 300;
-  SpriteWidth := 256;
-  SpriteHeight := 256;
+  SpriteWidth := 72;
+  SpriteHeight := 72;
   StretchMultiplier := 1;
   BoundRadius := 1.0;
   IsTransparent := True;
@@ -185,6 +189,8 @@ var
   DesiredAspect: Single;
   ActualAspect: Single;
   ViewWidth: Single;
+  ProcTimer: Int64;
+  rgb: TCastleImage;
 begin
   WriteLnLog('Start State Resize');
   inherited;
@@ -227,6 +233,28 @@ begin
   Viewport.Left := Trunc((ViewWidth - Viewport.Width) / 2);
   Viewport.Bottom := Trunc((StateContainer.Height - Viewport.Height) / 2);
 
+  if (TUIState.CurrentTop = CastleApp) then
+    begin
+      {$ifdef usebackcontrol}
+      ProcTimer := CastleGetTickCount64;
+      rgb :=  MakeTransparentLayerGrid(SpriteWidth, SpriteHeight, Trunc(Viewport.Width), Trunc(Viewport.Height), 8);
+      ProcTimer := CastleGetTickCount64 - ProcTimer;
+      WriteLnLog('Backimage create took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
+      {$endif}
+
+      {$ifdef usebackcontrol}
+      ProcTimer := CastleGetTickCount64;
+      VPBackImage.Image :=  rgb;
+      VPBackImage.Left := Viewport.Left;
+      VPBackImage.Bottom := Viewport.Bottom;
+      VPBackImage.Width := Viewport.Width;
+      VPBackImage.Height := Viewport.Height;
+      ProcTimer := CastleGetTickCount64 - ProcTimer;
+
+      WriteLnLog('Backimage write took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
+      {$endif}
+  end;
+
   LabelMode.Caption := LabelMode.Caption + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
 
   UpdateScale;
@@ -258,8 +286,15 @@ end;
 procedure TCastleApp.LoadViewport;
 begin
   WriteLnLog('Start LoadViewport');
+  {$ifdef usebackcontrol}
+  VPBackImage := TCastleImageControl.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
+  VPBackImage.OwnsImage := True;
+  VPBackImage.Stretch := False;
 
-  Viewport := TCastleViewport.Create(Application);
+  InsertFront(VPBackImage);
+  {$endif}
+
+  Viewport := TCastleViewport.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
   Viewport.FullSize := False;
   Viewport.AutoCamera := False;
   Viewport.Setup2D;
@@ -340,10 +375,10 @@ begin
 //        Stage.LoadStage(-1);
 //        Stage.LoadStage('castle-data:/ground/Tileable Brick Ground Textures - Set 2/Brick_03.png', -1);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg', -1);
-      Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
+//      Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/grid16.png', 0, 1000, 1000);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
-//        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
+        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
         Stage.Add(WorkingModel.Scene);
         Viewport.Items.Add(Stage);
         Viewport.Items.MainScene := Stage;
@@ -550,6 +585,7 @@ var
   GrabScene: TCastleScene;
   ViewportRect: TRectangle;
   Image: TDrawableImage;
+  BackImage: TRGBAlphaImage;
 begin
   SourceViewport := nil;
 
@@ -557,7 +593,11 @@ begin
     begin
       try
         try
-          Image := TDrawableImage.Create(TRGBAlphaImage.Create(TextureWidth, TextureHeight), true, true);
+          BackImage := TRGBAlphaImage.Create(TextureWidth, TextureHeight);
+          BackImage.ClearAlpha(0);
+
+          Image := TDrawableImage.Create(BackImage, true, true);
+
           Image.RenderToImageBegin;
 
           GrabScene := SourceScene.Clone(nil);
@@ -566,9 +606,15 @@ begin
           SourceViewport.Width := TextureWidth;
           SourceViewport.Height := TextureHeight;
           if isSpriteTransparent then
-            SourceViewport.Transparent := True
+            begin
+              SourceViewport.Transparent := True;
+              SourceViewport.BackgroundColor := Vector4(1,1,1,0);
+            end
           else
-            SourceViewport.BackgroundColor := Vector4(1,1,1,1);
+            begin
+              SourceViewport.Transparent := False;
+              SourceViewport.BackgroundColor := Vector4(1,1,1,1);
+            end;
 
           SourceViewport.Setup2D;
           SourceViewport.Camera.ProjectionType := ptOrthographic;
@@ -594,7 +640,7 @@ begin
           WriteLnLog(FloatToStr(iScale) + ' vs ' + FloatToStr(WorkingModel.LockedScale));
           SourceViewport.Items := ViewPort.Items;
           ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);
-            {$ifndef cgeapp}CastleForm.{$endif}Window.Container.RenderControl(SourceViewport,ViewportRect);
+          {$ifndef cgeapp}CastleForm.{$endif}Window.Container.RenderControl(SourceViewport,ViewportRect);
 
           Image.RenderToImageEnd;
 
@@ -620,6 +666,7 @@ begin
         FreeAndNil(GrabScene);
         FreeAndNil(SourceViewport);
         FreeAndNil(Image);
+//        FreeAndNil(BackImage);
       end;
     end;
 end;

@@ -6,10 +6,9 @@ unit GUIInitialization;
   Badly Formatted Anitxt
 }
 {$mode objfpc}{$H+}
-// {$define disableMap}
+ {$define disableMap}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
-// DG - 838383, LG B2B2B2
 interface
 
 uses
@@ -23,7 +22,7 @@ uses
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
   CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels, BGRAKnob,
   BCLabel, ECSwitch, ECSlider, ECSpinCtrls, CastleGLShaders, X3DLoad,
-  Overlays;
+  Overlays, RGBAlphaImageHelp;
 
 type
   { TCastleForm }
@@ -36,9 +35,11 @@ type
     Button4: TButton;
     Button5: TButton;
     CastleOpenDialog1: TCastleOpenDialog;
+    UseTransparency: TCheckBox;
     ComboBox1: TComboBox;
     ComboBox2: TComboBox;
     ComboBox3: TComboBox;
+    ECSlider1: TECSlider;
     GroundHeightSlider: TECSlider;
     GroundScaleSlider: TECSlider;
     ECSwitch1: TECSwitch;
@@ -90,6 +91,7 @@ type
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure ECSlider1Change(Sender: TObject);
     procedure GroundHeightSliderChange(Sender: TObject);
     procedure GroundScaleSliderChange(Sender: TObject);
     procedure ExitMenuClick(Sender: TObject);
@@ -100,6 +102,8 @@ type
     procedure CreateSpriteMenuClick(Sender: TObject);
     procedure ListView1Click(Sender: TObject);
     procedure SelectDirectoryMenuItemClick(Sender: TObject);
+    procedure SpinEdit1Change(Sender: TObject);
+    procedure SpinEdit2Change(Sender: TObject);
     procedure TabSheet3Show(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -136,9 +140,11 @@ type
 
 var
   CastleForm: TCastleForm;
+  ScanModelDir: String;
   FSPrefix: String;
   ModelFile: String;
   MapFile: String;
+  CallCounter: Integer;
 
 const
   InfoFloatFormat: String = '###0.0000';
@@ -158,12 +164,20 @@ begin
   FSPrefix := HomePath;
   {$endif}
 
+  ScanModelDir := FSPrefix + '3DModels' + PathDelim + 'Kenney' + PathDelim + 'Pirate Kit';
 {$ifdef disableMap}
   MapFile := '';
-  ModelFile := 'castle-data:/oblique.glb';
+//  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
+  ModelFile := 'castle-data:/Quaternius/Cute Animated Monsters - Aug 2020/Demon.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Cleric.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Monk.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Ranger.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Rogue.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Warrior.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+//  ModelFile := 'castle-data:/Quaternius/Mechs/Stan.glb';
 //  ModelFile := 'castle-data:/isoroom/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
@@ -172,12 +186,18 @@ begin
 {$else}
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'Elong_anim.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'gltf' + PathDelim + 'ElongataGreen.glb';
-  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
-  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
-//  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
-//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + '_bike_animations.txt';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'elfrangers-aniamtions-list.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elf-Males' + PathDelim + 'FBX 2013' + PathDelim + 'Elf-03.glb';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Goblins-Undead' + PathDelim + 'goblin_anim.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Goblins-Undead' + PathDelim + 'gltf' + PathDelim + 'Goblin1b-Axe.glb';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'dog' + PathDelim + 'German_Shepherd_new' + PathDelim + 'German Shepherd Animation Ranges.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'dog' + PathDelim + 'german_shepherd' + PathDelim + 'scene.gltf';
+  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + '_bike_animations.txt';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'chibii-racers-dirt-bikes' + PathDelim + 'gitf' + PathDelim + 'dirt_bike01.gltf';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Spiders' + PathDelim + 'spider_anim.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Spiders' + PathDelim + 'gltf' + PathDelim + 'spider1.glb';
+//  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Dragon-boss' + PathDelim + 'dragonboss_animation_list.txt';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Dragon-boss' + PathDelim + 'DragonBoss.glb';
 //  MapFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'Thief-animations-list.txt';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + '3drt' + PathDelim + 'gltf' + PathDelim + 'Thief' + PathDelim + 'thief_torch.glb';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'TurboSquid' + PathDelim + 'Wyvern' + PathDelim + 'GreenDragon.glb';
@@ -245,12 +265,56 @@ begin
 end;
 
 procedure TCastleForm.SelectDirectoryMenuItemClick(Sender: TObject);
+var
+  ProcTimer: Int64;
+  cnt: Cardinal;
+  ProcMsg: String;
+  ScanDir: String;
 begin
+  WriteLnLog('ApplicationConfig = ' + ApplicationConfig(''));
+  WriteLnLog('ApplicationData = ' + ApplicationData(''));
+
+  cnt := 0;
+  ProcTimer := CastleGetTickCount64;
+  CallCounter := 0;
+
+  SelectDirectoryDialog1.InitialDir := ScanModelDir;
   if SelectDirectoryDialog1.Execute then
     begin
+      ScanDir := SelectDirectoryDialog1.FileName;
+      WriteLnLog('Scanning Path : ' + URIToFilenameSafe(ScanDir));
+      try
+//        cnt := FindFiles(ScanDir, '*', True, @FindFilesFunction, @FoundUUIDList, []);
+      except
+        on E : Exception do
+          begin
+            WriteLnLog('Something went wrong in SelectSpriteDirectoryClick' + LineEnding + E.ClassName + LineEnding + E.Message);
+          end;
+      end;
+    end;
+
+  ProcTimer := CastleGetTickCount64 - ProcTimer;
+  ProcMsg := 'Scan of ' + IntToStr(cnt) + ' took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds';
+  WriteLnLog(ProcMsg);
+
+//  if SelectDirectoryDialog1.Execute then
+//    begin
+      // FileToLoadList.Add();
       // AddGuiModel(URIToFilenameSafe(CastleOpenDialog1.Filename));
       // Caption := 'Spritely : ' + CastleOpenDialog1.Filename;
-    end;
+//    end;
+end;
+
+procedure TCastleForm.SpinEdit1Change(Sender: TObject);
+begin
+  CastleApp.SpriteWidth := SpinEdit1.Value;
+  CastleApp.Resize;
+end;
+
+procedure TCastleForm.SpinEdit2Change(Sender: TObject);
+begin
+  CastleApp.SpriteHeight := SpinEdit2.Value;
+  CastleApp.Resize;
 end;
 
 procedure TCastleForm.TabSheet3Show(Sender: TObject);
@@ -554,14 +618,14 @@ begin
     begin
       if not (WorkingModel.Scene = nil) then
         begin
-          Sprite := CastleApp.CreateSpriteImage(CastleApp.WorkingModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample);
+          Sprite := CastleApp.CreateSpriteImage(CastleApp.WorkingModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample, UseTransparency.Checked);
           if not(Sprite = nil) then
             begin
               if (OverSample > 1) then
                 begin
                   Sprite.Resize(SpriteWidth, SpriteHeight, riLanczos); // Mitchel);
                 end;
-              SName := FileNameAutoInc('grab_%4.4d.jpg');
+              SName := FileNameAutoInc('grab_%4.4d.png');
               SaveImage(Sprite, SName);
               FreeAndNil(Sprite);
             end;
@@ -578,6 +642,7 @@ var
   AElevation: Single;
   ADir: TVector3;
 begin
+//  TimePlayingSpeed := BGRAKnob1.Value;
   LightLabel.Caption := FormatFloat('###0.0000', BGRAKnob1.Value);
   ARadius := 1;
   ATheta := DegToRad(BGRAKnob1.Value);
@@ -615,8 +680,30 @@ begin
 end;
 
 procedure TCastleForm.Button4Click(Sender: TObject);
+var
+  ProcTimer: Int64;
+  rgb: TRGBAlphaImage;
 begin
+  Button4.Enabled := False;
 //  TUIState.Push(CastleOverlay);
+  ProcTimer := CastleGetTickCount64;
+  rgb := TRGBAlphaImage.Create(16384, 16384);
+  rgb.FastFillRect(0, 0, rgb.Width -1, rgb.Height -1,Vector4Byte(255, 0, 0, 255));
+{
+  with CastleApp do
+    rgb :=  MakeTransparentLayerGrid(SpriteWidth, SpriteHeight,
+        Trunc(Viewport.Width), Trunc(Viewport.Height), 36);
+}
+  ProcTimer := CastleGetTickCount64 - ProcTimer;
+  WriteLnLog('Grid create took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
+  SaveImage(rgb, 'testgrid.png');
+  rgb.free;
+  Button4.Enabled := True;
+end;
+
+procedure TCastleForm.ECSlider1Change(Sender: TObject);
+begin
+  CastleApp.WorkingModel.Scene.TimePlayingSpeed := ECSlider1.Position;
 end;
 
 procedure TCastleForm.GroundHeightSliderChange(Sender: TObject);
@@ -669,6 +756,9 @@ begin
   CastleApp := TCastleApp.Create(Window);
   TUIState.Current := CastleApp;
   Window.Container.UIScaling := usNone;
+  SpinEdit1.Value := CastleApp.SpriteWidth;
+  SpinEdit2.Value := CastleApp.SpriteHeight;
+  CastleApp.Resize;
 end;
 
 procedure TCastleForm.WindowClose(Sender: TObject);

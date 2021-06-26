@@ -1,10 +1,10 @@
 object CastleForm: TCastleForm
   Left = 636
-  Height = 738
-  Top = 270
+  Height = 808
+  Top = 200
   Width = 1275
   Caption = 'CastleApp'
-  ClientHeight = 718
+  ClientHeight = 788
   ClientWidth = 1275
   Menu = MainMenu1
   OnCreate = FormCreate
@@ -13,23 +13,23 @@ object CastleForm: TCastleForm
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel
     Left = 200
-    Height = 718
+    Height = 788
     Top = 0
     Width = 875
     Align = alClient
     Caption = 'Panel1'
-    ClientHeight = 718
+    ClientHeight = 788
     ClientWidth = 875
     TabOrder = 0
     object Splitter1: TSplitter
       Left = 1
-      Height = 716
+      Height = 786
       Top = 1
       Width = 5
     end
     object PageControl1: TPageControl
       Left = 6
-      Height = 716
+      Height = 786
       Top = 1
       Width = 868
       ActivePage = TabSheet1
@@ -38,11 +38,11 @@ object CastleForm: TCastleForm
       TabOrder = 1
       object TabSheet1: TTabSheet
         Caption = 'Sprite Builder'
-        ClientHeight = 688
+        ClientHeight = 758
         ClientWidth = 860
         object Window: TCastleControlBase
           Left = 0
-          Height = 688
+          Height = 758
           Top = 0
           Width = 860
           Align = alClient
@@ -123,28 +123,28 @@ object CastleForm: TCastleForm
   end
   object PanelLeft: TPanel
     Left = 0
-    Height = 718
+    Height = 788
     Top = 0
     Width = 200
     Align = alLeft
     BevelOuter = bvNone
     Caption = 'PanelLeft'
-    ClientHeight = 718
+    ClientHeight = 788
     ClientWidth = 200
     TabOrder = 1
     object Panel3: TPanel
       Left = 0
-      Height = 643
+      Height = 713
       Top = 0
       Width = 200
       Align = alClient
       BevelOuter = bvNone
-      ClientHeight = 643
+      ClientHeight = 713
       ClientWidth = 200
       TabOrder = 0
       object TreeView1: TTreeView
         Left = 0
-        Height = 453
+        Height = 523
         Top = 0
         Width = 200
         Align = alClient
@@ -160,7 +160,7 @@ object CastleForm: TCastleForm
         Cursor = crVSplit
         Left = 0
         Height = 5
-        Top = 453
+        Top = 523
         Width = 200
         Align = alBottom
         ResizeAnchor = akBottom
@@ -168,7 +168,7 @@ object CastleForm: TCastleForm
       object ListView1: TListView
         Left = 0
         Height = 185
-        Top = 458
+        Top = 528
         Width = 200
         Align = alBottom
         AutoSort = False
@@ -190,7 +190,7 @@ object CastleForm: TCastleForm
     object PanelLeftBottom: TPanel
       Left = 0
       Height = 75
-      Top = 643
+      Top = 713
       Width = 200
       Align = alBottom
       ClientHeight = 75
@@ -232,11 +232,11 @@ object CastleForm: TCastleForm
   end
   object PanelRight: TPanel
     Left = 1075
-    Height = 718
+    Height = 788
     Top = 0
     Width = 200
     Align = alRight
-    ClientHeight = 718
+    ClientHeight = 788
     ClientWidth = 200
     TabOrder = 2
     object MyRollOut1: TMyRollOut
@@ -271,6 +271,7 @@ object CastleForm: TCastleForm
         Increment = 16
         MaxValue = 1024
         MinValue = 16
+        OnChange = SpinEdit1Change
         TabOrder = 0
         Value = 256
       end
@@ -283,6 +284,7 @@ object CastleForm: TCastleForm
         Increment = 16
         MaxValue = 1024
         MinValue = 16
+        OnChange = SpinEdit2Change
         TabOrder = 1
         Value = 256
       end
@@ -379,9 +381,9 @@ object CastleForm: TCastleForm
         PositionMargin = 4
         PositionType = kptLineSquareCap
         UsePhongLighting = True
-        MinValue = 30
+        MinValue = 1
         MaxValue = 360
-        Value = 270
+        Value = 2
         OnValueChanged = BGRAKnob1ValueChanged
         StartFromBottom = True
       end
@@ -393,20 +395,32 @@ object CastleForm: TCastleForm
         Caption = 'LightLabel'
         ParentColor = False
       end
+      object UseTransparency: TCheckBox
+        Left = 7
+        Height = 19
+        Top = 158
+        Width = 126
+        Alignment = taLeftJustify
+        AutoSize = False
+        Caption = 'Transparent'
+        Checked = True
+        State = cbChecked
+        TabOrder = 4
+      end
     end
     object MyRollOut2: TMyRollOut
       Left = 1
-      Height = 578
+      Height = 350
       Top = 257
       Width = 198
       Align = alTop
       Caption = 'Ground'
-      ClientHeight = 578
+      ClientHeight = 350
       ClientWidth = 198
       Enabled = True
       TabOrder = 1
       CollapseKind = akTop
-      ExpandedSize = 578
+      ExpandedSize = 350
       ButtonPosition = akTop
       ButtonSize = 27
       Button.Left = 0
@@ -559,7 +573,7 @@ object CastleForm: TCastleForm
       end
       object ListView2: TListView
         Left = 1
-        Height = 349
+        Height = 121
         Top = 228
         Width = 196
         Align = alClient
@@ -569,28 +583,53 @@ object CastleForm: TCastleForm
     end
     object MyRollOut3: TMyRollOut
       Left = 1
-      Height = 56
-      Top = 717
+      Height = 161
+      Top = 607
       Width = 198
       Align = alTop
-      Caption = 'MyRollOut3'
-      ClientHeight = 56
+      ClientHeight = 161
       ClientWidth = 198
       Enabled = True
       TabOrder = 2
       CollapseKind = akTop
-      ExpandedSize = 56
+      ExpandedSize = 161
       ButtonPosition = akTop
       ButtonSize = 27
       Button.Left = 0
       Button.Height = 27
       Button.Top = 0
       Button.Width = 198
-      Button.Caption = 'Caption'
+      Button.Caption = 'PLayback Control'
       Button.Color = clSkyBlue
       Button.ColorExpanded = 16287767
       AnimationSpeed = 20
       Animated = False
+      object ECSlider1: TECSlider
+        Left = 1
+        Height = 86
+        Top = 28
+        Width = 196
+        Align = alTop
+        Caption = 'ECSlider1'
+        DiscreteChange = 0.1
+        Increment = 0.01
+        Orientation = eooHorizontal
+        Knob.Height = 20
+        Knob.Width = 32
+        PageSize = 10
+        Position = 1
+        RelativeScaleLength = -1
+        Scale.DateTimeFormat = 'hh:nn:ss'
+        Scale.LogarithmBase = 10
+        Scale.Max = 2
+        Scale.TickLongValue = 10
+        Scale.TickMiddleValue = 5
+        Scale.TickShortValue = 1
+        ScaleFontOptions.FontSize = 7
+        ScaleFontOptions.FontStyles = []
+        TabOrder = 0
+        OnChange = ECSlider1Change
+      end
     end
   end
   object MainMenu1: TMainMenu
@@ -626,7 +665,7 @@ object CastleForm: TCastleForm
     end
   end
   object CastleOpenDialog1: TCastleOpenDialog
-    Options = [ofAllowMultiSelect, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Options = [ofAllowMultiSelect, ofFileMustExist, ofNoDereferenceLinks, ofNoResolveLinks, ofEnableSizing, ofViewDetail]
     Left = 373
     Top = 112
   end
