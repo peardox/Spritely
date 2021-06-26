@@ -35,3 +35,18 @@ PVGames for their wonderful 2.5D art, the inspiration for Spritely - https://pvg
 Andrzej Kilijanski for his CGE Sprite code - https://digitalkarabela.com/
 
 *** Not all features are in this pre-release
+
+Requirements
+
+Lazarus + FPC
+
+https://github.com/castle-engine/castle-engine
+
+https://github.com/roth-a/expandpanels
+
+https://wiki.freepascal.org/Eye-Candy_Controls
+
+https://github.com/bgrabitmap/bgrabitmap
+
+https://github.com/bgrabitmap/bgracontrols
+
