@@ -1,6 +1,7 @@
 unit RGBAlphaImageHelp;
 
 {$mode objfpc}{$H+}
+// {$define usedword} // Comment out to use pixel-based approach
 
 interface
 
@@ -72,14 +73,15 @@ begin
           for y := 0 to AHeight do
             begin
               PDest := PixelPtr(XPos, YPos + y);
-//              FillDWord(PDest^, AWidth, DWord(NewRGB));
-
+              {$ifdef usedword}
+              FillDWord(PDest^, AWidth + 1, DWord(NewRGB));
+              {$else}
               for x := 0 to AWidth do
                 begin
                   PDest^ := NewRGB;
                   Inc(PDest);
                 end;
-
+              {$endif}
             end;
         end;
     end;
