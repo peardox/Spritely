@@ -105,7 +105,6 @@ type
     procedure SpinEdit1Change(Sender: TObject);
     procedure SpinEdit2Change(Sender: TObject);
     procedure TabControl1Change(Sender: TObject);
-    procedure TabSheet3Show(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
       var Handled: Boolean);
@@ -254,7 +253,6 @@ begin
       DebugBoxMenu.Checked := Exists;
       Listview1.Visible := Exists;
       Splitter2.Visible := Exists;
-      // TabSheet3.TabVisible := Exists;
     end;
 end;
 
@@ -328,24 +326,22 @@ begin
 
   if TabControl1.TabIndex = 0 then
     begin
+      TUIState.Current := CastleApp;
       RenderPanel.Visible := True;
       ActiveControl := Window;
     end
   else if TabControl1.TabIndex = 1 then
     begin
+      TUIState.Current := SheetViewer;
       RenderPanel.Visible := True;
       ActiveControl := Window;
     end
   else if TabControl1.TabIndex = 2 then
     begin
       LogPanel.Visible := True;
+      AppLog.VertScrollBar.Position := 99999;
     end;
 
-end;
-
-procedure TCastleForm.TabSheet3Show(Sender: TObject);
-begin
-  AppLog.VertScrollBar.Position := 99999;
 end;
 
 procedure TCastleForm.FormDestroy(Sender: TObject);

@@ -24,15 +24,15 @@ uses
   CastleGLUtils, multimodel, staging, Overlays, MiscFunctions;
 
 type
-  { TViewMode }
-  TViewMode = (
-    vmFlat,
-    vmTwoToOne,
-    vmIsometric,
-    vmIsometricX2,
-    vmMilitary,
-    vmCustom
-  );
+  { TViewModeSettings }
+  TViewModeSettings = record
+    Name: String;
+    StretchMultiplier: Single;
+    Stretch: Boolean;
+    CameraElevation: Single;
+    CameraRotation: Single;
+  end;
+  TViewModeSettingsArray = Array[0..5] of TViewModeSettings;
 
   { TCastleApp }
 
@@ -74,6 +74,7 @@ type
     ModelRotationCheck: Boolean;
     ModelRotationDone: Boolean;
     AppLogLevel: Boolean;
+    ViewModeSettings: TViewModeSettingsArray;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -109,6 +110,15 @@ var
   CastleOverlay: TCastleOverlay;
   ModelArray: TCastleModelArray;
 
+const
+  vmFlat2D: Cardinal = 0;
+  vmTwoToOne: Cardinal = 1;
+  vmIsometric: Cardinal = 2;
+  vmIsometricX2: Cardinal = 3;
+  vmMilitary: Cardinal = 4;
+  vmCustom: Cardinal = 5;
+
+
 implementation
 {$ifdef cgeapp}
 uses AppInitialization;
@@ -122,6 +132,25 @@ constructor TCastleApp.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WriteLnLog('TCastleApp Created');
+//  ViewModeSettings[vmFlat2D] = ('Flat 2D', 1, False, 0, 2 * pi * (6/8));
+{
+  TViewModeSettings = record
+    Name: Sting;
+    StretchMultiplier: Single;
+    Stretch: Boolean;
+    CameraElevation: Single;
+    CameraRotation: Single;
+
+    ,
+    vmFlatSide,
+    vmFlatTop,
+    vmTwoToOne,
+    vmIsometric,
+    vmIsometricX2,
+    vmMilitary,
+    vmCustom
+}
+
   LogTextureCache := True;
   AppLogLevel := False;
   WorkingModel := nil;
@@ -202,13 +231,11 @@ begin
     begin
       if ViewWidth <= (StateContainer.Height / DesiredAspect) then
         begin
-          LabelMode.Caption := '1 = Aspect Switch';
           Viewport.Height := StateContainer.Height;
           Viewport.Width := StateContainer.Height * DesiredAspect;
         end
       else
         begin
-          LabelMode.Caption := '2 = Aspect Switch';
           Viewport.Height := StateContainer.Height;
           Viewport.Width := StateContainer.Height * DesiredAspect;
         end;
@@ -217,13 +244,11 @@ begin
     begin
       if ViewWidth <= (StateContainer.Height / DesiredAspect) then
         begin
-          LabelMode.Caption := '3 = Aspect Switch';
           Viewport.Width := ViewWidth;
           Viewport.Height := ViewWidth / DesiredAspect;
         end
       else
         begin
-          LabelMode.Caption := '4 = Aspect Switch';
           Viewport.Width := ViewWidth;
           Viewport.Height := ViewWidth / DesiredAspect;
         end;
@@ -243,7 +268,7 @@ begin
       {$endif}
   end;
 
-  LabelMode.Caption := LabelMode.Caption + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
+  LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
 
   UpdateScale;
   WriteLnLog('End State Resize : LeftTop = ' + FloatToStr(Viewport.Left) + ' ' + FloatToStr(Viewport.Height) + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height));
@@ -509,7 +534,7 @@ begin
       begin
         StretchMultiplier := 1;
         Viewport.Camera.Orthographic.Stretch := False;
-        CameraElevation :=  -2;
+        CameraElevation :=  -999999;
         ViewFromRadius(2, CameraElevation,  2 * pi * (6/8));
       end
     else

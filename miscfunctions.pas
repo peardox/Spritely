@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, Math, X3DNodes, CastleImages, CastleVectors,
   CastleUIState, CastleControls, CastleUIControls, CastleColors,
-  CastleLog, CastleNotifications, CastleUtils, RGBAlphaImageHelp;
+  CastleLog, CastleNotifications, CastleUtils, CastleTimeUtils,
+  RGBAlphaImageHelp;
 
 type
   TControlHelper = class helper for TCastleUserInterface
@@ -35,6 +36,7 @@ function CreateDirectionalLight: TDirectionalLightNode;
 function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 1.0; const LayerDepth: Single = 0): TTransformNode;
 function CreateColorPlane(const imWidth: Single; const imHeight: Single; const LayerDepth: Single; const AColor: TVector3): TTransformNode;
 function MakeTransparentLayerGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8): TCastleImage;
+function MakeTransparentLayerRectGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8; const GridSizeY: Cardinal = 0): TCastleImage;
 
 implementation
   uses MainGameUnit;
@@ -217,6 +219,7 @@ end;
 
 function MakeTransparentLayerGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8): TCastleImage;
 var
+  ProcTimer: Int64;
   img: TRGBAlphaImage;
   XPos: Cardinal;
   YPos: Cardinal;
@@ -227,6 +230,8 @@ var
 begin
   if((AViewWidth < GridSize) or (AViewHeight < GridSize)) then
     Exit;
+
+  ProcTimer := CastleGetTickCount64;
 
   img := TRGBAlphaImage.Create(AViewWidth, AViewHeight);
 
@@ -261,10 +266,74 @@ begin
         end;
     end;
 
-  SaveImage(img, 'testgrid.png');
-  WriteLnLog('Done');
+  ProcTimer := CastleGetTickCount64 - ProcTimer;
+  WriteLnLog('Grid took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
   Result := img;
 end;
+
+function MakeTransparentLayerRectGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8; const GridSizeY: Cardinal = 0): TCastleImage;
+var
+  ProcTimer: Int64;
+  img: TRGBAlphaImage;
+  XPos: Cardinal;
+  YPos: Cardinal;
+  XGrid: Single;
+  YGrid: Single;
+  GridWidth: Cardinal;
+  GridHeight: Cardinal;
+  Skip: Integer;
+  LightGrey: TVector4Byte;
+begin
+  GridWidth := GridSize;
+
+  if GridSizeY = 0 then
+    GridHeight := GridSize
+  else
+    GridHeight := GridSizeY;
+
+  if((AViewWidth < GridWidth) or (AViewHeight < GridHeight)) then
+    Exit;
+
+  ProcTimer := CastleGetTickCount64;
+
+  img := TRGBAlphaImage.Create(AViewWidth, AViewHeight);
+
+  LightGrey := Vector4Byte($B2, $B2, $B2, $FF); // Vector4Byte(255, 0, 0, 255);
+  img.Clear(HexToColor('838383'));
+
+  XGrid := AViewWidth / ASpriteWidth;
+  YGrid := AViewHeight / ASpriteHeight;
+
+  WriteLnLog('Image : ' + IntToStr(img.Width) + ' x ' + IntToStr(img.Height) +
+    ', GridMult : ' + FloatToStr(XGrid) + ' x ' + FloatToStr(XGrid) +
+    ', GridSize : ' + IntToStr(GridWidth) + ' x ' + IntToStr(GridHeight));
+
+  if (((GridWidth * XGrid) < 1) or ((GridHeight * YGrid) < 1)) then
+    begin
+      img.Clear(HexToColor('000000'));
+    end
+  else
+    begin
+      for YPos := 0 to (ASpriteHeight div GridHeight) - 1 do
+        begin
+          Skip := YPos Mod 2;
+          for XPos := 0 to (ASpriteWidth div GridWidth) - 1 do
+            begin
+              if (((Skip + XPos) Mod 2) = 0) then
+                begin
+                  img.FastFillRect(Trunc(XPos * GridWidth * XGrid), Trunc(YPos * GridHeight * YGrid),
+                    Trunc(((XPos + 1) * GridWidth * XGrid)) - 1, Trunc(((YPos + 1) * GridHeight * YGrid)) - 1,
+                    LightGrey);
+                end;
+            end;
+        end;
+    end;
+
+  ProcTimer := CastleGetTickCount64 - ProcTimer;
+  WriteLnLog('RectGrid took ' + FormatFloat('####0.000000', ProcTimer) + ' seconds');
+  Result := img;
+end;
+
 
 end.
 
