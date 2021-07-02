@@ -10,10 +10,15 @@ uses
   CastleLog, CastleNotifications, CastleUtils, RGBAlphaImageHelp;
 
 type
+  TControlHelper = class helper for TCastleUserInterface
+  public
+    procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const ButtonCode: TNotifyEvent = nil);
+//    procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
+  end;
+
   { TUIStateHelper }
   TUIStateHelper = class helper for TUIState
   public
-    procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
     procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
   end;
 
@@ -34,12 +39,12 @@ function MakeTransparentLayerGrid(const ASpriteWidth: Cardinal; const ASpriteHei
 implementation
   uses MainGameUnit;
 
-procedure TUIStateHelper.CreateButton(var objButton: TCastleButton; const ButtonText: String; const Line: Integer; const ButtonCode: TNotifyEvent = nil);
+procedure TControlHelper.CreateButton(var objButton: TCastleButton; const ButtonText: String; const ButtonCode: TNotifyEvent = nil);
 begin
   objButton := TCastleButton.Create(Self);
   objButton.Caption := ButtonText;
-  objButton.Anchor(hpMiddle, 10);
-  objButton.Anchor(vpBottom, 10 + (Line * 35));
+  objButton.HorizontalAnchorDelta := 0;
+  objButton.VerticalAnchorDelta := 0;
   objButton.onClick := ButtonCode;
   InsertFront(objButton);
 end;

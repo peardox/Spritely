@@ -31,7 +31,13 @@ var
   Data: TJsonNode;
   Take: TAniTake;
   I: Integer;
+  {$ifdef AllowBadLines}
+  T:Integer;
+  {$endif}
 begin
+  {$ifdef AllowBadLines}
+  T := 0;
+  {$endif}
   Result := nil;
   for Node in Json do
     begin
@@ -75,14 +81,19 @@ begin
                   end;
                 end;
               if not(Take.TakeName = EmptyStr) and not(Take.TakeStart = -1) and not(Take.TakeStop = 0) then
-                Result[I] := Take
+                begin
+                  Result[T] := Take;
+                  Inc(T);
+                end{$ifdef AllowBadLines};{$else}
               else
                 raise Exception.Create('Partial record found for Take #' + IntToStr(I));
+                {$endif}
             end;
         end
       else
         WriteLnLog('Node : ' + Node.Name + ' =>' + Node.KindAsString);
     end;
+  SetLength(Result, T);
 end;
 
 end.

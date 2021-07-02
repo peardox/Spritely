@@ -22,6 +22,19 @@ uses
   CastleGLUtils, multimodel, staging, MiscFunctions;
 
 type
+  TControlPanel = class(TCastleUserInterface)
+    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; const AWidth: Single; const AHeight: Single);
+  private
+    TopSection: TCastleUserInterface;
+    BottomSection: TCastleUserInterface;
+    ABtn: TCastleButton;
+    BBtn: TCastleButton;
+    CBtn: TCastleButton;
+    UseModelSpots: Boolean;
+    procedure UseModelSpotsClick(Sender: TObject);
+  end;
+
   { TCastleOverlay }
 
   TCastleOverlay = class(TUIState)
@@ -41,6 +54,8 @@ type
   end;
 
 implementation
+
+uses MainGameUnit;
 
 constructor TCastleOverlay.Create(AOwner: TComponent);
 begin
@@ -107,6 +122,73 @@ procedure TCastleOverlay.Update(const SecondsPassed: Single; var HandleInput: bo
 begin
 end;
 
+constructor TControlPanel.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+{
+  AutoSizeToChildren := False;
+  AutoSizeWidth := False;
+  AutoSizeHeight := False;
+}
+end;
+
+constructor TControlPanel.Create(AOwner: TComponent; const AWidth: Single; const AHeight: Single);
+begin
+  Create(AOwner);
+
+  Width := AWidth;
+  Height := AHeight;
+  Anchor(hpRight);
+  Anchor(vpTop);
+  BorderColor := White;
+  TUIState(AOwner).InsertFront(Self);
+
+  TopSection := TCastleUserInterface.Create(Self);
+  TopSection.Height := Height - 80;
+  TopSection.Width := Width;
+  Self.InsertFront(TopSection);
+
+  BottomSection := TCastleUserInterface.Create(Self);
+  BottomSection.Height := 80;
+  BottomSection.Width := Width;
+  Self.InsertFront(BottomSection);
+
+  BottomSection.CreateButton(ABtn, 'Hello', nil);
+  ABtn.Left := 0;
+  BottomSection.CreateButton(BBtn, 'Hello', nil);
+  BBtn.Left := 10;
+  BBtn.Bottom := 10;
+  BottomSection.CreateButton(CBtn, 'Hello', @UseModelSpotsClick);
+  CBtn.Left := 20;
+  CBtn.Bottom := 20;
+end;
+
+procedure TControlPanel.UseModelSpotsClick(Sender: TObject);
+var
+  i: Integer;
+begin
+  With CastleApp do
+    begin
+      if not(WorkingModel = nil) then
+        begin
+          if UseModelSpots then
+            begin
+              UseModelSpots := False;
+              for i := 0 to High(WorkingModel.SpotNode) do
+                begin
+                WorkingModel.SpotNode[i].IsOn := True;
+//                WorkingModel.SpotNode[i].Color := Vector3(46/255, 19/255, 19/255);
+                end;
+            end
+          else
+            begin
+              UseModelSpots := True;
+              for i := 0 to High(WorkingModel.SpotNode) do
+                WorkingModel.SpotNode[i].IsOn := False;
+            end;
+        end;
+    end;
+end;
 
 end.
 

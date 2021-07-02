@@ -52,9 +52,10 @@ type
     LabelFPS: TCastleLabel;
     LabelRender: TCastleLabel;
     LabelSpare: TCastleLabel;
+
   public
     VPMax: TVector2Integer;
-
+    ControlPanel: TControlPanel;
     FileToLoadList: TStringList;
     {$ifdef usebackcontrol}
     VPBackImage: TCastleImageControl;
@@ -128,8 +129,8 @@ begin
   ViewMode := 0;
   OverSample := 8;
   ControlWidth := 300;
-  SpriteWidth := 72;
-  SpriteHeight := 72;
+  SpriteWidth := 512;
+  SpriteHeight := 512;
   StretchMultiplier := 1;
   BoundRadius := 1.0;
   IsTransparent := True;
@@ -273,6 +274,7 @@ end;
 procedure TCastleApp.LoadViewport;
 begin
   WriteLnLog('Start LoadViewport');
+
   {$ifdef usebackcontrol}
   VPBackImage := TCastleImageControl.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
   VPBackImage.OwnsImage := True;
@@ -300,6 +302,8 @@ begin
   Viewport.Camera.ProjectionType := ptOrthographic;
 
   InsertFront(Viewport);
+
+  ControlPanel := TControlPanel.Create(Self, ControlWidth, StateContainer.Height);
 
   UpdateScale; // SB
 

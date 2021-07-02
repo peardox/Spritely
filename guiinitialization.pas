@@ -35,6 +35,7 @@ type
     Button4: TButton;
     Button5: TButton;
     CastleOpenDialog1: TCastleOpenDialog;
+    UseModelSpots: TCheckBox;
     UseTransparency: TCheckBox;
     ComboBox1: TComboBox;
     ComboBox2: TComboBox;
@@ -110,6 +111,8 @@ type
       var Handled: Boolean);
     procedure TreeView1EditingEnd(Sender: TObject; Node: TTreeNode;
       Cancel: Boolean);
+    procedure UseModelSpotsChange(Sender: TObject);
+    procedure UseTransparencyChange(Sender: TObject);
     procedure WindowClose(Sender: TObject);
     procedure WindowMotion(Sender: TObject; const Event: TInputMotion);
     procedure WindowOpen(Sender: TObject);
@@ -477,6 +480,44 @@ begin
     end;
 end;
 
+procedure TCastleForm.UseModelSpotsChange(Sender: TObject);
+var
+  i: Integer;
+begin
+  With CastleApp do
+    begin
+      if not(WorkingModel = nil) then
+        begin
+          if UseModelSpots.Checked then
+            begin
+              for i := 0 to High(WorkingModel.SpotNode) do
+                begin
+                WorkingModel.SpotNode[i].IsOn := True;
+//                WorkingModel.SpotNode[i].Color := Vector3(46/255, 19/255, 19/255);
+                end;
+            end
+          else
+            begin
+              for i := 0 to High(WorkingModel.SpotNode) do
+                WorkingModel.SpotNode[i].IsOn := False;
+            end;
+        end;
+    end;
+end;
+
+procedure TCastleForm.UseTransparencyChange(Sender: TObject);
+var
+  i: Integer;
+begin
+  With CastleApp do
+    begin
+      if UseTransparency.Checked then
+        Stage.ShowGround(False)
+      else
+        Stage.ShowGround(True);
+    end;
+end;
+
 procedure TCastleForm.MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
 var
   Json: TJsonNode;
@@ -680,24 +721,9 @@ begin
 end;
 
 procedure TCastleForm.Button4Click(Sender: TObject);
-var
-  ProcTimer: Int64;
-  rgb: TRGBAlphaImage;
 begin
   Button4.Enabled := False;
 //  TUIState.Push(CastleOverlay);
-  ProcTimer := CastleGetTickCount64;
-  rgb := TRGBAlphaImage.Create(16384, 16384);
-  rgb.FastFillRect(0, 0, rgb.Width -1, rgb.Height -1,Vector4Byte(255, 0, 0, 255));
-{
-  with CastleApp do
-    rgb :=  MakeTransparentLayerGrid(SpriteWidth, SpriteHeight,
-        Trunc(Viewport.Width), Trunc(Viewport.Height), 36);
-}
-  ProcTimer := CastleGetTickCount64 - ProcTimer;
-  WriteLnLog('Grid create took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
-  SaveImage(rgb, 'testgrid.png');
-  rgb.free;
   Button4.Enabled := True;
 end;
 

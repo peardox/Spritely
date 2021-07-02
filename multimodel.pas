@@ -48,6 +48,7 @@ type
 
   end;
   TAnimationInfoArray = Array of TAnimationInfo;
+  TSpotArray = Array[0..5] of TSpotLightNode;
 
   { TCastleModel }
   TCastleModel = class(TCastleComponent)
@@ -58,7 +59,7 @@ type
     fIsLocked: Boolean;
     fLockedScale: Single;
     fModelName: String;
-    fSpotNode: Array[0..5] of TSpotLightNode;
+    fSpotNode: TSpotArray;
     fRootNode: TX3DRootNode;
     fScene: TCastleScene;
     fSceneNode:  TX3DRootNode;
@@ -91,7 +92,7 @@ type
     property  Transform: TTransformNode read fTransform write fTransform;
     property  Spatial: TSceneSpatialStructures read GetSpatial write SetSpatial default [];
     property  IsLooped: Boolean read GetIsLooped write SetIsLooped default True;
-//    property  SpotNode: TSpotLightNode read fSpotNode write fSpotNode;
+    property  SpotNode: TSpotArray read fSpotNode write fSpotNode;
 
     procedure ResetAnimationState(const IgnoreAffectedBy: TTimeSensorNode = nil);
     procedure PrepareResources(const Options: TPrepareResourcesOptions;

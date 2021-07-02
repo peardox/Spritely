@@ -370,7 +370,7 @@ object CastleForm: TCastleForm
       object BGRAKnob1: TBGRAKnob
         Left = 27
         Height = 50
-        Top = 184
+        Top = 200
         Width = 50
         CurveExponent = 0.200000002980232
         KnobColor = clBtnFace
@@ -390,7 +390,7 @@ object CastleForm: TCastleForm
       object LightLabel: TLabel
         Left = 128
         Height = 15
-        Top = 185
+        Top = 201
         Width = 55
         Caption = 'LightLabel'
         ParentColor = False
@@ -402,10 +402,22 @@ object CastleForm: TCastleForm
         Width = 126
         Alignment = taLeftJustify
         AutoSize = False
-        Caption = 'Transparent'
-        Checked = True
-        State = cbChecked
+        Caption = 'Transparent Ground'
+        OnChange = UseTransparencyChange
         TabOrder = 4
+      end
+      object UseModelSpots: TCheckBox
+        Left = 10
+        Height = 19
+        Top = 178
+        Width = 122
+        Alignment = taLeftJustify
+        AutoSize = False
+        Caption = 'Use Model Spots'
+        Checked = True
+        OnChange = UseModelSpotsChange
+        State = cbChecked
+        TabOrder = 5
       end
     end
     object MyRollOut2: TMyRollOut

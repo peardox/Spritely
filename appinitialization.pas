@@ -21,7 +21,6 @@ procedure ApplicationInitialize;
 begin
   if not IsLibrary then
     InitializeLog;
-  MaxVP := GLFeatures.MaxViewportDimensions;
   RenderReady := False;
   PrepDone := False;
   CastleApp := TCastleApp.Create(Application);

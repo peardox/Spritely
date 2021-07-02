@@ -27,6 +27,7 @@ type
     {$endif}
     fShadowNode: TSpotLightNode;
     fGroundModelRoot: TX3DRootNode;
+    fGroundSwitch: TSwitchNode;
   public
     GroundTexture: String;
     procedure LoadStage(const GroundModel: String; const GroundLevel: Single = 0; const GroundScale: Single = 5;  const GroundSize: Single = 20);
@@ -37,7 +38,7 @@ type
     procedure ChangeTextureCoordinates(const Model3D: TX3DRootNode; const AScale: Single = 1.0);
     function  ChangeTexture(const ANode: TX3DRootNode; const TextureUrl: String): TVector3Cardinal;
     function  CreateGroundPlane(AFileName: String; const AScale: Single = 1.0): TX3DRootNode;
-
+    procedure ShowGround(const AChoice: Boolean);
     {$if defined(spotlight)}
     property  LightNode: TSpotLightNode read fLightNode write fLightNode;
     {$elseif defined(pointlight)}
@@ -66,6 +67,14 @@ begin
   LoadStage(GroundLevel, Vector3(1,1,1), EmptyStr);
 end;
 
+procedure TCastleStage.ShowGround(const AChoice: Boolean);
+begin
+  if AChoice then
+    fGroundSwitch.WhichChoice := 0
+  else
+    fGroundSwitch.WhichChoice := -1;
+
+end;
 
 procedure TCastleStage.LoadStage(const GroundLevel: Single; const GroundColor: TVector3; const GroundModel: String; const GroundScale: Single = 5;  const GroundSize: Single = 20);
 var
@@ -84,6 +93,9 @@ begin
         fGroundTransformNode.AddChildren(fGroundModelRoot);
       end;
     fGroundTransformNode.X3DName := 'GroundTransformNode';
+    fGroundSwitch := TSwitchNode.Create;
+    fGroundSwitch.WhichChoice := 0;
+    fGroundSwitch.AddChildren(fGroundTransformNode);
 
     {$if defined(spotlight)}
     fLightNode := CreateSpotLight(Vector3(0, 30, 30));
@@ -106,7 +118,7 @@ begin
     fShadowNode.Shadows := True;
     StageRootNode.AddChildren(fShadowNode);
 }
-    StageRootNode.AddChildren(fGroundTransformNode);
+    StageRootNode.AddChildren(fGroundSwitch);
     Load(StageRootNode, True);
 
 //    ReceiveShadowVolumes:=True;
