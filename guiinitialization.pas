@@ -22,7 +22,7 @@ uses
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
   CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels, BGRAKnob,
   BCLabel, ECSwitch, ECSlider, ECSpinCtrls, CastleGLShaders, X3DLoad,
-  Overlays, RGBAlphaImageHelp;
+  SheetView, Overlays, RGBAlphaImageHelp;
 
 type
   { TCastleForm }
@@ -35,6 +35,9 @@ type
     Button4: TButton;
     Button5: TButton;
     CastleOpenDialog1: TCastleOpenDialog;
+    LogPanel: TPanel;
+    RenderPanel: TPanel;
+    TabControl1: TTabControl;
     UseModelSpots: TCheckBox;
     UseTransparency: TCheckBox;
     ComboBox1: TComboBox;
@@ -66,7 +69,6 @@ type
     MyRollOut1: TMyRollOut;
     MyRollOut2: TMyRollOut;
     MyRollOut3: TMyRollOut;
-    PageControl1: TPageControl;
     Panel1: TPanel;
     GPPanel1: TPanel;
     Panel4: TPanel;
@@ -83,9 +85,6 @@ type
     SpinEdit2: TSpinEdit;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
-    TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
-    TabSheet3: TTabSheet;
     TreeView1: TTreeView;
     Window: TCastleControlBase;
     procedure BGRAKnob1ValueChanged(Sender: TObject; Value: single);
@@ -105,6 +104,7 @@ type
     procedure SelectDirectoryMenuItemClick(Sender: TObject);
     procedure SpinEdit1Change(Sender: TObject);
     procedure SpinEdit2Change(Sender: TObject);
+    procedure TabControl1Change(Sender: TObject);
     procedure TabSheet3Show(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -221,8 +221,9 @@ begin
   ExpandPanels1.AddPanel(MyRollOut2);
   ExpandPanels1.AddPanel(MyRollOut3);
 }
-  PageControl1.ActivePage := TabSheet1;
-  TabSheet3.TabVisible := True;
+  TabControl1.TabIndex := 0;
+  RenderPanel.Visible := True;
+  LogPanel.Visible := False;
 
   ModeOrientation := True;
   Applog.Clear;
@@ -318,6 +319,28 @@ procedure TCastleForm.SpinEdit2Change(Sender: TObject);
 begin
   CastleApp.SpriteHeight := SpinEdit2.Value;
   CastleApp.Resize;
+end;
+
+procedure TCastleForm.TabControl1Change(Sender: TObject);
+begin
+  RenderPanel.Visible := False;
+  LogPanel.Visible := False;
+
+  if TabControl1.TabIndex = 0 then
+    begin
+      RenderPanel.Visible := True;
+      ActiveControl := Window;
+    end
+  else if TabControl1.TabIndex = 1 then
+    begin
+      RenderPanel.Visible := True;
+      ActiveControl := Window;
+    end
+  else if TabControl1.TabIndex = 2 then
+    begin
+      LogPanel.Visible := True;
+    end;
+
 end;
 
 procedure TCastleForm.TabSheet3Show(Sender: TObject);
@@ -430,7 +453,7 @@ end;
 
 procedure TCastleForm.FocusViewport;
 begin
-  if PageControl1.ActivePage = TabSheet1 then
+  if TabControl1.TabIndex = 0 then
     ActiveControl := Window;
 end;
 
@@ -780,6 +803,7 @@ begin
   RenderReady := False;
   TCastleControlBase.MainControl := Window;
   CastleApp := TCastleApp.Create(Window);
+  SheetViewer := TSheetViewer.Create(Window);
   TUIState.Current := CastleApp;
   Window.Container.UIScaling := usNone;
   SpinEdit1.Value := CastleApp.SpriteWidth;

@@ -59,7 +59,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="13">
       <Unit0>
         <Filename Value="SpritelyLaz.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -121,6 +121,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="RGBAlphaImageHelp"/>
       </Unit11>
+      <Unit12>
+        <Filename Value="sheetview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SheetView"/>
+      </Unit12>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

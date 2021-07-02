@@ -27,24 +27,34 @@ object CastleForm: TCastleForm
       Top = 1
       Width = 5
     end
-    object PageControl1: TPageControl
+    object TabControl1: TTabControl
       Left = 6
       Height = 786
       Top = 1
       Width = 868
-      ActivePage = TabSheet1
-      Align = alClient
+      OnChange = TabControl1Change
       TabIndex = 0
+      Tabs.Strings = (
+        'Sprite Builder'
+        'Sheet Viewer'
+        'App Log'
+      )
+      Align = alClient
       TabOrder = 1
-      object TabSheet1: TTabSheet
-        Caption = 'Sprite Builder'
-        ClientHeight = 758
-        ClientWidth = 860
+      object RenderPanel: TPanel
+        Left = 2
+        Height = 761
+        Top = 23
+        Width = 864
+        Align = alClient
+        ClientHeight = 761
+        ClientWidth = 864
+        TabOrder = 1
         object Window: TCastleControlBase
-          Left = 0
-          Height = 758
-          Top = 0
-          Width = 860
+          Left = 1
+          Height = 759
+          Top = 1
+          Width = 862
           Align = alClient
           Options = []
           TabOrder = 0
@@ -54,19 +64,21 @@ object CastleForm: TCastleForm
           OnMotion = WindowMotion
         end
       end
-      object TabSheet2: TTabSheet
-        Caption = 'Texture Atlas'
-      end
-      object TabSheet3: TTabSheet
-        Caption = 'Log Output'
-        ClientHeight = 688
-        ClientWidth = 860
-        OnShow = TabSheet3Show
+      object LogPanel: TPanel
+        Left = 2
+        Height = 761
+        Top = 23
+        Width = 864
+        Align = alClient
+        ClientHeight = 761
+        ClientWidth = 864
+        TabOrder = 2
+        Visible = False
         object AppLog: TMemo
-          Left = 0
-          Height = 661
-          Top = 0
-          Width = 860
+          Left = 1
+          Height = 732
+          Top = 1
+          Width = 862
           Align = alClient
           Lines.Strings = (
             'AppLog'
@@ -76,14 +88,14 @@ object CastleForm: TCastleForm
           TabOrder = 0
         end
         object Panel5: TPanel
-          Left = 0
+          Left = 1
           Height = 27
-          Top = 661
-          Width = 860
+          Top = 733
+          Width = 862
           Align = alBottom
           AutoSize = True
           ClientHeight = 27
-          ClientWidth = 860
+          ClientWidth = 862
           Color = clBtnFace
           ParentColor = False
           TabOrder = 1

@@ -31,13 +31,9 @@ var
   Data: TJsonNode;
   Take: TAniTake;
   I: Integer;
-  {$ifdef AllowBadLines}
   T:Integer;
-  {$endif}
 begin
-  {$ifdef AllowBadLines}
   T := 0;
-  {$endif}
   Result := nil;
   for Node in Json do
     begin
