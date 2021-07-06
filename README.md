@@ -50,3 +50,9 @@ https://github.com/bgrabitmap/bgrabitmap
 
 https://github.com/bgrabitmap/bgracontrols
 
+mbColorLib
+
+poweredby
+
+SplashAbout
+

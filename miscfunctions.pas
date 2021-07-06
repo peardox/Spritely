@@ -37,6 +37,7 @@ function CreateColorPlane(const imWidth: Single = 1.0; const imHeight: Single = 
 function CreateColorPlane(const imWidth: Single; const imHeight: Single; const LayerDepth: Single; const AColor: TVector3): TTransformNode;
 function MakeTransparentLayerGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8): TCastleImage;
 function MakeTransparentLayerRectGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8; const GridSizeY: Cardinal = 0): TCastleImage;
+function HTTPEncode(const AStr: string): string;
 
 implementation
   uses MainGameUnit;
@@ -215,11 +216,36 @@ begin
     Result := S.Remove(I);
 end;
 
+function HTTPEncode(const AStr: string): string;
+const
+  NoConversion = ['A'..'Z', 'a'..'z', '0'..'9', '*', '@', '.', '_', '-', ':', '/'];
+var
+  Sp, Rp: PChar;
+begin
+  SetLength(Result, Length(AStr) * 3);
+  Sp := PChar(AStr);
+  Rp := PChar(Result);
+  while Sp^ <> #0 do
+  begin
+    if Sp^ in NoConversion then
+      Rp^ := Sp^
+//    else if Sp^ = ' ' then
+//      Rp^ := '+'
+    else
+    begin
+      FormatBuf(Rp^, 3, '%%%.2x', 6, [Ord(Sp^)]);
+      Inc(Rp, 2);
+    end;
+    Inc(Rp);
+    Inc(Sp);
+  end;
+  SetLength(Result, Rp - PChar(Result));
+end;
+
 // TCastleImageControl DG - 838383, LG B2B2B2
 
 function MakeTransparentLayerGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8): TCastleImage;
 var
-  ProcTimer: Int64;
   img: TRGBAlphaImage;
   XPos: Cardinal;
   YPos: Cardinal;
@@ -231,8 +257,6 @@ begin
   if((AViewWidth < GridSize) or (AViewHeight < GridSize)) then
     Exit;
 
-  ProcTimer := CastleGetTickCount64;
-
   img := TRGBAlphaImage.Create(AViewWidth, AViewHeight);
 
   LightGrey := Vector4Byte($B2, $B2, $B2, $FF); // Vector4Byte(255, 0, 0, 255);
@@ -240,10 +264,6 @@ begin
 
   XGrid := AViewWidth / ASpriteWidth;
   YGrid := AViewHeight / ASpriteHeight;
-
-  WriteLnLog('Image : ' + IntToStr(img.Width) + ' x ' + IntToStr(img.Height) +
-    ', GridMult : ' + FloatToStr(XGrid) + ' x ' + FloatToStr(XGrid) +
-    ', GridSize : ' + IntToStr(GridSize));
 
   if (((GridSize * XGrid) < 1) or ((GridSize * YGrid) < 1)) then
     begin
@@ -266,14 +286,11 @@ begin
         end;
     end;
 
-  ProcTimer := CastleGetTickCount64 - ProcTimer;
-  WriteLnLog('Grid took ' + FormatFloat('####0.000000', ProcTimer / 1000) + ' seconds');
   Result := img;
 end;
 
 function MakeTransparentLayerRectGrid(const ASpriteWidth: Cardinal; const ASpriteHeight: Cardinal; const AViewWidth: Cardinal; const AViewHeight: Cardinal; const GridSize: Cardinal = 8; const GridSizeY: Cardinal = 0): TCastleImage;
 var
-  ProcTimer: Int64;
   img: TRGBAlphaImage;
   XPos: Cardinal;
   YPos: Cardinal;
@@ -294,8 +311,6 @@ begin
   if((AViewWidth < GridWidth) or (AViewHeight < GridHeight)) then
     Exit;
 
-  ProcTimer := CastleGetTickCount64;
-
   img := TRGBAlphaImage.Create(AViewWidth, AViewHeight);
 
   LightGrey := Vector4Byte($B2, $B2, $B2, $FF); // Vector4Byte(255, 0, 0, 255);
@@ -303,10 +318,6 @@ begin
 
   XGrid := AViewWidth / ASpriteWidth;
   YGrid := AViewHeight / ASpriteHeight;
-
-  WriteLnLog('Image : ' + IntToStr(img.Width) + ' x ' + IntToStr(img.Height) +
-    ', GridMult : ' + FloatToStr(XGrid) + ' x ' + FloatToStr(XGrid) +
-    ', GridSize : ' + IntToStr(GridWidth) + ' x ' + IntToStr(GridHeight));
 
   if (((GridWidth * XGrid) < 1) or ((GridHeight * YGrid) < 1)) then
     begin
@@ -329,8 +340,6 @@ begin
         end;
     end;
 
-  ProcTimer := CastleGetTickCount64 - ProcTimer;
-  WriteLnLog('RectGrid took ' + FormatFloat('####0.000000', ProcTimer) + ' seconds');
   Result := img;
 end;
 

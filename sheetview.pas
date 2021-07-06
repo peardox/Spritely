@@ -91,6 +91,8 @@ end;
 
 procedure TSheetViewer.Resize;
 var
+  ProcTimer: Int64;
+  ProcTimer2: Int64;
   DesiredAspect: Single;
   ActualAspect: Single;
   ViewWidth: Single;
@@ -133,8 +135,12 @@ begin
 
   if (TUIState.CurrentTop = SheetViewer) then
     begin
+      ProcTimer := CastleGetTickCount64;
+
       VPBackImage.Image :=  MakeTransparentLayerRectGrid(SheetWidth, SheetHeight, Trunc(MainControl.Width), Trunc(MainControl.Height), (CastleApp.SpriteWidth), (CastleApp.SpriteHeight));
-      VPBackImage.Left := MainControl.Left;
+   ProcTimer2 := CastleGetTickCount64;
+  WriteLnLog('RectGrid took ' + FormatFloat('####0.000000', (ProcTimer2  - ProcTimer)) + ' seconds' + '[' + FloatToStr(ProcTimer) + ' - ' + FloatToStr(ProcTimer2) + ']');
+     VPBackImage.Left := MainControl.Left;
       VPBackImage.Bottom := MainControl.Bottom;
       VPBackImage.Width := MainControl.Width;
       VPBackImage.Height := MainControl.Height;

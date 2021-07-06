@@ -133,6 +133,8 @@ begin
 end;
 
 constructor TControlPanel.Create(AOwner: TComponent; const AWidth: Single; const AHeight: Single);
+var
+  BtnWidth: Single;
 begin
   Create(AOwner);
 
@@ -153,14 +155,28 @@ begin
   BottomSection.Width := Width;
   Self.InsertFront(BottomSection);
 
+  BtnWidth := Width / 3;
+
   BottomSection.CreateButton(ABtn, 'Hello', nil);
   ABtn.Left := 0;
+  ABtn.Bottom := 0;
+  ABtn.AutoSize := False;
+  ABtn.Width := BtnWidth;
+  ABtn.Height := BtnWidth;
+
   BottomSection.CreateButton(BBtn, 'Hello', nil);
-  BBtn.Left := 10;
-  BBtn.Bottom := 10;
+  BBtn.Left := BtnWidth;
+  BBtn.Bottom := 0;
+  BBtn.AutoSize := False;
+  BBtn.Width := BtnWidth;
+  BBtn.Height := BtnWidth;
+
   BottomSection.CreateButton(CBtn, 'Hello', @UseModelSpotsClick);
-  CBtn.Left := 20;
-  CBtn.Bottom := 20;
+  CBtn.Left := (BtnWidth * 2);
+  CBtn.Bottom := 0;
+  CBtn.AutoSize := False;
+  CBtn.Width := BtnWidth;
+  CBtn.Height := BtnWidth;
 end;
 
 procedure TControlPanel.UseModelSpotsClick(Sender: TObject);

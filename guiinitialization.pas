@@ -6,14 +6,16 @@ unit GUIInitialization;
   Badly Formatted Anitxt
 }
 {$mode objfpc}{$H+}
- {$define disableMap}
+{$define disableMap}
+{$define remotefile}
 
 // FPS = 23.98, 24, 25, 29.97, 30, 50, 59.94, 60, Custom
 interface
 
 uses
   Classes, SysUtils, Math, CastleUIState, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, ComCtrls, Menus, Spin, Arrow, CastleControl, MainGameUnit,
+  ExtCtrls, StdCtrls, ComCtrls, Menus, Spin, Arrow,
+  CastleControl, MainGameUnit,
   CastleControls, CastleColors, CastleUIControls, CastleTriangles, CastleShapes,
   CastleVectors, CastleSceneCore, CastleScene, CastleTransform, CastleViewport,
   CastleCameras, X3DNodes, X3DFields, X3DTIme, CastleImages, CastleGLImages,
@@ -128,7 +130,7 @@ type
     function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
     procedure AddInfoPanel;
     procedure UpdateInfoPanel;
-    procedure LoadGuiModel(const AModel: String);
+    procedure LoadGuiModel(const AModel: String; const isRemote: Boolean = False);
     procedure FocusViewport;
     function  SyncModelFromNode(const Node: Pointer): TCastleModel;
     function  IdentifyNode(const Node: TTreeNode): Cardinal;
@@ -169,6 +171,9 @@ begin
   ScanModelDir := FSPrefix + '3DModels' + PathDelim + 'Kenney' + PathDelim + 'Pirate Kit';
 {$ifdef disableMap}
   MapFile := '';
+{$ifdef remotefile}
+  ModelFile := 'https://spritely.co.uk/3DModels/Quaternius/RPG Characters - Nov 2020/Cleric.glb';
+{$else}
 //  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
@@ -181,10 +186,12 @@ begin
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/Quaternius/Mechs/Stan.glb';
 //  ModelFile := 'castle-data:/isoroom/scene.gltf';
+//  ModelFile := FSPrefix + 'Assets' + 'simple_classic_crate' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'generic_cliff_2_mobile_rhe' + PathDelim + 'scene.gltf';
+{$endif}
 {$else}
 //  MapFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'Elong_anim.txt';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + 'Elongata' + PathDelim + 'gltf' + PathDelim + 'ElongataGreen.glb';
@@ -605,7 +612,7 @@ end;
 procedure TCastleForm.GuiBootStrap;
 begin
 //  Treeview1.Items.Clear;
-  LoadGuiModel(ModelFile);
+  LoadGuiModel(ModelFile{$ifdef remotefile}, True{$endif});
 end;
 
 procedure TCastleForm.AddModelToTree(const AModel: TCastleModel; const doExpand: Boolean);
@@ -640,9 +647,9 @@ begin
     end;
 end;
 
-procedure TCastleForm.LoadGuiModel(const AModel: String);
+procedure TCastleForm.LoadGuiModel(const AModel: String; const isRemote: Boolean = False);
 begin
-  if not(URIFileExists(AModel)) then
+  if not(isRemote) and not(URIFileExists(AModel)) then
     Exit;
 
   if not(TUIState.CurrentTop = CastleOverlay) then
@@ -656,7 +663,14 @@ begin
     begin
       if FileToLoadList.Count = 0 then
         begin
-          FileToLoadList.Add(URIToFilenameSafe(AModel));
+          if not(isRemote) then
+            FileToLoadList.Add(URIToFilenameSafe(AModel))
+          else
+            begin
+            FileToLoadList.Add(HTTPEncode(AModel));
+            WriteLnLog('REQ : ' + AModel);
+            WriteLnLog('URL : ' + HTTPEncode(AModel));
+            end;
           WaitForRenderAndCall(@LoadModel);
         end
       else

@@ -21,7 +21,8 @@ uses
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging, Overlays, MiscFunctions;
+  CastleGLUtils, multimodel, staging, Overlays, MiscFunctions,
+  {$ifndef VER3_0} OpenSSLSockets, {$endif} CastleDownload;
 
 type
   { TViewModeSettings }
@@ -131,6 +132,9 @@ uses GUIInitialization;
 constructor TCastleApp.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  EnableBlockingDownloads := True;
+  LogAllLoading := True;
+
   WriteLnLog('TCastleApp Created');
 //  ViewModeSettings[vmFlat2D] = ('Flat 2D', 1, False, 0, 2 * pi * (6/8));
 {
@@ -346,11 +350,16 @@ begin
 end;
 
 procedure TCastleApp.LoadModel(Sender: TObject);
+var
+  fname: String;
 begin
-  WriteLnLog('LoadModel ' + FileToLoadList[0]  + ' at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
   if FileToLoadList.Count > 0 then
-    LoadModel(FileToLoadList.Pop);
-  WriteLnLog('LoadMode Done at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
+    begin
+      fname := FileToLoadList.Pop;
+      WriteLnLog('LoadModel ' + fname  + ' at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
+      LoadModel(fname);
+      WriteLnLog('LoadMode Done at ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000));
+    end;
 
   if FileToLoadList.Count = 0 then
     begin
