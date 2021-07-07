@@ -76,6 +76,8 @@ type
     ModelRotationDone: Boolean;
     AppLogLevel: Boolean;
     ViewModeSettings: TViewModeSettingsArray;
+    DirectionCount: Integer;
+    FrameCount: Integer;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -134,6 +136,9 @@ begin
   inherited Create(AOwner);
   EnableBlockingDownloads := True;
   LogAllLoading := True;
+
+  DirectionCount := 8;
+  FrameCount := 8;
 
   WriteLnLog('TCastleApp Created');
 //  ViewModeSettings[vmFlat2D] = ('Flat 2D', 1, False, 0, 2 * pi * (6/8));
