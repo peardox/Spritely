@@ -344,6 +344,7 @@ object CastleForm: TCastleForm
           '32'
           '64'
         )
+        OnChange = ComboBox2Change
         TabOrder = 2
         Text = '8'
       end
@@ -376,6 +377,7 @@ object CastleForm: TCastleForm
           '11'
           '12'
         )
+        OnChange = ComboBox3Change
         TabOrder = 3
         Text = '8'
       end

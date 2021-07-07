@@ -93,6 +93,8 @@ type
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure ComboBox2Change(Sender: TObject);
+    procedure ComboBox3Change(Sender: TObject);
     procedure ECSlider1Change(Sender: TObject);
     procedure GroundHeightSliderChange(Sender: TObject);
     procedure GroundScaleSliderChange(Sender: TObject);
@@ -456,8 +458,8 @@ end;
 
 procedure TCastleForm.FocusViewport;
 begin
-  if TabControl1.TabIndex = 0 then
-    ActiveControl := Window;
+//  if TabControl1.TabIndex = 0 then
+//    ActiveControl := Window;
 end;
 
 procedure TCastleForm.TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -760,6 +762,16 @@ begin
   Button4.Enabled := True;
 end;
 
+procedure TCastleForm.ComboBox2Change(Sender: TObject);
+begin
+  CastleApp.DirectionCount := StrToIntDef(ComboBox2.Text, 8);
+end;
+
+procedure TCastleForm.ComboBox3Change(Sender: TObject);
+begin
+  CastleApp.FrameCount := StrToIntDef(ComboBox1.Text, 8);
+end;
+
 procedure TCastleForm.ECSlider1Change(Sender: TObject);
 begin
   CastleApp.WorkingModel.Scene.TimePlayingSpeed := ECSlider1.Position;
@@ -877,8 +889,6 @@ procedure TCastleForm.WindowPress(Sender: TObject;
   const Event: TInputPressRelease);
 var
   Q: TQuaternion;
-const
-  OrientationStepSize = 4;
 begin
   FocusViewport;
   if Event.Key = keySpace then
@@ -905,17 +915,17 @@ begin
               if Event.Key = keyNumpadMinus then
                 CastleApp.iScaleMultiplier := CastleApp.iScaleMultiplier - (CastleApp.iScaleMultiplier * 0.1);
               if Event.Key = keyPageUp then
-                WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z + (Pi / OrientationStepSize);
+                WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount);
               if Event.Key = keyPageDown then
-                WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z - (Pi / OrientationStepSize);
+                WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z - ((2 * Pi) / DirectionCount);
               if Event.Key = keyArrowDown then
-                WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X + (Pi / OrientationStepSize);
+                WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount);
               if Event.Key = keyArrowUp then
-                WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X - (Pi / OrientationStepSize);
+                WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X - ((2 * Pi) / DirectionCount);
               if Event.Key = keyArrowRight then
-                WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y + (Pi / OrientationStepSize);
+                WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount);
               if Event.Key = keyArrowLeft then
-                WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y - (Pi / OrientationStepSize);
+                WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y - ((2 * Pi) / DirectionCount);
               Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
               Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, WorkingModel.BaseRotation.X));
               Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, WorkingModel.BaseRotation.Y));

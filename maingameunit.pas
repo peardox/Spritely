@@ -56,7 +56,7 @@ type
 
   public
     VPMax: TVector2Integer;
-    ControlPanel: TControlPanel;
+    ControlPanel: TSpriteControlPanel;
     FileToLoadList: TStringList;
     {$ifdef usebackcontrol}
     VPBackImage: TCastleImageControl;
@@ -337,7 +337,8 @@ begin
 
   InsertFront(Viewport);
 
-  ControlPanel := TControlPanel.Create(Self, ControlWidth, StateContainer.Height);
+  ControlPanel := TSpriteControlPanel.Create(Self, ControlWidth, StateContainer.Height);
+  ControlPanel.LoadOrentationLayout;
 
   UpdateScale; // SB
 
