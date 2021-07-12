@@ -146,9 +146,6 @@ begin
   EnableBlockingDownloads := True;
   LogAllLoading := True;
 
-  DirectionCount := 8;
-  FrameCount := 8;
-
 //  ViewModeSettings[vmFlat2D] = ('Flat 2D', 1, False, 0, 2 * pi * (6/8));
 {
   TViewModeSettings = record
@@ -173,6 +170,9 @@ begin
   WorkingModel := nil;
   ModelArray := nil;
   FullSIze := True;
+
+  DirectionCount := 8;
+  FrameCount := 8;
   ViewMode := 0;
   OverSample := 8;
   ControlWidth := 300;
@@ -191,8 +191,8 @@ begin
   FileToLoadList.OwnsObjects := False;
   FileToLoadList.Duplicates := dupAccept;
 
-  CastleOverlay := TCastleOverlay.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
   LoadViewport;
+  CastleOverlay := TCastleOverlay.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
 end;
 
 destructor TCastleApp.Destroy;

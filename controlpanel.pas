@@ -224,7 +224,6 @@ begin
   AChk.Height := BtnHeight;
   AChk.CheckboxColor := White;
   AChk.TextColor := White;
-  AChk.Checked := True;
 
   BottomSection.CreateCheckbox(BChk, 'Local Lights', @UseModelSpotsClick);
   BChk.Left := 10;
@@ -234,7 +233,12 @@ begin
   BChk.Height := BtnHeight;
   BChk.CheckboxColor := White;
   BChk.TextColor := White;
-  BChk.Checked := True;
+  if not(Parent = nil) then
+    begin
+      WriteLnLog('Setting CP Defaults');
+      AChk.Checked := TCastleApp(Parent).UseTransparency;
+      BChk.Checked := TCastleApp(Parent).UseModelSpots;
+    end;
 end;
 
 procedure TSpriteControlPanel.DoZoomIn(Sender: TObject);
