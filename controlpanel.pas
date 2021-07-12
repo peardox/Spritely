@@ -45,8 +45,12 @@ type
     FBtn: TCastleButton;
     GBtn: TCastleButton;
     HBtn: TCastleButton;
-    UseModelSpots: Boolean;
+
+    AChk: TCastleCheckbox;
+    BChk: TCastleCheckbox;
+
     procedure UseModelSpotsClick(Sender: TObject);
+    procedure UseTransparencyChange(Sender: TObject);
     procedure UpdateView;
     procedure DoRotateXPlus(Sender: TObject);
     procedure DoRotateXMinus(Sender: TObject);
@@ -125,6 +129,8 @@ var
   BtnFontScale: Single;
   BtnImageScale: Single;
 begin
+  WriteLnLog('Start LoadOrentationLayout');
+
   BtnWidth := (Width - 30) / 2;
   BtnHeight := BtnWidth * 1 / 3;
   BtnFontScale := 0.75;
@@ -209,6 +215,26 @@ begin
   HBtn.FontScale := BtnFontScale;
   HBtn.Image.URL := 'castle-data:/icons/zoomin.png';
   HBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateCheckbox(AChk, 'Transparent', @UseTransparencyChange);
+  AChk.Left := 10;
+  AChk.Bottom := 10 + 5 * (BtnHeight + 10);
+  AChk.AutoSize := False;
+  AChk.Width := BtnWidth;
+  AChk.Height := BtnHeight;
+  AChk.CheckboxColor := White;
+  AChk.TextColor := White;
+  AChk.Checked := True;
+
+  BottomSection.CreateCheckbox(BChk, 'Local Lights', @UseModelSpotsClick);
+  BChk.Left := 10;
+  BChk.Bottom := 10 + 6 * (BtnHeight + 10);
+  BChk.AutoSize := False;
+  BChk.Width := BtnWidth;
+  BChk.Height := BtnHeight;
+  BChk.CheckboxColor := White;
+  BChk.TextColor := White;
+  BChk.Checked := True;
 end;
 
 procedure TSpriteControlPanel.DoZoomIn(Sender: TObject);
@@ -284,6 +310,8 @@ var
 begin
   With CastleApp do
     begin
+      UseModelSpots := BChk.Checked;
+
       WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount);
       if not(WorkingModel = nil) then
         begin
@@ -293,7 +321,6 @@ begin
               for i := 0 to High(WorkingModel.SpotNode) do
                 begin
                 WorkingModel.SpotNode[i].IsOn := True;
-//                WorkingModel.SpotNode[i].Color := Vector3(46/255, 19/255, 19/255);
                 end;
             end
           else
@@ -305,6 +332,22 @@ begin
         end;
     end;
 end;
+
+procedure TSpriteControlPanel.UseTransparencyChange(Sender: TObject);
+var
+  i: Integer;
+begin
+  With CastleApp do
+    begin
+      UseTransparency := AChk.Checked;
+
+      if UseTransparency then
+        Stage.ShowGround(False)
+      else
+        Stage.ShowGround(True);
+    end;
+end;
+
 
 end.
 

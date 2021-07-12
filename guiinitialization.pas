@@ -40,8 +40,6 @@ type
     LogPanel: TPanel;
     RenderPanel: TPanel;
     TabControl1: TTabControl;
-    UseModelSpots: TCheckBox;
-    UseTransparency: TCheckBox;
     ComboBox1: TComboBox;
     ComboBox2: TComboBox;
     ComboBox3: TComboBox;
@@ -105,6 +103,7 @@ type
     procedure DebugBoxMenuClick(Sender: TObject);
     procedure CreateSpriteMenuClick(Sender: TObject);
     procedure ListView1Click(Sender: TObject);
+    procedure RenderPanelResize(Sender: TObject);
     procedure SelectDirectoryMenuItemClick(Sender: TObject);
     procedure SpinEdit1Change(Sender: TObject);
     procedure SpinEdit2Change(Sender: TObject);
@@ -114,8 +113,6 @@ type
       var Handled: Boolean);
     procedure TreeView1EditingEnd(Sender: TObject; Node: TTreeNode;
       Cancel: Boolean);
-    procedure UseModelSpotsChange(Sender: TObject);
-    procedure UseTransparencyChange(Sender: TObject);
     procedure WindowClose(Sender: TObject);
     procedure WindowMotion(Sender: TObject; const Event: TInputMotion);
     procedure WindowOpen(Sender: TObject);
@@ -273,6 +270,15 @@ end;
 procedure TCastleForm.ListView1Click(Sender: TObject);
 begin
   FocusViewport;
+end;
+
+procedure TCastleForm.RenderPanelResize(Sender: TObject);
+begin
+  if not(CastleApp = nil) then
+    begin
+      RenderPanel.Constraints.MinHeight := 240;
+      RenderPanel.Constraints.MinWidth := CastleApp.ControlWidth + CastleApp.MinSpritePanelWidth;
+    end;
 end;
 
 procedure TCastleForm.SelectDirectoryMenuItemClick(Sender: TObject);
@@ -508,44 +514,6 @@ begin
     end;
 end;
 
-procedure TCastleForm.UseModelSpotsChange(Sender: TObject);
-var
-  i: Integer;
-begin
-  With CastleApp do
-    begin
-      if not(WorkingModel = nil) then
-        begin
-          if UseModelSpots.Checked then
-            begin
-              for i := 0 to High(WorkingModel.SpotNode) do
-                begin
-                WorkingModel.SpotNode[i].IsOn := True;
-//                WorkingModel.SpotNode[i].Color := Vector3(46/255, 19/255, 19/255);
-                end;
-            end
-          else
-            begin
-              for i := 0 to High(WorkingModel.SpotNode) do
-                WorkingModel.SpotNode[i].IsOn := False;
-            end;
-        end;
-    end;
-end;
-
-procedure TCastleForm.UseTransparencyChange(Sender: TObject);
-var
-  i: Integer;
-begin
-  With CastleApp do
-    begin
-      if UseTransparency.Checked then
-        Stage.ShowGround(False)
-      else
-        Stage.ShowGround(True);
-    end;
-end;
-
 procedure TCastleForm.MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
 var
   Json: TJsonNode;
@@ -694,7 +662,7 @@ begin
     begin
       if not (WorkingModel.Scene = nil) then
         begin
-          Sprite := CastleApp.CreateSpriteImage(CastleApp.WorkingModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample, UseTransparency.Checked);
+          Sprite := CastleApp.CreateSpriteImage(CastleApp.WorkingModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample, CastleApp.UseTransparency);
           if not(Sprite = nil) then
             begin
               if (OverSample > 1) then

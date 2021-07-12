@@ -13,7 +13,8 @@ uses
 type
   TControlHelper = class helper for TCastleUserInterface
   public
-    procedure CreateButton(var objButton: TCastleButton; const ButtonText: String; const ButtonCode: TNotifyEvent = nil);
+    procedure CreateButton(var obj: TCastleButton; const AText: String; const AProc: TNotifyEvent = nil);
+    procedure CreateCheckbox(var obj: TCastleCheckbox; const AText: String; const AProc: TNotifyEvent = nil);
 //    procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
   end;
 
@@ -42,14 +43,24 @@ function HTTPEncode(const AStr: string): string;
 implementation
   uses MainGameUnit;
 
-procedure TControlHelper.CreateButton(var objButton: TCastleButton; const ButtonText: String; const ButtonCode: TNotifyEvent = nil);
+procedure TControlHelper.CreateButton(var obj: TCastleButton; const AText: String; const AProc: TNotifyEvent = nil);
 begin
-  objButton := TCastleButton.Create(Self);
-  objButton.Caption := ButtonText;
-  objButton.HorizontalAnchorDelta := 0;
-  objButton.VerticalAnchorDelta := 0;
-  objButton.onClick := ButtonCode;
-  InsertFront(objButton);
+  obj := TCastleButton.Create(Self);
+  obj.Caption := AText;
+  obj.HorizontalAnchorDelta := 0;
+  obj.VerticalAnchorDelta := 0;
+  obj.onClick := AProc;
+  InsertFront(obj);
+end;
+
+procedure TControlHelper.CreateCheckbox(var obj: TCastleCheckbox; const AText: String; const AProc: TNotifyEvent = nil);
+begin
+  obj := TCastleCheckBox.Create(Self);
+  obj.Caption := AText;
+  obj.HorizontalAnchorDelta := 0;
+  obj.VerticalAnchorDelta := 0;
+  obj.onChange := AProc;
+  InsertFront(obj);
 end;
 
 procedure TUIStateHelper.CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);

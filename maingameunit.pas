@@ -49,7 +49,9 @@ type
     fSpriteWidth: Cardinal;
     fSpriteHeight: Cardinal;
     fControlWidth: Cardinal;
-
+    fMinSpritePanelWidth: Cardinal;
+    fUseModelSpots: Boolean;
+    fUseTransparency: Boolean;
     fStretchMultiplier: Single;
     LabelFPS: TCastleLabel;
     LabelRender: TCastleLabel;
@@ -98,12 +100,16 @@ type
     function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
     procedure UpdateScale;
 
+    property  MinSpritePanelWidth: Cardinal read fMinSpritePanelWidth write fMinSpritePanelWidth;
     property  ControlWidth: Cardinal read fControlWidth write fControlWidth;
     property  StretchMultiplier: Single read fStretchMultiplier write SetStretchMultiplier default 0;
     property  ViewMode: Cardinal read fViewMode write SetViewMode default 0;
     property  OverSample: Cardinal read fOverSample write fOverSample;
     property  SpriteWidth: Cardinal read fSpriteWidth write fSpriteWidth;
     property  SpriteHeight: Cardinal read fSpriteHeight write fSpriteHeight;
+  published
+    property  UseModelSpots: Boolean read fUseModelSpots write fUseModelSpots default True;
+    property  UseTransparency: Boolean read fUseTransparency write fUseTransparency default True;
 end;
 
 var
@@ -135,13 +141,14 @@ uses GUIInitialization;
 constructor TCastleApp.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  WriteLnLog('Create CastleApp');
+
   EnableBlockingDownloads := True;
   LogAllLoading := True;
 
   DirectionCount := 8;
   FrameCount := 8;
 
-  WriteLnLog('TCastleApp Created');
 //  ViewModeSettings[vmFlat2D] = ('Flat 2D', 1, False, 0, 2 * pi * (6/8));
 {
   TViewModeSettings = record
@@ -169,6 +176,9 @@ begin
   ViewMode := 0;
   OverSample := 8;
   ControlWidth := 300;
+  MinSpritePanelWidth := 32;
+  UseModelSpots := True;
+  UseTransparency := True;
   SpriteWidth := 512;
   SpriteHeight := 512;
   StretchMultiplier := 1;
@@ -235,6 +245,9 @@ begin
   inherited;
 
   ViewWidth := StateContainer.Width - ControlWidth;
+  if ViewWidth < MinSpritePanelWidth then
+    Exit;
+
   DesiredAspect := SpriteWidth / SpriteHeight;
   ActualAspect := ViewWidth / StateContainer.Height;
 

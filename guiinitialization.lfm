@@ -49,7 +49,10 @@ object CastleForm: TCastleForm
         Align = alClient
         ClientHeight = 761
         ClientWidth = 864
+        Constraints.MinHeight = 240
+        Constraints.MinWidth = 64
         TabOrder = 1
+        OnResize = RenderPanelResize
         object Window: TCastleControlBase
           Left = 1
           Height = 759
@@ -408,32 +411,6 @@ object CastleForm: TCastleForm
         Width = 55
         Caption = 'LightLabel'
         ParentColor = False
-      end
-      object UseTransparency: TCheckBox
-        Left = 7
-        Height = 19
-        Top = 158
-        Width = 126
-        Alignment = taLeftJustify
-        AutoSize = False
-        Caption = 'Transparent Ground'
-        Checked = True
-        OnChange = UseTransparencyChange
-        State = cbChecked
-        TabOrder = 4
-      end
-      object UseModelSpots: TCheckBox
-        Left = 10
-        Height = 19
-        Top = 178
-        Width = 122
-        Alignment = taLeftJustify
-        AutoSize = False
-        Caption = 'Use Model Spots'
-        Checked = True
-        OnChange = UseModelSpotsChange
-        State = cbChecked
-        TabOrder = 5
       end
     end
     object MyRollOut2: TMyRollOut
