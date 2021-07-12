@@ -59,7 +59,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="15">
       <Unit0>
         <Filename Value="SpritelyLaz.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -131,6 +131,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ControlPanel"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="spritecontrols.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SpriteControls"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

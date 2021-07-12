@@ -19,7 +19,7 @@ uses
   CastleImages, CastleGLImages, CastleRectangles, CastleQuaternions,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging, MiscFunctions;
+  CastleGLUtils, multimodel, staging, MiscFunctions, SpriteControls;
 
 type
   { TControlPanel }
@@ -48,6 +48,8 @@ type
 
     AChk: TCastleCheckbox;
     BChk: TCastleCheckbox;
+
+    ASpin: TCastleIntegerSpinEdit;
 
     procedure UseModelSpotsClick(Sender: TObject);
     procedure UseTransparencyChange(Sender: TObject);
@@ -233,6 +235,14 @@ begin
   BChk.Height := BtnHeight;
   BChk.CheckboxColor := White;
   BChk.TextColor := White;
+
+  ASpin := TCastleIntegerSpinEdit.Create(BottomSection, 'Width', (BtnWidth * 2) + 10, BtnHeight);
+  ASpin.Left := 10;
+  ASpin.Bottom := 10 + 8 * (BtnHeight + 10);
+//  ASpin.AutoSize := False;
+  ASpin.Width := BtnWidth;
+  ASpin.Height := BtnHeight;
+
   with Parent as TCastleApp do
     begin
       WriteLnLog('Setting CP Defaults');
