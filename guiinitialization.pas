@@ -242,7 +242,7 @@ begin
   {$endif}
   AppTime := CastleGetTickCount64;
   PrepDone := False;
-  KeyPreview := True;
+//  KeyPreview := True;
   Caption := 'Spritely';
   Tracking := False;
   Button1.Caption := 'Create Sprite';

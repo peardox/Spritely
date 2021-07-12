@@ -45,11 +45,18 @@ type
     FBtn: TCastleButton;
     GBtn: TCastleButton;
     HBtn: TCastleButton;
+    IBtn: TCastleButton;
+    JBtn: TCastleButton;
+    KBtn: TCastleButton;
+    LBtn: TCastleButton;
 
     AChk: TCastleCheckbox;
     BChk: TCastleCheckbox;
 
-    ASpin: TCastleIntegerSpinEdit;
+    CtlDirections: TCastleIntegerSpinEdit;
+    CtlFrames: TCastleIntegerSpinEdit;
+    CtlSpriteHeight: TCastleIntegerSpinEdit;
+    CtlSpriteWidth: TCastleIntegerSpinEdit;
 
     procedure UseModelSpotsClick(Sender: TObject);
     procedure UseTransparencyChange(Sender: TObject);
@@ -130,17 +137,21 @@ var
   BtnHeight: Single;
   BtnFontScale: Single;
   BtnImageScale: Single;
+  BtnMargin: Single;
+  BtnRow: Cardinal;
 begin
   WriteLnLog('Start LoadOrentationLayout');
 
-  BtnWidth := (Width - 30) / 2;
-  BtnHeight := BtnWidth * 1 / 3;
-  BtnFontScale := 0.75;
-  BtnImageScale := 0.075;
+  BtnRow := 0;
+  BtnMargin := 10;
+  BtnWidth := (Width - (3 * BtnMargin)) / 2;
+  BtnHeight := 30;
+  BtnFontScale := 0.8;
+  BtnImageScale := (BtnHeight / 512) * BtnFontScale;
 
   BottomSection.CreateButton(ABtn, 'Rot Z-', @DoRotateZMinus);
-  ABtn.Left := 10;
-  ABtn.Bottom := 10;
+  ABtn.Left := BtnMargin;
+  ABtn.Bottom := BtnRow + BtnMargin;
   ABtn.AutoSize := False;
   ABtn.Width := BtnWidth;
   ABtn.Height := BtnHeight;
@@ -149,8 +160,8 @@ begin
   ABtn.ImageScale := BtnImageScale;
 
   BottomSection.CreateButton(BBtn, 'Rot Z+', @DoRotateZPlus);
-  BBtn.Left := BtnWidth + 20;
-  BBtn.Bottom := 10;
+  BBtn.Left := BtnWidth + (2 * BtnMargin);
+  BBtn.Bottom := BtnRow + BtnMargin;
   BBtn.AutoSize := False;
   BBtn.Width := BtnWidth;
   BBtn.Height := BtnHeight;
@@ -158,9 +169,11 @@ begin
   BBtn.Image.URL := 'castle-data:/icons/zplus.png';
   BBtn.ImageScale := BtnImageScale;
 
+  Inc(BtnRow);
+
   BottomSection.CreateButton(CBtn, 'Rot Y-', @DoRotateYMinus);
-  CBtn.Left := 10;
-  CBtn.Bottom := 10 + BtnHeight + 10;
+  CBtn.Left := BtnMargin;
+  CBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   CBtn.AutoSize := False;
   CBtn.Width := BtnWidth;
   CBtn.Height := BtnHeight;
@@ -170,7 +183,7 @@ begin
 
   BottomSection.CreateButton(DBtn, 'Rot Y+', @DoRotateYPlus);
   DBtn.Left := BtnWidth + 20;
-  DBtn.Bottom := 10 + BtnHeight + 10;
+  DBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   DBtn.AutoSize := False;
   DBtn.Width := BtnWidth;
   DBtn.Height := BtnHeight;
@@ -178,9 +191,11 @@ begin
   DBtn.Image.URL := 'castle-data:/icons/yplus.png';
   DBtn.ImageScale := BtnImageScale;
 
+  Inc(BtnRow);
+
   BottomSection.CreateButton(EBtn, 'Rot X-', @DoRotateXMinus);
-  EBtn.Left := 10;
-  EBtn.Bottom := 10 + 2 * (BtnHeight + 10);
+  EBtn.Left := BtnMargin;
+  EBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   EBtn.AutoSize := False;
   EBtn.Width := BtnWidth;
   EBtn.Height := BtnHeight;
@@ -190,7 +205,7 @@ begin
 
   BottomSection.CreateButton(FBtn, 'Rot X+', @DoRotateXPlus);
   FBtn.Left := BtnWidth + 20;
-  FBtn.Bottom := 10 + 2 * (BtnHeight + 10);
+  FBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   FBtn.AutoSize := False;
   FBtn.Width := BtnWidth;
   FBtn.Height := BtnHeight;
@@ -198,9 +213,11 @@ begin
   FBtn.Image.URL := 'castle-data:/icons/xplus.png';
   FBtn.ImageScale := BtnImageScale;
 
+  Inc(BtnRow);
+
   BottomSection.CreateButton(GBtn, 'Zoom Out', @DoZoomOut);
-  GBtn.Left := 10;
-  GBtn.Bottom := 10 + 3 * (BtnHeight + 10);
+  GBtn.Left := BtnMargin;
+  GBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   GBtn.AutoSize := False;
   GBtn.Width := BtnWidth;
   GBtn.Height := BtnHeight;
@@ -210,7 +227,7 @@ begin
 
   BottomSection.CreateButton(HBtn, 'Zoom In', @DoZoomIn);
   HBtn.Left := BtnWidth + 20;
-  HBtn.Bottom := 10 + 3 * (BtnHeight + 10);
+  HBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   HBtn.AutoSize := False;
   HBtn.Width := BtnWidth;
   HBtn.Height := BtnHeight;
@@ -218,36 +235,123 @@ begin
   HBtn.Image.URL := 'castle-data:/icons/zoomin.png';
   HBtn.ImageScale := BtnImageScale;
 
+  Inc(BtnRow);
+
+  BottomSection.CreateButton(IBtn, 'Move Up', @DoZoomOut);
+  IBtn.Left := BtnMargin;
+  IBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  IBtn.AutoSize := False;
+  IBtn.Width := BtnWidth;
+  IBtn.Height := BtnHeight;
+  IBtn.FontScale := BtnFontScale;
+  IBtn.Image.URL := 'castle-data:/icons/up.png';
+  IBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(JBtn, 'Move Down', @DoZoomIn);
+  JBtn.Left := BtnWidth + 20;
+  JBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  JBtn.AutoSize := False;
+  JBtn.Width := BtnWidth;
+  JBtn.Height := BtnHeight;
+  JBtn.FontScale := BtnFontScale;
+  JBtn.Image.URL := 'castle-data:/icons/down.png';
+  JBtn.ImageScale := BtnImageScale;
+
+  Inc(BtnRow);
+
+  BottomSection.CreateButton(KBtn, 'Move Left', @DoZoomOut);
+  KBtn.Left := BtnMargin;
+  KBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  KBtn.AutoSize := False;
+  KBtn.Width := BtnWidth;
+  KBtn.Height := BtnHeight;
+  KBtn.FontScale := BtnFontScale;
+  KBtn.Image.URL := 'castle-data:/icons/left.png';
+  KBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(LBtn, 'Move Right', @DoZoomIn);
+  LBtn.Left := BtnWidth + 20;
+  LBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  LBtn.AutoSize := False;
+  LBtn.Width := BtnWidth;
+  LBtn.Height := BtnHeight;
+  LBtn.FontScale := BtnFontScale;
+  LBtn.Image.URL := 'castle-data:/icons/right.png';
+  LBtn.ImageScale := BtnImageScale;
+
+  Inc(BtnRow);
+
   BottomSection.CreateCheckbox(AChk, 'Transparent', @UseTransparencyChange);
-  AChk.Left := 10;
-  AChk.Bottom := 10 + 5 * (BtnHeight + 10);
+  AChk.Left := BtnMargin;
+  AChk.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   AChk.AutoSize := False;
   AChk.Width := BtnWidth;
   AChk.Height := BtnHeight;
   AChk.CheckboxColor := White;
   AChk.TextColor := White;
 
+  Inc(BtnRow);
+
   BottomSection.CreateCheckbox(BChk, 'Local Lights', @UseModelSpotsClick);
-  BChk.Left := 10;
-  BChk.Bottom := 10 + 6 * (BtnHeight + 10);
+  BChk.Left := BtnMargin;
+  BChk.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
   BChk.AutoSize := False;
   BChk.Width := BtnWidth;
   BChk.Height := BtnHeight;
   BChk.CheckboxColor := White;
   BChk.TextColor := White;
 
-  ASpin := TCastleIntegerSpinEdit.Create(BottomSection, 'Width', (BtnWidth * 2) + 10, BtnHeight);
-  ASpin.Left := 10;
-  ASpin.Bottom := 10 + 8 * (BtnHeight + 10);
-//  ASpin.AutoSize := False;
-  ASpin.Width := BtnWidth;
-  ASpin.Height := BtnHeight;
+  Inc(BtnRow);
+
+  CtlDirections := TCastleIntegerSpinEdit.Create(BottomSection, 'Directions', (BtnWidth * 2) + 10, BtnHeight);
+  CtlDirections.Left := BtnMargin;
+  CtlDirections.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlDirections.Width := BtnWidth;
+  CtlDirections.Height := BtnHeight;
+
+  Inc(BtnRow);
+
+  CtlFrames := TCastleIntegerSpinEdit.Create(BottomSection, 'Frames', (BtnWidth * 2) + 10, BtnHeight);
+  CtlFrames.Left := BtnMargin;
+  CtlFrames.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlFrames.Width := BtnWidth;
+  CtlFrames.Height := BtnHeight;
+
+  Inc(BtnRow);
+
+  CtlSpriteHeight := TCastleIntegerSpinEdit.Create(BottomSection, 'Height', (BtnWidth * 2) + 10, BtnHeight);
+  CtlSpriteHeight.Left := BtnMargin;
+  CtlSpriteHeight.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlSpriteHeight.Width := BtnWidth;
+  CtlSpriteHeight.Height := BtnHeight;
+
+  Inc(BtnRow);
+
+  CtlSpriteWidth := TCastleIntegerSpinEdit.Create(BottomSection, 'Width', (BtnWidth * 2) + 10, BtnHeight);
+  CtlSpriteWidth.Left := BtnMargin;
+  CtlSpriteWidth.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlSpriteWidth.Width := BtnWidth;
+  CtlSpriteWidth.Height := BtnHeight;
+
+  Inc(BtnRow);
 
   with Parent as TCastleApp do
     begin
       WriteLnLog('Setting CP Defaults');
       AChk.Checked := UseTransparency;
       BChk.Checked := UseModelSpots;
+      CtlDirections.Min := 1;
+      CtlDirections.Max := 64;
+      CtlDirections.Value := 8;
+      CtlFrames.Min := 1;
+      CtlFrames.Max := 64;
+      CtlFrames.Value := 4;
+      CtlSpriteHeight.Min := 16;
+      CtlSpriteHeight.Max := 2048;
+      CtlSpriteHeight.Value := SpriteHeight;
+      CtlSpriteWidth.Min := 16;
+      CtlSpriteWidth.Max := 2048;
+      CtlSpriteWidth.Value := SpriteWidth;
     end;
 end;
 

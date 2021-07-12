@@ -35,7 +35,15 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     constructor Create(AOwner: TComponent; ACaption: String; const AWidth: Single; const AHeight: Single);
-//    procedure Resize; override;
+    function  GetSpinValue: Integer;
+    procedure SetSpinValue(AValue: Integer);
+    function  GetSpinMinValue: Integer;
+    procedure SetSpinMinValue(AValue: Integer);
+    function  GetSpinMaxValue: Integer;
+    procedure SetSpinMaxValue(AValue: Integer);
+    property  Value: Integer read GetSpinValue write SetSpinValue;
+    property  Min: Integer read GetSpinMinValue write SetSpinMinValue;
+    property  Max: Integer read GetSpinMaxValue write SetSpinMaxValue;
   end;
 
 {
@@ -122,6 +130,40 @@ begin
 //  SpinMinus.Left := SpinLabel.Width;
 
 end;
+
+function  TCastleIntegerSpinEdit.GetSpinValue: Integer;
+begin
+  Result := SpinNumber.Value;
+end;
+
+procedure TCastleIntegerSpinEdit.SetSpinValue(AValue: Integer);
+begin
+  if not(AValue = SpinNumber.Value) then
+    SpinNumber.Value := AValue;
+end;
+
+function  TCastleIntegerSpinEdit.GetSpinMinValue: Integer;
+begin
+  Result := SpinNumber.Min;
+end;
+
+procedure TCastleIntegerSpinEdit.SetSpinMinValue(AValue: Integer);
+begin
+  if not(AValue = SpinNumber.Min) then
+    SpinNumber.Min := AValue;
+end;
+
+function  TCastleIntegerSpinEdit.GetSpinMaxValue: Integer;
+begin
+  Result := SpinNumber.Max;
+end;
+
+procedure TCastleIntegerSpinEdit.SetSpinMaxValue(AValue: Integer);
+begin
+  if not(AValue = SpinNumber.Max) then
+    SpinNumber.Max := AValue;
+end;
+
 
 procedure TCastleIntegerSpinEdit.FocusOnMe(const Sender: TInputListener; const Event: TInputMotion; var Handled: Boolean);
 begin
