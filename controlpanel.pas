@@ -233,29 +233,31 @@ begin
   BChk.Height := BtnHeight;
   BChk.CheckboxColor := White;
   BChk.TextColor := White;
-  if not(Parent = nil) then
+  with Parent as TCastleApp do
     begin
       WriteLnLog('Setting CP Defaults');
-      AChk.Checked := TCastleApp(Parent).UseTransparency;
-      BChk.Checked := TCastleApp(Parent).UseModelSpots;
+      AChk.Checked := UseTransparency;
+      BChk.Checked := UseModelSpots;
     end;
 end;
 
 procedure TSpriteControlPanel.DoZoomIn(Sender: TObject);
 begin
-  CastleApp.iScaleMultiplier := CastleApp.iScaleMultiplier + (CastleApp.iScaleMultiplier * 0.1);
+  with Parent as TCastleApp do
+    iScaleMultiplier := iScaleMultiplier + (iScaleMultiplier * 0.1);
 end;
 
 procedure TSpriteControlPanel.DoZoomOut(Sender: TObject);
 begin
-  CastleApp.iScaleMultiplier := CastleApp.iScaleMultiplier - (CastleApp.iScaleMultiplier * 0.1);
+  with Parent as TCastleApp do
+    iScaleMultiplier := iScaleMultiplier - (iScaleMultiplier * 0.1);
 end;
 
 procedure TSpriteControlPanel.UpdateView;
 var
   Q: TQuaternion;
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     begin
     Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
     Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, WorkingModel.BaseRotation.X));
@@ -268,42 +270,42 @@ end;
 
 procedure TSpriteControlPanel.DoRotateXPlus(Sender: TObject);
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateXMinus(Sender: TObject);
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X - ((2 * Pi) / DirectionCount);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateYPlus(Sender: TObject);
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateYMinus(Sender: TObject);
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y - ((2 * Pi) / DirectionCount);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateZPlus(Sender: TObject);
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateZMinus(Sender: TObject);
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z - ((2 * Pi) / DirectionCount);
   UpdateView;
 end;
@@ -312,7 +314,7 @@ procedure TSpriteControlPanel.UseModelSpotsClick(Sender: TObject);
 var
   i: Integer;
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     begin
       UseModelSpots := BChk.Checked;
 
@@ -341,7 +343,7 @@ procedure TSpriteControlPanel.UseTransparencyChange(Sender: TObject);
 var
   i: Integer;
 begin
-  With CastleApp do
+  with Parent as TCastleApp do
     begin
       UseTransparency := AChk.Checked;
 
