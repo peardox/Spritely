@@ -1,7 +1,7 @@
 object CastleForm: TCastleForm
-  Left = 636
+  Left = 413
   Height = 808
-  Top = 200
+  Top = 173
   Width = 1275
   Caption = 'CastleApp'
   ClientHeight = 788
@@ -417,7 +417,9 @@ object CastleForm: TCastleForm
         Alignment = taLeftJustify
         AutoSize = False
         Caption = 'Transparent Ground'
+        Checked = True
         OnChange = UseTransparencyChange
+        State = cbChecked
         TabOrder = 4
       end
       object UseModelSpots: TCheckBox

@@ -19,7 +19,8 @@ uses
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging, Overlays, MiscFunctions;
+  CastleGLUtils, multimodel, staging, Overlays, MiscFunctions,
+  ControlPanel;
 
 type
   { TSheetViewer }
@@ -172,7 +173,7 @@ begin
 
   InsertFront(VPBackImage);
 
-  ControlPanel := TControlPanel.Create(Self, ControlWidth, StateContainer.Height);
+  ControlPanel := TControlPanel.Create(Self, ControlWidth);
 end;
 
 end.

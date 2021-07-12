@@ -22,6 +22,7 @@ uses
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, Overlays, MiscFunctions,
+  ControlPanel,
   {$ifndef VER3_0} OpenSSLSockets, {$endif} CastleDownload;
 
 type
@@ -164,6 +165,7 @@ begin
   AppLogLevel := False;
   WorkingModel := nil;
   ModelArray := nil;
+  FullSIze := True;
   ViewMode := 0;
   OverSample := 8;
   ControlWidth := 300;
@@ -277,7 +279,8 @@ begin
       {$endif}
   end;
 
-  LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height);
+  LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
+   + ' : ' + FloatToStr(iScaleMultiplier);
 
   UpdateScale;
   WriteLnLog('End State Resize : LeftTop = ' + FloatToStr(Viewport.Left) + ' ' + FloatToStr(Viewport.Height) + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height));
@@ -337,7 +340,7 @@ begin
 
   InsertFront(Viewport);
 
-  ControlPanel := TSpriteControlPanel.Create(Self, ControlWidth, StateContainer.Height);
+  ControlPanel := TSpriteControlPanel.Create(Self, ControlWidth);
   ControlPanel.LoadOrentationLayout;
 
   UpdateScale; // SB
@@ -503,6 +506,8 @@ var
   sc: TVector3;
   sr: Single;
 begin
+  inherited;
+
   if AppLogLevel then
     WriteLnLog('Start Update');
   if ModelRotationCheck or not ModelRotationDone then
@@ -598,7 +603,9 @@ begin
       {$endif}
     end;
 
-  inherited;
+  LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
+   + ' : ' + FormatFloat('#0.00000', iScaleMultiplier);
+
 end;
 
 procedure ShowAppMessage(const AMsg: String);
