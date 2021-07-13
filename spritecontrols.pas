@@ -43,6 +43,7 @@ type
     procedure SetSpinStepSize(AValue: Cardinal);
     procedure OnPlusClick(Sender: TObject);
     procedure OnMinusClick(Sender: TObject);
+    procedure DoEditedChange(Sender: TObject);
   public
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     constructor Create(AOwner: TComponent); override;
@@ -95,6 +96,7 @@ begin
   SpinMinus.onClick := @OnMinusClick;
 
   SpinNumber := TCastleIntegerEdit.Create(SpinGroup);
+  SpinNumber.OnChange := @DoEditedChange;
 
   SpinPlus := TCastleButton.Create(SpinGroup);
   SpinPlus.Caption := '+';
@@ -137,8 +139,6 @@ begin
 
   SpinLabel.Height := AHeight;
   SpinLabel.Width := AWidth - SpinPlus.Width - SpinNumber.Width - SpinMinus.Width;
-//  SpinMinus.Left := SpinLabel.Width;
-
 end;
 
 function  TCastleIntegerSpinEdit.GetSpinValue: Integer;
@@ -156,9 +156,9 @@ begin
         SpinNumber.Value := Max
       else
         SpinNumber.Value := AValue;
-      if Assigned(OnChange) then
-        OnChange(Self);
     end;
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 function  TCastleIntegerSpinEdit.GetSpinMinValue: Integer;
@@ -202,6 +202,15 @@ end;
 procedure TCastleIntegerSpinEdit.OnMinusClick(Sender: TObject);
 begin
   Value := Value - StepSize;
+end;
+
+procedure TCastleIntegerSpinEdit.DoEditedChange(Sender: TObject);
+var
+  i: Integer;
+begin
+  i := TCastleIntegerEdit(Sender).Value;
+  WriteLnLog('Sender : ' + Sender.ClassName + ' : ' + IntToStr(i));
+  Self.Value := TCastleIntegerEdit(Sender).Value;
 end;
 
 end.
