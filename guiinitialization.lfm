@@ -159,46 +159,17 @@ object CastleForm: TCastleForm
       TabOrder = 0
       object TreeView1: TTreeView
         Left = 0
-        Height = 423
+        Height = 613
         Top = 0
         Width = 200
         Align = alClient
         Images = ImageList1
         ImagesWidth = 24
         ScrollBars = ssAutoBoth
-        TabOrder = 1
+        TabOrder = 0
         OnClick = TreeView1Click
         OnContextPopup = TreeView1ContextPopup
         OnEditingEnd = TreeView1EditingEnd
-      end
-      object Splitter2: TSplitter
-        Cursor = crVSplit
-        Left = 0
-        Height = 5
-        Top = 423
-        Width = 200
-        Align = alBottom
-        ResizeAnchor = akBottom
-      end
-      object ListView1: TListView
-        Left = 0
-        Height = 185
-        Top = 428
-        Width = 200
-        Align = alBottom
-        AutoSort = False
-        Columns = <        
-          item
-            Caption = 'Description'
-            Width = 150
-          end        
-          item
-            Caption = 'Value'
-            Width = 146
-          end>
-        ScrollBars = ssAutoBoth
-        TabOrder = 0
-        ViewStyle = vsReport
       end
     end
     object PanelLeftBottom: TPanel

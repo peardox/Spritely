@@ -616,11 +616,6 @@ begin
           end;
 
       end;
-      {$ifdef cgeapp}
-// Todo : UpdateInfoPanel for App
-      {$else}
-      CastleForm.UpdateInfoPanel;
-      {$endif}
     end;
 
   LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)

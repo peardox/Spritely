@@ -41,7 +41,6 @@ type
     ECSlider1: TECSlider;
     ImageList1: TImageList;
     Label1: TLabel;
-    ListView1: TListView;
     MainMenu1: TMainMenu;
     AppLog: TMemo;
     MenuItem1: TMenuItem;
@@ -58,7 +57,6 @@ type
     PopupMenu1: TPopupMenu;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     Splitter1: TSplitter;
-    Splitter2: TSplitter;
     TreeView1: TTreeView;
     Window: TCastleControlBase;
     procedure Button1Click(Sender: TObject);
@@ -83,18 +81,10 @@ type
     procedure WindowMotion(Sender: TObject; const Event: TInputMotion);
     procedure WindowOpen(Sender: TObject);
 
-    procedure AddInfo(const AName: String; const AValue: Integer);
-    procedure AddInfo(const AName: String; const AValue: Single);
-    procedure AddInfo(const AName: String; const AValue: String);
-    procedure UpdateInfo(const AName: String; const AValue: Integer);
-    procedure UpdateInfo(const AName: String; const AValue: Single);
-    procedure UpdateInfo(const AName: String; const AValue: String);
     procedure WindowPress(Sender: TObject; const Event: TInputPressRelease);
 
     procedure MapAnims(const modelNode: TTreeNode; const AnimNode: TAnimationInfo);
     function  Pos2DTo3D(const AXpos: Single; const AYpos: Single): String;
-    procedure AddInfoPanel;
-    procedure UpdateInfoPanel;
     procedure LoadGuiModel(const AModel: String; const isRemote: Boolean = False);
     function  SyncModelFromNode(const Node: Pointer): TCastleModel;
     function  IdentifyNode(const Node: TTreeNode): Cardinal;
@@ -201,8 +191,6 @@ begin
   Tracking := False;
   Button1.Caption := 'Create Sprite';
   Button2.Caption := 'Change ViewMode';
-  Listview1.Visible := False;
-  Splitter2.Visible := False;
 end;
 
 procedure TCastleForm.DebugBoxMenuClick(Sender: TObject);
@@ -211,8 +199,6 @@ begin
     begin
       Exists := not Exists;
       DebugBoxMenu.Checked := Exists;
-      Listview1.Visible := Exists;
-      Splitter2.Visible := Exists;
     end;
 end;
 
@@ -576,8 +562,6 @@ begin
 //      LoadModel(URIToFilenameSafe(AModel));
       Tracking := True;
     end;
-  AddInfoPanel;
-
 end;
 
 procedure TCastleForm.Button1Click(Sender: TObject);
@@ -674,48 +658,8 @@ end;
 
 procedure TCastleForm.WindowMotion(Sender: TObject; const Event: TInputMotion);
 begin
-  Window.SetFocus;
-  UpdateInfo('Mouse', Pos2DTo3D(Event.Position.X, Event.Position.Y));
-end;
-
-procedure TCastleForm.AddInfo(const AName: String; const AValue: Integer);
-begin
-  AddInfo(AName, IntToStr(AValue));
-end;
-
-procedure TCastleForm.AddInfo(const AName: String; const AValue: Single);
-begin
-  AddInfo(AName, FormatFloat(InfoFloatFormat, AValue));
-end;
-
-procedure TCastleForm.AddInfo(const AName: String; const AValue: String);
-var
-  vNewItem: TListItem;
-begin
-  vNewItem := ListView1.Items.Add;
-  vNewItem.Caption := AName;
-  vNewItem.SubItems.Add(AValue);
-end;
-
-procedure TCastleForm.UpdateInfo(const AName: String; const AValue: Integer);
-begin
-  UpdateInfo(AName, IntToStr(AValue));
-end;
-
-procedure TCastleForm.UpdateInfo(const AName: String; const AValue: Single);
-begin
-  UpdateInfo(AName, FormatFloat(InfoFloatFormat, AValue));
-end;
-
-procedure TCastleForm.UpdateInfo(const AName: String; const AValue: String);
-var
-  idx: Integer;
-begin
-  for idx := 0 to ListView1.Items.Count -1 do
-    begin
-      if ListView1.Items[idx].Caption = AName then
-        ListView1.Items[idx].SubItems[0] := AValue;
-    end;
+  if not(ActiveControl = Window) then
+    Window.SetFocus;
 end;
 
 procedure TCastleForm.WindowPress(Sender: TObject;
@@ -751,73 +695,6 @@ begin
     end;
 
   Result := res;
-end;
-
-procedure TCastleForm.AddInfoPanel;
-begin
-  with CastleApp do
-    begin
-      if not(WorkingModel = nil) then
-        begin
-          AddInfo('Mouse', '');
-          AddInfo('Radius', WorkingModel.Scene.BoundingBox.Radius2D(2).ToString);
-          AddInfo('Window Width', Window.Width);
-          AddInfo('Window Height', Window.Height);
-          AddInfo('Projection (Y Axis)', CastleApp.CameraElevation);
-          AddInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
-          AddInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
-          AddInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
-          AddInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
-          AddInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
-          AddInfo('BBox 0', WorkingModel.Scene.BoundingBox.Data[0].ToString);
-          AddInfo('BBox 1', WorkingModel.Scene.BoundingBox.Data[1].ToString);
-          AddInfo('Translation', WorkingModel.Scene.Translation.ToString);
-          AddInfo('Center', WorkingModel.Scene.Center.ToString);
-          AddInfo('Rotation', WorkingModel.Scene.Rotation.ToString);
-          AddInfo('iScale', CastleApp.iScale.ToString);
-          AddInfo('iScaleMultiplier', CastleApp.iScaleMultiplier.ToString);
-          AddInfo('BoundRadius', CastleApp.BoundRadius.ToString);
-          AddInfo('Pos A', '');
-          AddInfo('Pos B', '');
-          AddInfo('Size', WorkingModel.Scene.BoundingBox.Size.ToString);
-          AddInfo('Max Viewport', VPMax.ToString);
-          AddInfo('Translation', WorkingModel.Transform.Translation.ToString);
-          AddInfo('Center', WorkingModel.Transform.Center.ToString);
-          AddInfo('Rotation', WorkingModel.Transform.Rotation.ToString);
-        end;
-    end;
-end;
-
-procedure TCastleForm.UpdateInfoPanel;
-begin
-  with CastleApp do
-    begin
-      if not(WorkingModel = nil) then
-        begin
-          UpdateInfo('Radius', WorkingModel.Scene.BoundingBox.Radius2D(2).ToString);
-          UpdateInfo('Window Width', Window.Width);
-          UpdateInfo('Window Height', Window.Height);
-          UpdateInfo('Ortho Width', Viewport.Camera.Orthographic.Width);
-          UpdateInfo('Ortho Height', Viewport.Camera.Orthographic.Height);
-          UpdateInfo('Ortho Effective Width', Viewport.Camera.Orthographic.EffectiveWidth);
-          UpdateInfo('Ortho Effective Height', Viewport.Camera.Orthographic.EffectiveHeight);
-          UpdateInfo('Ortho Scale', Viewport.Camera.Orthographic.Scale);
-          UpdateInfo('BBox 0', WorkingModel.Scene.BoundingBox.Data[0].ToString);
-          UpdateInfo('BBox 1', WorkingModel.Scene.BoundingBox.Data[1].ToString);
-          UpdateInfo('Translation', WorkingModel.Scene.Translation.ToString);
-          UpdateInfo('Center', WorkingModel.Scene.Center.ToString);
-          UpdateInfo('Rotation', WorkingModel.Scene.Rotation.ToString);
-          UpdateInfo('iScale', CastleApp.iScale.ToString);
-          UpdateInfo('iScaleMultiplier', CastleApp.iScaleMultiplier.ToString);
-          UpdateInfo('BoundRadius', CastleApp.BoundRadius.ToString);
-          UpdateInfo('Pos A', Pos2DTo3D(0, 0));
-          UpdateInfo('Pos B', Pos2DTo3D(Window.Width, Window.Height));
-          UpdateInfo('Size', WorkingModel.Scene.BoundingBox.Size.ToString);
-          UpdateInfo('Translation', WorkingModel.Transform.Translation.ToString);
-          UpdateInfo('Center', WorkingModel.Transform.Center.ToString);
-          UpdateInfo('Rotation', WorkingModel.Transform.Rotation.ToString);
-        end;
-    end;
 end;
 
 end.
