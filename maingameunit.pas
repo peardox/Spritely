@@ -567,6 +567,13 @@ begin
       begin
         StretchMultiplier := 1;
         Viewport.Camera.Orthographic.Stretch := False;
+        CameraElevation :=  -sqrt(2.0);
+        ViewFromRadius(2, CameraElevation, CameraRotation);
+      end
+    else if ViewMode = 6 then
+      begin
+        StretchMultiplier := 1;
+        Viewport.Camera.Orthographic.Stretch := False;
         CameraElevation :=  -999999;
         ViewFromRadius(2, CameraElevation,  2 * pi * (6/8));
       end
@@ -659,7 +666,7 @@ begin
           if isSpriteTransparent then
             begin
               SourceViewport.Transparent := True;
-              SourceViewport.BackgroundColor := Vector4(1,1,1,0);
+//              SourceViewport.BackgroundColor := Vector4(1,1,1,0);
             end
           else
             begin

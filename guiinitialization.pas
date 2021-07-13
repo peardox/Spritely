@@ -22,7 +22,7 @@ uses
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleLCLUtils,
   CastleDialogs, CastleApplicationProperties, CastleLog, CastleTimeUtils,
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels, BGRAKnob,
+  CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels,
   BCLabel, ECSwitch, ECSlider, ECSpinCtrls, CastleGLShaders, X3DLoad,
   SheetView, Overlays, RGBAlphaImageHelp;
 
@@ -30,34 +30,18 @@ type
   { TCastleForm }
 
   TCastleForm = class(TForm)
-    BGRAKnob1: TBGRAKnob;
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
-    Button4: TButton;
-    Button5: TButton;
     CastleOpenDialog1: TCastleOpenDialog;
     LogPanel: TPanel;
     RenderPanel: TPanel;
     TabControl1: TTabControl;
     ComboBox1: TComboBox;
-    ComboBox2: TComboBox;
-    ComboBox3: TComboBox;
     ECSlider1: TECSlider;
-    GroundHeightSlider: TECSlider;
-    GroundScaleSlider: TECSlider;
-    ECSwitch1: TECSwitch;
-    GroundHeightEdit: TFloatSpinEdit;
-    GroundScaleEdit: TFloatSpinEdit;
     ImageList1: TImageList;
     Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    LightLabel: TLabel;
     ListView1: TListView;
-    ListView2: TListView;
     MainMenu1: TMainMenu;
     AppLog: TMemo;
     MenuItem1: TMenuItem;
@@ -66,47 +50,29 @@ type
     CreateSpriteMenu: TMenuItem;
     ExitMenu: TMenuItem;
     SelectDirectoryMenuItem: TMenuItem;
-    MyRollOut1: TMyRollOut;
-    MyRollOut2: TMyRollOut;
-    MyRollOut3: TMyRollOut;
     Panel1: TPanel;
-    GPPanel1: TPanel;
-    Panel4: TPanel;
-    GPPanel2: TPanel;
-    Panel7: TPanel;
     PanelLeft: TPanel;
     Panel3: TPanel;
     PanelLeftBottom: TPanel;
     Panel5: TPanel;
-    PanelRight: TPanel;
     PopupMenu1: TPopupMenu;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
-    SpinEdit1: TSpinEdit;
-    SpinEdit2: TSpinEdit;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     TreeView1: TTreeView;
     Window: TCastleControlBase;
-    procedure BGRAKnob1ValueChanged(Sender: TObject; Value: single);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-    procedure Button4Click(Sender: TObject);
-    procedure ComboBox2Change(Sender: TObject);
-    procedure ComboBox3Change(Sender: TObject);
     procedure ECSlider1Change(Sender: TObject);
-    procedure GroundHeightSliderChange(Sender: TObject);
-    procedure GroundScaleSliderChange(Sender: TObject);
+    procedure FormResize(Sender: TObject);
     procedure ExitMenuClick(Sender: TObject);
     procedure FileOpenMenuClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure DebugBoxMenuClick(Sender: TObject);
     procedure CreateSpriteMenuClick(Sender: TObject);
-    procedure ListView1Click(Sender: TObject);
     procedure RenderPanelResize(Sender: TObject);
     procedure SelectDirectoryMenuItemClick(Sender: TObject);
-    procedure SpinEdit1Change(Sender: TObject);
-    procedure SpinEdit2Change(Sender: TObject);
     procedure TabControl1Change(Sender: TObject);
     procedure TreeView1Click(Sender: TObject);
     procedure TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -130,7 +96,6 @@ type
     procedure AddInfoPanel;
     procedure UpdateInfoPanel;
     procedure LoadGuiModel(const AModel: String; const isRemote: Boolean = False);
-    procedure FocusViewport;
     function  SyncModelFromNode(const Node: Pointer): TCastleModel;
     function  IdentifyNode(const Node: TTreeNode): Cardinal;
   private
@@ -221,11 +186,7 @@ begin
   ApplicationProperties.OnLog.Add(@LogHandler.LogCallback);
 
   InitializeLog;
-{
-  ExpandPanels1.AddPanel(MyRollOut1);
-  ExpandPanels1.AddPanel(MyRollOut2);
-  ExpandPanels1.AddPanel(MyRollOut3);
-}
+
   TabControl1.TabIndex := 0;
   RenderPanel.Visible := True;
   LogPanel.Visible := False;
@@ -233,16 +194,9 @@ begin
   ModeOrientation := True;
   Applog.Clear;
 
-  {$ifdef darwin}
-//  WindowState := wsFullScreen;
-  {$endif}
   WriteLnLog('FormCreate : ' + FormatFloat('####0.000', (CastleGetTickCount64 - AppTime) / 1000) + ' : ');
-  {$ifdef darwin}
-//  WindowState := wsFullScreen;
-  {$endif}
   AppTime := CastleGetTickCount64;
   PrepDone := False;
-//  KeyPreview := True;
   Caption := 'Spritely';
   Tracking := False;
   Button1.Caption := 'Create Sprite';
@@ -265,11 +219,6 @@ end;
 procedure TCastleForm.CreateSpriteMenuClick(Sender: TObject);
 begin
   Button1Click(Sender);
-end;
-
-procedure TCastleForm.ListView1Click(Sender: TObject);
-begin
-  FocusViewport;
 end;
 
 procedure TCastleForm.RenderPanelResize(Sender: TObject);
@@ -320,18 +269,6 @@ begin
       // AddGuiModel(URIToFilenameSafe(CastleOpenDialog1.Filename));
       // Caption := 'Spritely : ' + CastleOpenDialog1.Filename;
 //    end;
-end;
-
-procedure TCastleForm.SpinEdit1Change(Sender: TObject);
-begin
-  CastleApp.SpriteWidth := SpinEdit1.Value;
-  CastleApp.Resize;
-end;
-
-procedure TCastleForm.SpinEdit2Change(Sender: TObject);
-begin
-  CastleApp.SpriteHeight := SpinEdit2.Value;
-  CastleApp.Resize;
 end;
 
 procedure TCastleForm.TabControl1Change(Sender: TObject);
@@ -458,14 +395,6 @@ begin
             end;
         end;
     end;
-
-  FocusViewport;
-end;
-
-procedure TCastleForm.FocusViewport;
-begin
-//  if TabControl1.TabIndex = 0 then
-//    ActiveControl := Window;
 end;
 
 procedure TCastleForm.TreeView1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -502,7 +431,6 @@ begin
           WriteLnLog('Context Clicked ' + ModelNode.ModelName);
         end;
     end;
-  FocusViewport;
 end;
 
 procedure TCastleForm.TreeView1EditingEnd(Sender: TObject; Node: TTreeNode;
@@ -676,68 +604,14 @@ begin
         end;
     end;
   Button1.Enabled := True;
-  FocusViewport;
-end;
-
-procedure TCastleForm.BGRAKnob1ValueChanged(Sender: TObject; Value: single);
-var
-  ATheta: Single;
-  ARadius: Single;
-  AElevation: Single;
-  ADir: TVector3;
-begin
-//  TimePlayingSpeed := BGRAKnob1.Value;
-  LightLabel.Caption := FormatFloat('###0.0000', BGRAKnob1.Value);
-  ARadius := 1;
-  ATheta := DegToRad(BGRAKnob1.Value);
-  AElevation := -12;
-  ADir := Vector3(sqrt(ARadius) * Cos(ATheta),
-                  AElevation,
-                  sqrt(ARadius) * Sin(ATheta));
-
-//  CastleApp.Stage.LightNode.Direction := ADir;
-{
-  CastleApp.Stage.LightNode.DefaultShadowMap := TGeneratedShadowMapNode.Create;
-  CastleApp.Stage.LightNode.DefaultShadowMap.Update := upAlways;
-  CastleApp.Stage.LightNode.DefaultShadowMap.Size := 4096;
-  CastleApp.Stage.LightNode.ShadowVolumesMain := False;
-  CastleApp.Stage.LightNode.ShadowVolumes := False;
-}
-  CastleApp.LabelMode.Caption := 'Light Direction : ' + ADir.ToString;
-
 end;
 
 procedure TCastleForm.Button2Click(Sender: TObject);
 begin
   with CastleApp do
     begin
-//      SaveNode(CastleApp.Stage.RootNode, 'testscene.x3dv');
-      // Stage.ChangeTexture(CastleApp.Stage.GroundModelRoot, 'castle-data:/ground/myfreetextures/pavers1b2.jpg');
-
       ViewMode := ViewMode + 1;
-      //  if not(CastleApp.WorkingModel.CurrentAnimation = -1) then
-      //    begin
-      //      CastleApp.WorkingModel.Pause;
-      //    end;
     end;
-  FocusViewport;
-end;
-
-procedure TCastleForm.Button4Click(Sender: TObject);
-begin
-  Button4.Enabled := False;
-//  TUIState.Push(CastleOverlay);
-  Button4.Enabled := True;
-end;
-
-procedure TCastleForm.ComboBox2Change(Sender: TObject);
-begin
-  CastleApp.DirectionCount := StrToIntDef(ComboBox2.Text, 8);
-end;
-
-procedure TCastleForm.ComboBox3Change(Sender: TObject);
-begin
-  CastleApp.FrameCount := StrToIntDef(ComboBox1.Text, 8);
 end;
 
 procedure TCastleForm.ECSlider1Change(Sender: TObject);
@@ -745,17 +619,9 @@ begin
   CastleApp.WorkingModel.Scene.TimePlayingSpeed := ECSlider1.Position;
 end;
 
-procedure TCastleForm.GroundHeightSliderChange(Sender: TObject);
+procedure TCastleForm.FormResize(Sender: TObject);
 begin
-  GroundHeightEdit.Value := GroundHeightSlider.Position;
-//  CastleApp.WorkingModel.Transform.Translation := Vector3(0, GroundHeightSlider.Position, 0);
-  CastleApp.Stage.GroundTransformNode.Translation := Vector3(0, GroundHeightSlider.Position, 0);
-end;
-
-procedure TCastleForm.GroundScaleSliderChange(Sender: TObject);
-begin
-  GroundScaleEdit.Value := GroundScaleSlider.Position;
-  CastleApp.Stage.ChangeTextureCoordinates(CastleApp.Stage.GroundModelRoot, GroundScaleSlider.Position);
+  PanelLeftBottom.Height := ECSlider1.Height + Button1.Height + Button2.Height;
 end;
 
 procedure TCastleForm.ExitMenuClick(Sender: TObject);
@@ -796,8 +662,6 @@ begin
   SheetViewer := TSheetViewer.Create(Window);
   TUIState.Current := CastleApp;
   Window.Container.UIScaling := usNone;
-  SpinEdit1.Value := CastleApp.SpriteWidth;
-  SpinEdit2.Value := CastleApp.SpriteHeight;
   CastleApp.Resize;
 end;
 
@@ -810,6 +674,7 @@ end;
 
 procedure TCastleForm.WindowMotion(Sender: TObject; const Event: TInputMotion);
 begin
+  Window.SetFocus;
   UpdateInfo('Mouse', Pos2DTo3D(Event.Position.X, Event.Position.Y));
 end;
 
@@ -855,10 +720,7 @@ end;
 
 procedure TCastleForm.WindowPress(Sender: TObject;
   const Event: TInputPressRelease);
-var
-  Q: TQuaternion;
 begin
-  FocusViewport;
   if Event.Key = keySpace then
     begin
       if not(CastleApp.WorkingModel.CurrentAnimation = -1) then
@@ -867,44 +729,12 @@ begin
         end;
     end;
 
-  if ModeOrientation then
+  if Event.Key = keyR then
     begin
-      with CastleApp do
+      if not(CastleApp.WorkingModel = nil) then
         begin
-          if not(WorkingModel = nil) then
-            begin
-              if Event.Key = keyR then
-                begin
-                  ModelRotationCheck := not ModelRotationCheck;
-                  ModelRotationDone := False;
-                end;
-              if Event.Key = keyNumpadPlus then
-                CastleApp.iScaleMultiplier := CastleApp.iScaleMultiplier + (CastleApp.iScaleMultiplier * 0.1);
-              if Event.Key = keyNumpadMinus then
-                CastleApp.iScaleMultiplier := CastleApp.iScaleMultiplier - (CastleApp.iScaleMultiplier * 0.1);
-              if Event.Key = keyPageUp then
-                WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount);
-              if Event.Key = keyPageDown then
-                WorkingModel.BaseRotation.Z := WorkingModel.BaseRotation.Z - ((2 * Pi) / DirectionCount);
-              if Event.Key = keyArrowDown then
-                WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount);
-              if Event.Key = keyArrowUp then
-                WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X - ((2 * Pi) / DirectionCount);
-              if Event.Key = keyArrowRight then
-                WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount);
-              if Event.Key = keyArrowLeft then
-                WorkingModel.BaseRotation.Y := WorkingModel.BaseRotation.Y - ((2 * Pi) / DirectionCount);
-              Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
-              Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, WorkingModel.BaseRotation.X));
-              Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, WorkingModel.BaseRotation.Y));
-              Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, WorkingModel.BaseRotation.Z));
-
-              WorkingModel.Transform.Rotation := Q.ToAxisAngle;
-              LabelMode.Caption := 'Orientation : X = ' +
-                IntToStr(RadsToFace(WorkingModel.BaseRotation.X)) + ', Y = ' +
-                IntToStr(RadsToFace(WorkingModel.BaseRotation.Y)) + ', Z = ' +
-                IntToStr(RadsToFace(WorkingModel.BaseRotation.Z));
-            end;
+          CastleApp.ModelRotationCheck := not CastleApp.ModelRotationCheck;
+          CastleApp.ModelRotationDone := False;
         end;
     end;
 end;

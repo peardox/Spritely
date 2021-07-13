@@ -19,7 +19,7 @@ uses
   CastleImages, CastleGLImages, CastleRectangles, CastleQuaternions,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging, MiscFunctions;
+  CastleUtils, CastleGLUtils, multimodel, staging, MiscFunctions;
 
 type
   TCastleIntegerSpinEdit = class(TCastleUserInterface)
@@ -30,20 +30,27 @@ type
     SpinPlus: TCastleButton;
     SpinNumber: TCastleIntegerEdit;
     SpinMinus: TCastleButton;
-  protected
-    procedure FocusOnMe(const Sender: TInputListener; const Event: TInputMotion; var Handled: Boolean);
-  public
-    constructor Create(AOwner: TComponent); override;
-    constructor Create(AOwner: TComponent; ACaption: String; const AWidth: Single; const AHeight: Single);
+  private
+    FOnChange: TNotifyEvent;
+    SpinStepSize: Cardinal;
     function  GetSpinValue: Integer;
     procedure SetSpinValue(AValue: Integer);
     function  GetSpinMinValue: Integer;
     procedure SetSpinMinValue(AValue: Integer);
     function  GetSpinMaxValue: Integer;
     procedure SetSpinMaxValue(AValue: Integer);
-    property  Value: Integer read GetSpinValue write SetSpinValue;
-    property  Min: Integer read GetSpinMinValue write SetSpinMinValue;
-    property  Max: Integer read GetSpinMaxValue write SetSpinMaxValue;
+    function  GetSpinStepSize: Cardinal;
+    procedure SetSpinStepSize(AValue: Cardinal);
+    procedure OnPlusClick(Sender: TObject);
+    procedure OnMinusClick(Sender: TObject);
+  public
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; ACaption: String; const AWidth: Single; const AHeight: Single);
+    property  Value: Integer read GetSpinValue write SetSpinValue default 0;
+    property  Min: Integer read GetSpinMinValue write SetSpinMinValue default 0;
+    property  Max: Integer read GetSpinMaxValue write SetSpinMaxValue default 1;
+    property  StepSize: Cardinal read GetSpinStepSize write SetSpinStepSize default 1;
   end;
 
 {
@@ -66,6 +73,8 @@ begin
 
   AutoSizeToChildren := True;
 
+  SpinStepSize := 1;
+
   SpinRect := TCastleRectangleControl.Create(Self);
   SpinRect.AutoSizeToChildren := True;
   SpinRect.Color := Red;
@@ -83,11 +92,13 @@ begin
 
   SpinMinus := TCastleButton.Create(SpinGroup);
   SpinMinus.Caption := '-';
+  SpinMinus.onClick := @OnMinusClick;
 
   SpinNumber := TCastleIntegerEdit.Create(SpinGroup);
 
   SpinPlus := TCastleButton.Create(SpinGroup);
   SpinPlus.Caption := '+';
+  SpinPlus.onClick := @OnPlusClick;
 
   SpinGroup.InsertFront(SpinLabel);
   SpinGroup.InsertFront(SpinMinus);
@@ -110,7 +121,6 @@ begin
   SpinNumber.Width := AHeight * 2;
   SpinNumber.Alignment := hpRight;
   SpinNumber.Enabled := True;
-  SpinNumber.OnMotion := @FocusOnMe;
 
   SpinLabel.AutoSize := False;
   SpinLabel.Caption := ' ' + ACaption;
@@ -139,7 +149,16 @@ end;
 procedure TCastleIntegerSpinEdit.SetSpinValue(AValue: Integer);
 begin
   if not(AValue = SpinNumber.Value) then
-    SpinNumber.Value := AValue;
+    begin
+      if (AValue < Min) then
+        SpinNumber.Value := Min
+      else if (AValue > Max) then
+        SpinNumber.Value := Max
+      else
+        SpinNumber.Value := AValue;
+      if Assigned(OnChange) then
+        OnChange(Self);
+    end;
 end;
 
 function  TCastleIntegerSpinEdit.GetSpinMinValue: Integer;
@@ -164,13 +183,26 @@ begin
     SpinNumber.Max := AValue;
 end;
 
-
-procedure TCastleIntegerSpinEdit.FocusOnMe(const Sender: TInputListener; const Event: TInputMotion; var Handled: Boolean);
+function  TCastleIntegerSpinEdit.GetSpinStepSize: Cardinal;
 begin
-{$ifndef cgeapp}
-  With CastleForm do
-    ActiveControl := Window;
-{$endif}
+  Result := SpinStepSize;
 end;
+
+procedure TCastleIntegerSpinEdit.SetSpinStepSize(AValue: Cardinal);
+begin
+  if not(AValue = SpinStepSize) then
+    SpinStepSize := AValue;
+end;
+
+procedure TCastleIntegerSpinEdit.OnPlusClick(Sender: TObject);
+begin
+  Value := Value + StepSize;
+end;
+
+procedure TCastleIntegerSpinEdit.OnMinusClick(Sender: TObject);
+begin
+  Value := Value - StepSize;
+end;
+
 end.
 

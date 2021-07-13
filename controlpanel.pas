@@ -69,6 +69,10 @@ type
     procedure DoRotateZMinus(Sender: TObject);
     procedure DoZoomIn(Sender: TObject);
     procedure DoZoomOut(Sender: TObject);
+    procedure DoSpriteHeightChange(Sender: TObject);
+    procedure DoSpriteWidthChange(Sender: TObject);
+    procedure DoDirectionsChange(Sender: TObject);
+    procedure DoFramesChange(Sender: TObject);
   public
     procedure LoadOrentationLayout;
   end;
@@ -342,16 +346,22 @@ begin
       BChk.Checked := UseModelSpots;
       CtlDirections.Min := 1;
       CtlDirections.Max := 64;
-      CtlDirections.Value := 8;
+      CtlDirections.Value := DirectionCount;
+      CtlDirections.OnChange := @DoDirectionsChange;
       CtlFrames.Min := 1;
       CtlFrames.Max := 64;
-      CtlFrames.Value := 4;
+      CtlFrames.Value := FrameCount;
+      CtlFrames.OnChange := @DoFramesChange;
       CtlSpriteHeight.Min := 16;
       CtlSpriteHeight.Max := 2048;
       CtlSpriteHeight.Value := SpriteHeight;
+      CtlSpriteHeight.StepSize := 16;
+      CtlSpriteHeight.OnChange := @DoSpriteHeightChange;
       CtlSpriteWidth.Min := 16;
       CtlSpriteWidth.Max := 2048;
       CtlSpriteWidth.Value := SpriteWidth;
+      CtlSpriteWidth.StepSize := 16;
+      CtlSpriteWidth.OnChange := @DoSpriteWidthChange;
     end;
 end;
 
@@ -453,9 +463,37 @@ begin
     end;
 end;
 
+procedure TSpriteControlPanel.DoSpriteWidthChange(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    begin
+      SpriteWidth := CtlSpriteWidth.Value;
+      Resize;
+    end;
+end;
+
+procedure TSpriteControlPanel.DoSpriteHeightChange(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    begin
+      SpriteHeight := CtlSpriteHeight.Value;
+      Resize;
+    end;
+end;
+
+procedure TSpriteControlPanel.DoDirectionsChange(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    DirectionCount := CtlDirections.Value;
+end;
+
+procedure TSpriteControlPanel.DoFramesChange(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    FrameCount := CtlFrames.Value;
+end;
+
 procedure TSpriteControlPanel.UseTransparencyChange(Sender: TObject);
-var
-  i: Integer;
 begin
   with Parent as TCastleApp do
     begin
