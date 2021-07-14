@@ -150,13 +150,15 @@ begin
   BtnMargin := 10;
   BtnWidth := (Width - (3 * BtnMargin)) / 2;
   {$if defined(ANDROID)}
-  BtnHeight := 60;
+  BtnHeight := 120;
+  BtnFontScale := 2.4;
   {$elseif defined(CASTLE_IOS)}
-  BtnHeight := 60;
+  BtnHeight := 120;
+  BtnFontScale := 2.4;
   {$else}
   BtnHeight := 30;
-  {$endif}
   BtnFontScale := 0.8;
+  {$endif}
   BtnImageScale := (BtnHeight / 512) * BtnFontScale;
 
   BottomSection.CreateButton(ABtn, 'Rot Z-', @DoRotateZMinus);
