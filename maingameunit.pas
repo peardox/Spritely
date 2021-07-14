@@ -2,7 +2,6 @@ unit MainGameUnit;
 
 {$mode objfpc}{$H+}
 {$define multimodel}
-{$define usebackcontrol}
 
 interface
 
@@ -61,9 +60,7 @@ type
     VPMax: TVector2Integer;
     ControlPanel: TSpriteControlPanel;
     FileToLoadList: TStringList;
-    {$ifdef usebackcontrol}
     VPBackImage: TCastleImageControl;
-    {$endif}
     Viewport: TCastleViewport;
     IsTransparent: Boolean;
     WorkingModel: TCastleModel;
@@ -98,6 +95,7 @@ type
     procedure ViewFromRadius(const ARadius: Single; const ADirection: TVector3);
     procedure ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
     function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
+    function  CreateSpriteImageAlt(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
     procedure UpdateScale;
 
     property  MinSpritePanelWidth: Cardinal read fMinSpritePanelWidth write fMinSpritePanelWidth;
@@ -175,7 +173,13 @@ begin
   FrameCount := 8;
   ViewMode := 0;
   OverSample := 8;
+  {$if defined(ANDROID)}
+  ControlWidth := 600;
+  {$elseif defined(CASTLE_IOS)}
+  ControlWidth := 600;
+  {$else}
   ControlWidth := 300;
+  {$end}
   MinSpritePanelWidth := 32;
   UseModelSpots := True;
   UseTransparency := True;
@@ -283,14 +287,12 @@ begin
 
   if (TUIState.CurrentTop = CastleApp) then
     begin
-      {$ifdef usebackcontrol}
       VPBackImage.Image :=  MakeTransparentLayerGrid(SpriteWidth, SpriteHeight, Trunc(Viewport.Width), Trunc(Viewport.Height), 8);
       VPBackImage.Left := Viewport.Left;
       VPBackImage.Bottom := Viewport.Bottom;
       VPBackImage.Width := Viewport.Width;
       VPBackImage.Height := Viewport.Height;
-      {$endif}
-  end;
+    end;
 
   LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
    + ' : ' + FloatToStr(iScaleMultiplier);
@@ -325,13 +327,11 @@ procedure TCastleApp.LoadViewport;
 begin
   WriteLnLog('Start LoadViewport');
 
-  {$ifdef usebackcontrol}
   VPBackImage := TCastleImageControl.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
   VPBackImage.OwnsImage := True;
   VPBackImage.Stretch := False;
 
   InsertFront(VPBackImage);
-  {$endif}
 
   Viewport := TCastleViewport.Create({$ifndef cgeapp}CastleForm.{$endif}Window);
   Viewport.FullSize := False;
@@ -424,8 +424,8 @@ begin
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/grid16.png', 0, 1000, 1000);
-//      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
-        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
+      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
+//        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
         Stage.Add(WorkingModel.Scene);
         Viewport.Items.Add(Stage);
         Viewport.Items.MainScene := Stage;
@@ -636,6 +636,7 @@ function TCastleApp.CreateSpriteImage(const SourceScene: TCastleScene; const Tex
 var
   SourceViewport: TCastleViewport;
   GrabScene: TCastleScene;
+  GrabStage: TCastleScene;
   ViewportRect: TRectangle;
   Image: TDrawableImage;
   BackImage: TRGBAlphaImage;
@@ -647,13 +648,14 @@ begin
       try
         try
           BackImage := TRGBAlphaImage.Create(TextureWidth, TextureHeight);
-          BackImage.ClearAlpha(0);
+//          BackImage.ClearAlpha(0);
 
           Image := TDrawableImage.Create(BackImage, true, true);
 
           Image.RenderToImageBegin;
 
-          GrabScene := SourceScene.Clone(nil);
+          GrabStage := Stage.Clone(nil);
+          GrabScene := WorkingModel.Scene.Clone(nil);
 
           SourceViewport := TCastleViewport.Create(nil);
           SourceViewport.Width := TextureWidth;
@@ -670,7 +672,7 @@ begin
             end;
 
           SourceViewport.Setup2D;
-          SourceViewport.Camera.ProjectionType := ptOrthographic;
+          SourceViewport.Camera.ProjectionType := Viewport.Camera.ProjectionType;
           SourceViewport.Camera.Orthographic.Origin := Viewport.Camera.Orthographic.Origin;
           SourceViewport.Camera.Up := Viewport.Camera.Up;
           SourceViewport.Camera.Direction := Viewport.Camera.Direction;
@@ -683,15 +685,18 @@ begin
               SourceViewport.Camera.Orthographic.Height := SourceViewport.EffectiveHeight;
             end;
 
+
           SourceViewport.Camera.Orthographic.Scale := (2 * BoundRadius) /
           (Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight) * iScaleMultiplier);
 
-//          SourceViewport.Camera.Orthographic.Scale := Viewport.Camera.Orthographic.Scale / (iScale);
-//          SourceViewport.Camera.Orthographic.Scale := (2 * BoundRadius) / Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight);
-//          SourceViewport.Camera.Orthographic.Scale := ((2 * BoundRadius) / (iScale * OverSample));
+//          SourceViewport.Camera.Orthographic.Scale := Viewport.Camera.Orthographic.Scale;
 
           WriteLnLog(FloatToStr(iScale) + ' vs ' + FloatToStr(WorkingModel.LockedScale));
+
           SourceViewport.Items := ViewPort.Items;
+//          GrabStage.Add(GrabScene);
+//          SourceViewport.Items.MainScene := GrabStage;
+
           ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);
           {$ifndef cgeapp}CastleForm.{$endif}Window.Container.RenderControl(SourceViewport,ViewportRect);
 
@@ -717,12 +722,84 @@ begin
         end;
       finally
         FreeAndNil(GrabScene);
+        FreeAndNil(GrabStage);
         FreeAndNil(SourceViewport);
         FreeAndNil(Image);
-//        FreeAndNil(BackImage);
       end;
     end;
 end;
+
+function TCastleApp.CreateSpriteImageAlt(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
+var
+  SourceViewport: TCastleViewport;
+  GrabScene: TCastleScene;
+  ViewportRect: TRectangle;
+  Image: TDrawableImage;
+begin
+  SourceViewport := nil;
+
+  if not(SourceScene = nil) and (TextureWidth > 0) and (TextureHeight > 0) then
+    begin
+      try
+        try
+          Image := TDrawableImage.Create(TRGBAlphaImage.Create(TextureWidth, TextureHeight), true, true);
+          Image.RenderToImageBegin;
+
+          GrabScene := SourceScene.Clone(nil);
+
+          SourceViewport := TCastleViewport.Create(nil);
+          SourceViewport.Width := TextureWidth;
+          SourceViewport.Height := TextureHeight;
+          if isSpriteTransparent then
+            SourceViewport.Transparent := True;
+
+          SourceViewport.Setup2D;
+          SourceViewport.Camera.ProjectionType := ptOrthographic;
+          SourceViewport.Camera.Orthographic.Origin := Viewport.Camera.Orthographic.Origin;
+          SourceViewport.Camera.Up := Viewport.Camera.Up;
+          SourceViewport.Camera.Direction := Viewport.Camera.Direction;
+          SourceViewport.Camera.Position  := Viewport.Camera.Position;
+          SourceViewport.Camera.Orthographic.Scale := Min(
+            Viewport.Camera.Orthographic.EffectiveWidth / TextureWidth,
+            Viewport.Camera.Orthographic.EffectiveHeight / TextureHeight);
+
+          WriteLnLog('Scale : ' + FloatToStr(SourceViewport.Camera.Orthographic.Scale));
+
+          SourceViewport.Items := ViewPort.Items;
+          ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);
+          {$ifndef cgeapp}CastleForm.{$endif}Window.Container.RenderControl(SourceViewport,ViewportRect);
+
+          Image.RenderToImageEnd;
+
+          if not False { Application.OpenGLES } then
+          begin
+            try
+              if isSpriteTransparent then
+                Result := Image.GetContents(TRGBAlphaImage)
+              else
+                Result := Image.GetContents(TRGBImage);
+            except
+              on E : Exception do
+                begin
+                  ShowMessage(E.ClassName + LineEnding + E.Message);
+                end;
+            end;
+          end;
+
+        except
+          on E : Exception do
+            begin
+              ShowMessage(E.ClassName + LineEnding + E.Message);
+            end;
+        end;
+      finally
+        FreeAndNil(GrabScene);
+        FreeAndNil(SourceViewport);
+        FreeAndNil(Image);
+      end;
+    end;
+end;
+
 
 end.
 

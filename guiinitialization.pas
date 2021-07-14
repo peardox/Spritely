@@ -131,7 +131,7 @@ begin
 //  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
-  ModelFile := 'castle-data:/Quaternius/Cute Animated Monsters - Aug 2020/Demon.glb';
+//  ModelFile := 'castle-data:/Quaternius/Cute Animated Monsters - Aug 2020/Demon.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Cleric.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Monk.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Ranger.glb';
@@ -140,7 +140,7 @@ begin
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/Quaternius/Mechs/Stan.glb';
 //  ModelFile := 'castle-data:/isoroom/scene.gltf';
-//  ModelFile := FSPrefix + 'Assets' + 'simple_classic_crate' + PathDelim + 'scene.gltf';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + 'simple_classic_crate' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
@@ -534,7 +534,10 @@ end;
 procedure TCastleForm.LoadGuiModel(const AModel: String; const isRemote: Boolean = False);
 begin
   if not(isRemote) and not(URIFileExists(AModel)) then
-    Exit;
+    begin
+      WriteLnLog('Tried to open non-existant file ' + AModel);
+      Exit;
+    end;
 
   if not(TUIState.CurrentTop = CastleOverlay) then
     begin
@@ -574,7 +577,8 @@ begin
     begin
       if not (WorkingModel.Scene = nil) then
         begin
-          Sprite := CastleApp.CreateSpriteImage(CastleApp.WorkingModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample, CastleApp.UseTransparency);
+    //      Sprite := CastleApp.CreateSpriteImage(CastleApp.WorkingModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample, CastleApp.UseTransparency);
+          Sprite := CastleApp.CreateSpriteImageAlt(Stage, SpriteWidth * OverSample, SpriteHeight * OverSample, CastleApp.UseTransparency);
           if not(Sprite = nil) then
             begin
               if (OverSample > 1) then
