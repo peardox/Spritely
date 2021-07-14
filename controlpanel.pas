@@ -155,7 +155,7 @@ begin
   BtnHeight := 60;
   {$else}
   BtnHeight := 30;
-  {$end}
+  {$endif}
   BtnFontScale := 0.8;
   BtnImageScale := (BtnHeight / 512) * BtnFontScale;
 
