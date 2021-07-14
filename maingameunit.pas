@@ -781,7 +781,7 @@ begin
             except
               on E : Exception do
                 begin
-                  ShowMessage(E.ClassName + LineEnding + E.Message);
+//                  ShowMessage(E.ClassName + LineEnding + E.Message);
                 end;
             end;
           end;
@@ -789,7 +789,7 @@ begin
         except
           on E : Exception do
             begin
-              ShowMessage(E.ClassName + LineEnding + E.Message);
+  //            ShowMessage(E.ClassName + LineEnding + E.Message);
             end;
         end;
       finally
