@@ -179,7 +179,7 @@ begin
   ControlWidth := 600;
   {$else}
   ControlWidth := 300;
-  {$end}
+  {$endif}
   MinSpritePanelWidth := 32;
   UseModelSpots := True;
   UseTransparency := True;
