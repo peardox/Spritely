@@ -21,7 +21,7 @@ uses
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, Overlays, MiscFunctions,
-  ControlPanel,
+  CastleBoxes, ControlPanel,
   {$ifndef VER3_0} OpenSSLSockets, {$endif} CastleDownload;
 
 type
@@ -96,6 +96,7 @@ type
     procedure ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
     function  CreateSpriteImage(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
     function  CreateSpriteImageAlt(const SourceScene: TCastleScene; const TextureWidth: Cardinal; const TextureHeight: Cardinal; const isSpriteTransparent: Boolean = False): TCastleImage;
+    procedure CalcAngles(const AScene: TCastleScene);
     procedure UpdateScale;
 
     property  MinSpritePanelWidth: Cardinal read fMinSpritePanelWidth write fMinSpritePanelWidth;
@@ -427,6 +428,12 @@ begin
       Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
 //        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
         Stage.Add(WorkingModel.Scene);
+
+        if UseTransparency then
+          Stage.ShowGround(False)
+        else
+          Stage.ShowGround(True);
+
         Viewport.Items.Add(Stage);
         Viewport.Items.MainScene := Stage;
     end
@@ -647,8 +654,9 @@ begin
     begin
       try
         try
+          CalcAngles(SourceScene);
           BackImage := TRGBAlphaImage.Create(TextureWidth, TextureHeight);
-//          BackImage.ClearAlpha(0);
+          BackImage.ClearAlpha(0);
 
           Image := TDrawableImage.Create(BackImage, true, true);
 
@@ -663,7 +671,7 @@ begin
           if isSpriteTransparent then
             begin
               SourceViewport.Transparent := True;
-//              SourceViewport.BackgroundColor := Vector4(1,1,1,0);
+              SourceViewport.BackgroundColor := Vector4(1,1,1,0);
             end
           else
             begin
@@ -800,6 +808,28 @@ begin
     end;
 end;
 
+procedure TCastleApp.CalcAngles(const AScene: TCastleScene);
+var
+  corners: TBoxCorners;
+  PlanePosition: TVector3;
+  i: Integer;
+begin
+  if not(AScene = nil) then
+    begin
+      if not AScene.BoundingBox.IsEmptyOrZero then
+        begin
+          AScene.BoundingBox.Corners(corners);
+          for i := Low(corners) to High(corners) do
+            begin
+              if Viewport.PositionToCameraPlane(Vector2(corners[i].X, corners[i].Y), False, 0, PlanePosition) then
+                WriteLnLog('Corner #' + IntToStr(i) + ' : ' + corners[i].ToString + ' => ' + PlanePosition.ToString)
+              else
+                WriteLnLog('Corner #' + IntToStr(i) + ' : No can do');
+            end;
+        end;
+    end;
+
+end;
 
 end.
 
