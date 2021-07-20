@@ -33,31 +33,19 @@
       <FormatVersion Value="2"/>
       <Modes Count="0"/>
     </RunParams>
-    <RequiredPackages Count="8">
+    <RequiredPackages Count="4">
       <Item1>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="eccontrols"/>
       </Item1>
       <Item2>
-        <PackageName Value="eccontrols"/>
+        <PackageName Value="castle_base"/>
       </Item2>
       <Item3>
-        <PackageName Value="Pexpandpanels"/>
+        <PackageName Value="castle_components"/>
       </Item3>
       <Item4>
-        <PackageName Value="poweredby"/>
-      </Item4>
-      <Item5>
-        <PackageName Value="splashabout"/>
-      </Item5>
-      <Item6>
-        <PackageName Value="castle_base"/>
-      </Item6>
-      <Item7>
-        <PackageName Value="castle_components"/>
-      </Item7>
-      <Item8>
         <PackageName Value="LCL"/>
-      </Item8>
+      </Item4>
     </RequiredPackages>
     <Units Count="15">
       <Unit0>

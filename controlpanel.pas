@@ -49,6 +49,8 @@ type
     JBtn: TCastleButton;
     KBtn: TCastleButton;
     LBtn: TCastleButton;
+    MBtn: TCastleButton;
+    NBtn: TCastleButton;
 
     AChk: TCastleCheckbox;
     BChk: TCastleCheckbox;
@@ -69,6 +71,8 @@ type
     procedure DoRotateZMinus(Sender: TObject);
     procedure DoZoomIn(Sender: TObject);
     procedure DoZoomOut(Sender: TObject);
+    procedure DoCamLeft(Sender: TObject);
+    procedure DoCamRight(Sender: TObject);
     procedure DoSpriteHeightChange(Sender: TObject);
     procedure DoSpriteWidthChange(Sender: TObject);
     procedure DoDirectionsChange(Sender: TObject);
@@ -153,8 +157,8 @@ begin
   BtnHeight := 120;
   BtnFontScale := 1.6;
   {$elseif defined(CASTLE_IOS)}
-  BtnHeight := 120;
-  BtnFontScale := 1.6;
+  BtnHeight := 60;
+  BtnFontScale := 0.8;
   {$else}
   BtnHeight := 30;
   BtnFontScale := 0.8;
@@ -293,6 +297,28 @@ begin
 
   Inc(BtnRow);
 
+  BottomSection.CreateButton(MBtn, 'Cam Rot-', @DoCamLeft);
+  MBtn.Left := BtnMargin;
+  MBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  MBtn.AutoSize := False;
+  MBtn.Width := BtnWidth;
+  MBtn.Height := BtnHeight;
+  MBtn.FontScale := BtnFontScale;
+  MBtn.Image.URL := 'castle-data:/icons/camera.png';
+  MBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(NBtn, 'Cam Rot+', @DoCamRight);
+  NBtn.Left := BtnWidth + 20;
+  NBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  NBtn.AutoSize := False;
+  NBtn.Width := BtnWidth;
+  NBtn.Height := BtnHeight;
+  NBtn.FontScale := BtnFontScale;
+  NBtn.Image.URL := 'castle-data:/icons/camera.png';
+  NBtn.ImageScale := BtnImageScale;
+
+  Inc(BtnRow);
+
   BottomSection.CreateCheckbox(AChk, 'Transparent', @UseTransparencyChange);
   AChk.Left := BtnMargin;
   AChk.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
@@ -383,6 +409,18 @@ procedure TSpriteControlPanel.DoZoomOut(Sender: TObject);
 begin
   with Parent as TCastleApp do
     iScaleMultiplier := iScaleMultiplier - (iScaleMultiplier * 0.1);
+end;
+
+procedure TSpriteControlPanel.DoCamLeft(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    CameraRotation := CameraRotation - (Pi / 8);
+end;
+
+procedure TSpriteControlPanel.DoCamRight(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    CameraRotation := CameraRotation + (Pi / 8);
 end;
 
 procedure TSpriteControlPanel.UpdateView;

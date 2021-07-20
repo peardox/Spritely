@@ -811,7 +811,7 @@ end;
 procedure TCastleApp.CalcAngles(const AScene: TCastleScene);
 var
   corners: TBoxCorners;
-  PlanePosition: TVector3;
+  OutputPoint3D, RayDirection, RayOrigin: TVector3;
   i: Integer;
 begin
   if not(AScene = nil) then
@@ -819,12 +819,12 @@ begin
       if not AScene.BoundingBox.IsEmptyOrZero then
         begin
           AScene.BoundingBox.Corners(corners);
+          Viewport.PositionToRay(Vector2(0, 0), True, RayOrigin, RayDirection);
           for i := Low(corners) to High(corners) do
             begin
-              if Viewport.PositionToCameraPlane(Vector2(corners[i].X, corners[i].Y), False, 0, PlanePosition) then
-                WriteLnLog('Corner #' + IntToStr(i) + ' : ' + corners[i].ToString + ' => ' + PlanePosition.ToString)
-              else
-                WriteLnLog('Corner #' + IntToStr(i) + ' : No can do');
+              OutputPoint3D := (Viewport.Camera.ProjectionMatrix * Viewport.Camera.Matrix).MultPoint(corners[i]);
+//              WriteLnLog('Corner #' + IntToStr(i) + ' : ' + corners[i].ToString + ' => ' + OutputPoint3D.ToString);
+              WriteLnLog(FormatFloat('0.00000000', OutputPoint3D.X) + ', ' + FormatFloat('0.00000000', OutputPoint3D.Y));
             end;
         end;
     end;

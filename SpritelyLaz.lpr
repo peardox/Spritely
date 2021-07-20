@@ -13,7 +13,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, GUIInitialization, castle_components, castle_base, Staging,
-  MiscFunctions, anitakeutils, SpritelyLog, pexpandpanels, poweredby, Overlays,
+  MiscFunctions, anitakeutils, SpritelyLog, Overlays,
   RGBAlphaImageHelp, SheetView, ControlPanel, SpriteControls;
 
 {$R *.res}

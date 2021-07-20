@@ -22,8 +22,8 @@ uses
   CastleFilesUtils, CastleURIUtils, MiscFunctions, CastleLCLUtils,
   CastleDialogs, CastleApplicationProperties, CastleLog, CastleTimeUtils,
   CastleKeysMouse, JsonTools, AniTxtJson, AniTakeUtils, Types,
-  CastleQuaternions, SpritelyLog, staging, multimodel, ExpandPanels,
-  BCLabel, ECSwitch, ECSlider, ECSpinCtrls, CastleGLShaders, X3DLoad,
+  CastleQuaternions, SpritelyLog, staging, multimodel,
+  ECSlider, CastleGLShaders, X3DLoad,
   SheetView, Overlays, RGBAlphaImageHelp;
 
 type
