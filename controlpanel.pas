@@ -154,10 +154,10 @@ begin
   BtnMargin := 10;
   BtnWidth := (Width - (3 * BtnMargin)) / 2;
   {$if defined(ANDROID)}
-  BtnHeight := 120;
-  BtnFontScale := 1.6;
+  BtnHeight := 90;
+  BtnFontScale := 0.8;
   {$elseif defined(CASTLE_IOS)}
-  BtnHeight := 60;
+  BtnHeight := 90;
   BtnFontScale := 0.8;
   {$else}
   BtnHeight := 30;
