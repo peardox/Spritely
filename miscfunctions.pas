@@ -13,7 +13,7 @@ uses
 type
   TControlHelper = class helper for TCastleUserInterface
   public
-    procedure CreateButton(var obj: TCastleButton; const AText: String; const AProc: TNotifyEvent = nil);
+    procedure CreateButton(var obj: TCastleButton; const AText: String; const AProc: TNotifyEvent = nil; const AImage: String = '');
     procedure CreateCheckbox(var obj: TCastleCheckbox; const AText: String; const AProc: TNotifyEvent = nil);
 //    procedure CreateLabel(var objLabel: TCastleLabel; const Line: Integer; const BottomUp: Boolean = True; RightAlign: Boolean = False);
   end;
@@ -43,13 +43,16 @@ function HTTPEncode(const AStr: string): string;
 implementation
   uses MainGameUnit;
 
-procedure TControlHelper.CreateButton(var obj: TCastleButton; const AText: String; const AProc: TNotifyEvent = nil);
+procedure TControlHelper.CreateButton(var obj: TCastleButton; const AText: String; const AProc: TNotifyEvent = nil; const AImage: String = '');
 begin
   obj := TCastleButton.Create(Self);
   obj.Caption := AText;
+  obj.AutoSize := False;
   obj.HorizontalAnchorDelta := 0;
   obj.VerticalAnchorDelta := 0;
   obj.onClick := AProc;
+  if not(AImage = EmptyStr) then
+    obj.Image.URL := AImage;
   InsertFront(obj);
 end;
 
@@ -57,6 +60,7 @@ procedure TControlHelper.CreateCheckbox(var obj: TCastleCheckbox; const AText: S
 begin
   obj := TCastleCheckBox.Create(Self);
   obj.Caption := AText;
+  obj.AutoSize := False;
   obj.HorizontalAnchorDelta := 0;
   obj.VerticalAnchorDelta := 0;
   obj.onChange := AProc;

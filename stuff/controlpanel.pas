@@ -37,30 +37,30 @@ type
 
   TSpriteControlPanel = class(TControlPanel)
   private
-    CtlRotZMinusBtn: TCastleButton;
-    CtlRotZPlusBtn: TCastleButton;
-    CtlRotYMinusBtn: TCastleButton;
-    CtlRotYPlusBtn: TCastleButton;
-    CtlRotXMinusBtn: TCastleButton;
-    CtlRotXPlusBtn: TCastleButton;
-    CtlZoomOutBtn: TCastleButton;
-    CtlZoomInBtn: TCastleButton;
-    CtlMoveUpBtn: TCastleButton;
-    CtlMoveDownBtn: TCastleButton;
-    CtlMoveRightBtn: TCastleButton;
-    CtlMoveLeftBtn: TCastleButton;
-    CtlCameraLeftBtn: TCastleButton;
-    CtlCameraRightBtn: TCastleButton;
-    CtlMoveBackBtn: TCastleButton;
-    CtlMoveFwdBtn: TCastleButton;
+    ABtn: TCastleButton;
+    BBtn: TCastleButton;
+    CBtn: TCastleButton;
+    DBtn: TCastleButton;
+    EBtn: TCastleButton;
+    FBtn: TCastleButton;
+    GBtn: TCastleButton;
+    HBtn: TCastleButton;
+    IBtn: TCastleButton;
+    JBtn: TCastleButton;
+    KBtn: TCastleButton;
+    LBtn: TCastleButton;
+    MBtn: TCastleButton;
+    NBtn: TCastleButton;
+    MoveBackBtn: TCastleButton;
+    MoveFwdBtn: TCastleButton;
 
-    CtlTransparencyChk: TCastleCheckbox;
-    CtlLocalLightsChk: TCastleCheckbox;
+    AChk: TCastleCheckbox;
+    BChk: TCastleCheckbox;
 
-    CtlDirectionsISE: TCastleIntegerSpinEdit;
-    CtlFramesISE: TCastleIntegerSpinEdit;
-    CtlSpriteHeightISE: TCastleIntegerSpinEdit;
-    CtlSpriteWidthISE: TCastleIntegerSpinEdit;
+    CtlDirections: TCastleIntegerSpinEdit;
+    CtlFrames: TCastleIntegerSpinEdit;
+    CtlSpriteHeight: TCastleIntegerSpinEdit;
+    CtlSpriteWidth: TCastleIntegerSpinEdit;
 
     procedure UseModelSpotsClick(Sender: TObject);
     procedure UseTransparencyChange(Sender: TObject);
@@ -155,35 +155,6 @@ var
   BtnImageScale: Single;
   BtnMargin: Single;
   BtnRow: Cardinal;
-
-  procedure PlaceButton(var obj: TCastleButton; const BtnCol: Integer);
-  begin
-    obj.Left := (BtnCol * (BtnWidth  + BtnMargin)) + BtnMargin;
-    obj.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
-    obj.Width := BtnWidth;
-    obj.Height := BtnHeight;
-    obj.FontScale := BtnFontScale;
-    obj.ImageScale := BtnImageScale;
-  end;
-
-  procedure PlaceCheckbox(var obj: TCastleCheckbox);
-  begin
-    obj.Left := BtnMargin;
-    obj.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
-    obj.Width := BtnWidth;
-    obj.Height := BtnHeight;
-    obj.CheckboxColor := White;
-    obj.TextColor := White;
-  end;
-
-  procedure PlaceISE(var obj: TCastleIntegerSpinEdit);
-  begin
-    obj.Left := BtnMargin;
-    obj.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
-    obj.Width := BtnWidth;
-    obj.Height := BtnHeight;
-  end;
-
 begin
   WriteLnLog('Start LoadOrentationLayout');
 
@@ -202,101 +173,260 @@ begin
   {$endif}
   BtnImageScale := (BtnHeight / 512) * BtnFontScale;
 
-  BottomSection.CreateButton(CtlRotZMinusBtn, 'Rot Z-', @DoRotateZMinus, 'castle-data:/icons/zminus.png');
-  PlaceButton(CtlRotZMinusBtn, 0);
-  BottomSection.CreateButton(CtlRotZPlusBtn, 'Rot Z+', @DoRotateZPlus, 'castle-data:/icons/zplus.png');
-  PlaceButton(CtlRotZPlusBtn, 1);
+  BottomSection.CreateButton(ABtn, 'Rot Z-', @DoRotateZMinus);
+  ABtn.Left := BtnMargin;
+  ABtn.Bottom := BtnRow + BtnMargin;
+  ABtn.AutoSize := False;
+  ABtn.Width := BtnWidth;
+  ABtn.Height := BtnHeight;
+  ABtn.FontScale := BtnFontScale;
+  ABtn.Image.URL := 'castle-data:/icons/zminus.png';
+  ABtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(BBtn, 'Rot Z+', @DoRotateZPlus);
+  BBtn.Left := BtnWidth + (2 * BtnMargin);
+  BBtn.Bottom := BtnRow + BtnMargin;
+  BBtn.AutoSize := False;
+  BBtn.TextAlignment := hpRight;
+  BBtn.Width := BtnWidth;
+  BBtn.Height := BtnHeight;
+  BBtn.FontScale := BtnFontScale;
+  BBtn.Image.URL := 'castle-data:/icons/zplus.png';
+  BBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlRotYMinusBtn, 'Rot Y-', @DoRotateYMinus, 'castle-data:/icons/yminus.png');
-  PlaceButton(CtlRotYMinusBtn, 0);
-  BottomSection.CreateButton(CtlRotYPlusBtn, 'Rot Y+', @DoRotateYPlus, 'castle-data:/icons/yplus.png');
-  PlaceButton(CtlRotYPlusBtn, 1);
+  BottomSection.CreateButton(CBtn, 'Rot Y-', @DoRotateYMinus);
+  CBtn.Left := BtnMargin;
+  CBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CBtn.AutoSize := False;
+  CBtn.Width := BtnWidth;
+  CBtn.Height := BtnHeight;
+  CBtn.FontScale := BtnFontScale;
+  CBtn.Image.URL := 'castle-data:/icons/yminus.png';
+  CBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(DBtn, 'Rot Y+', @DoRotateYPlus);
+  DBtn.Left := BtnWidth + 20;
+  DBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  DBtn.AutoSize := False;
+  DBtn.Width := BtnWidth;
+  DBtn.Height := BtnHeight;
+  DBtn.FontScale := BtnFontScale;
+  DBtn.Image.URL := 'castle-data:/icons/yplus.png';
+  DBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlRotXMinusBtn, 'Rot X-', @DoRotateXMinus, 'castle-data:/icons/xminus.png');
-  PlaceButton(CtlRotXMinusBtn, 0);
-  BottomSection.CreateButton(CtlRotXPlusBtn, 'Rot X+', @DoRotateXPlus, 'castle-data:/icons/xplus.png');
-  PlaceButton(CtlRotXPlusBtn, 1);
+  BottomSection.CreateButton(EBtn, 'Rot X-', @DoRotateXMinus);
+  EBtn.Left := BtnMargin;
+  EBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  EBtn.AutoSize := False;
+  EBtn.Width := BtnWidth;
+  EBtn.Height := BtnHeight;
+  EBtn.FontScale := BtnFontScale;
+  EBtn.Image.URL := 'castle-data:/icons/xminus.png';
+  EBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(FBtn, 'Rot X+', @DoRotateXPlus);
+  FBtn.Left := BtnWidth + 20;
+  FBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  FBtn.AutoSize := False;
+  FBtn.Width := BtnWidth;
+  FBtn.Height := BtnHeight;
+  FBtn.FontScale := BtnFontScale;
+  FBtn.Image.URL := 'castle-data:/icons/xplus.png';
+  FBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlZoomOutBtn, 'Zoom Out', @DoZoomOut, 'castle-data:/icons/zoomout.png');
-  PlaceButton(CtlZoomOutBtn, 0);
-  BottomSection.CreateButton(CtlZoomInBtn, 'Zoom In', @DoZoomIn, 'castle-data:/icons/zoomin.png');
-  PlaceButton(CtlZoomInBtn, 1);
+  BottomSection.CreateButton(GBtn, 'Zoom Out', @DoZoomOut);
+  GBtn.Left := BtnMargin;
+  GBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  GBtn.AutoSize := False;
+  GBtn.Width := BtnWidth;
+  GBtn.Height := BtnHeight;
+  GBtn.FontScale := BtnFontScale;
+  GBtn.Image.URL := 'castle-data:/icons/zoomout.png';
+  GBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(HBtn, 'Zoom In', @DoZoomIn);
+  HBtn.Left := BtnWidth + 20;
+  HBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  HBtn.AutoSize := False;
+  HBtn.Width := BtnWidth;
+  HBtn.Height := BtnHeight;
+  HBtn.FontScale := BtnFontScale;
+  HBtn.Image.URL := 'castle-data:/icons/zoomin.png';
+  HBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlMoveUpBtn, 'Move Up', @DoMoveUp, 'castle-data:/icons/up.png');
-  PlaceButton(CtlMoveUpBtn, 0);
-  BottomSection.CreateButton(CtlMoveDownBtn, 'Move Down', @DoMoveDown, 'castle-data:/icons/down.png');
-  PlaceButton(CtlMoveDownBtn, 1);
+  BottomSection.CreateButton(IBtn, 'Move Up', @DoMoveUp);
+  IBtn.Left := BtnMargin;
+  IBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  IBtn.AutoSize := False;
+  IBtn.Width := BtnWidth;
+  IBtn.Height := BtnHeight;
+  IBtn.FontScale := BtnFontScale;
+  IBtn.Image.URL := 'castle-data:/icons/up.png';
+  IBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(JBtn, 'Move Down', @DoMoveDown);
+  JBtn.Left := BtnWidth + 20;
+  JBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  JBtn.AutoSize := False;
+  JBtn.Width := BtnWidth;
+  JBtn.Height := BtnHeight;
+  JBtn.FontScale := BtnFontScale;
+  JBtn.Image.URL := 'castle-data:/icons/down.png';
+  JBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlMoveLeftBtn, 'Move Left', @DoMoveLeft, 'castle-data:/icons/left.png');
-  PlaceButton(CtlMoveLeftBtn, 0);
-  BottomSection.CreateButton(CtlMoveRightBtn, 'Move Right', @DoMoveRight, 'castle-data:/icons/right.png');
-  PlaceButton(CtlMoveRightBtn, 1);
+  BottomSection.CreateButton(KBtn, 'Move Left', @DoMoveLeft);
+  KBtn.Left := BtnMargin;
+  KBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  KBtn.AutoSize := False;
+  KBtn.Width := BtnWidth;
+  KBtn.Height := BtnHeight;
+  KBtn.FontScale := BtnFontScale;
+  KBtn.Image.URL := 'castle-data:/icons/left.png';
+  KBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(LBtn, 'Move Right', @DoMoveRight);
+  LBtn.Left := BtnWidth + 20;
+  LBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  LBtn.AutoSize := False;
+  LBtn.Width := BtnWidth;
+  LBtn.Height := BtnHeight;
+  LBtn.FontScale := BtnFontScale;
+  LBtn.Image.URL := 'castle-data:/icons/right.png';
+  LBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlMoveFwdBtn, 'Move Fwd', @DoMoveFwd, 'castle-data:/icons/forward.png');
-  PlaceButton(CtlMoveFwdBtn, 0);
-  BottomSection.CreateButton(CtlMoveBackBtn, 'Move Back', @DoMoveBack, 'castle-data:/icons/back.png');
-  PlaceButton(CtlMoveBackBtn, 1);
+  BottomSection.CreateButton(MoveFwdBtn, 'Move Fwd', @DoMoveFwd);
+  MoveFwdBtn.Left := BtnMargin;
+  MoveFwdBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  MoveFwdBtn.AutoSize := False;
+  MoveFwdBtn.Width := BtnWidth;
+  MoveFwdBtn.Height := BtnHeight;
+  MoveFwdBtn.FontScale := BtnFontScale;
+  MoveFwdBtn.Image.URL := 'castle-data:/icons/forward.png';
+  MoveFwdBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(MoveBackBtn, 'Move Back', @DoMoveBack);
+  MoveBackBtn.Left := BtnWidth + 20;
+  MoveBackBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  MoveBackBtn.AutoSize := False;
+  MoveBackBtn.Width := BtnWidth;
+  MoveBackBtn.Height := BtnHeight;
+  MoveBackBtn.FontScale := BtnFontScale;
+  MoveBackBtn.Image.URL := 'castle-data:/icons/back.png';
+  MoveBackBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlCameraLeftBtn, 'Cam Rot-', @DoCamLeft, 'castle-data:/icons/camera.png');
-  PlaceButton(CtlCameraLeftBtn, 0);
-  BottomSection.CreateButton(CtlCameraRightBtn, 'Cam Rot+', @DoCamRight, 'castle-data:/icons/camera.png');
-  PlaceButton(CtlCameraRightBtn, 1);
+  BottomSection.CreateButton(MBtn, 'Cam Rot-', @DoCamLeft);
+  MBtn.Left := BtnMargin;
+  MBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  MBtn.AutoSize := False;
+  MBtn.Width := BtnWidth;
+  MBtn.Height := BtnHeight;
+  MBtn.FontScale := BtnFontScale;
+  MBtn.Image.URL := 'castle-data:/icons/camera.png';
+  MBtn.ImageScale := BtnImageScale;
+
+  BottomSection.CreateButton(NBtn, 'Cam Rot+', @DoCamRight);
+  NBtn.Left := BtnWidth + 20;
+  NBtn.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  NBtn.AutoSize := False;
+  NBtn.Width := BtnWidth;
+  NBtn.Height := BtnHeight;
+  NBtn.FontScale := BtnFontScale;
+  NBtn.Image.URL := 'castle-data:/icons/camera.png';
+  NBtn.ImageScale := BtnImageScale;
+
   Inc(BtnRow);
 
-  BottomSection.CreateCheckbox(CtlTransparencyChk, 'Transparent', @UseTransparencyChange);
-  PlaceCheckbox(CtlTransparencyChk);
+  BottomSection.CreateCheckbox(AChk, 'Transparent', @UseTransparencyChange);
+  AChk.Left := BtnMargin;
+  AChk.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  AChk.AutoSize := False;
+  AChk.Width := BtnWidth;
+  AChk.Height := BtnHeight;
+  AChk.CheckboxColor := White;
+  AChk.TextColor := White;
+
   Inc(BtnRow);
 
-  BottomSection.CreateCheckbox(CtlLocalLightsChk, 'Local Lights', @UseModelSpotsClick);
-  PlaceCheckbox(CtlLocalLightsChk);
+  BottomSection.CreateCheckbox(BChk, 'Local Lights', @UseModelSpotsClick);
+  BChk.Left := BtnMargin;
+  BChk.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  BChk.AutoSize := False;
+  BChk.Width := BtnWidth;
+  BChk.Height := BtnHeight;
+  BChk.CheckboxColor := White;
+  BChk.TextColor := White;
+
   Inc(BtnRow);
 
-  CtlDirectionsISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Directions', (BtnWidth * 2) + 10, BtnHeight);
-  PlaceISE(CtlDirectionsISE);
+  CtlDirections := TCastleIntegerSpinEdit.Create(BottomSection, 'Directions', (BtnWidth * 2) + 10, BtnHeight);
+  CtlDirections.Left := BtnMargin;
+  CtlDirections.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlDirections.Width := BtnWidth;
+  CtlDirections.Height := BtnHeight;
+
   Inc(BtnRow);
 
-  CtlFramesISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Frames', (BtnWidth * 2) + 10, BtnHeight);
-  PlaceISE(CtlFramesISE);
+  CtlFrames := TCastleIntegerSpinEdit.Create(BottomSection, 'Frames', (BtnWidth * 2) + 10, BtnHeight);
+  CtlFrames.Left := BtnMargin;
+  CtlFrames.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlFrames.Width := BtnWidth;
+  CtlFrames.Height := BtnHeight;
+
   Inc(BtnRow);
 
-  CtlSpriteHeightISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Height', (BtnWidth * 2) + 10, BtnHeight);
-  PlaceISE(CtlSpriteHeightISE);
+  CtlSpriteHeight := TCastleIntegerSpinEdit.Create(BottomSection, 'Height', (BtnWidth * 2) + 10, BtnHeight);
+  CtlSpriteHeight.Left := BtnMargin;
+  CtlSpriteHeight.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlSpriteHeight.Width := BtnWidth;
+  CtlSpriteHeight.Height := BtnHeight;
+
   Inc(BtnRow);
 
-  CtlSpriteWidthISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Width', (BtnWidth * 2) + 10, BtnHeight);
-  PlaceISE(CtlSpriteWidthISE);
+  CtlSpriteWidth := TCastleIntegerSpinEdit.Create(BottomSection, 'Width', (BtnWidth * 2) + 10, BtnHeight);
+  CtlSpriteWidth.Left := BtnMargin;
+  CtlSpriteWidth.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+  CtlSpriteWidth.Width := BtnWidth;
+  CtlSpriteWidth.Height := BtnHeight;
+
   Inc(BtnRow);
 
   with Parent as TCastleApp do
     begin
       WriteLnLog('Setting CP Defaults');
-      CtlTransparencyChk.Checked := UseTransparency;
-      CtlLocalLightsChk.Checked := UseModelSpots;
-      CtlDirectionsISE.Min := 1;
-      CtlDirectionsISE.Max := 64;
-      CtlDirectionsISE.Value := DirectionCount;
-      CtlDirectionsISE.OnChange := @DoDirectionsChange;
-      CtlFramesISE.Min := 1;
-      CtlFramesISE.Max := 64;
-      CtlFramesISE.Value := FrameCount;
-      CtlFramesISE.OnChange := @DoFramesChange;
-      CtlSpriteHeightISE.Min := 16;
-      CtlSpriteHeightISE.Max := 2048;
-      CtlSpriteHeightISE.Value := SpriteHeight;
-      CtlSpriteHeightISE.StepSize := 16;
-      CtlSpriteHeightISE.OnChange := @DoSpriteHeightChange;
-      CtlSpriteWidthISE.Min := 16;
-      CtlSpriteWidthISE.Max := 2048;
-      CtlSpriteWidthISE.Value := SpriteWidth;
-      CtlSpriteWidthISE.StepSize := 16;
-      CtlSpriteWidthISE.OnChange := @DoSpriteWidthChange;
+      AChk.Checked := UseTransparency;
+      BChk.Checked := UseModelSpots;
+      CtlDirections.Min := 1;
+      CtlDirections.Max := 64;
+      CtlDirections.Value := DirectionCount;
+      CtlDirections.OnChange := @DoDirectionsChange;
+      CtlFrames.Min := 1;
+      CtlFrames.Max := 64;
+      CtlFrames.Value := FrameCount;
+      CtlFrames.OnChange := @DoFramesChange;
+      CtlSpriteHeight.Min := 16;
+      CtlSpriteHeight.Max := 2048;
+      CtlSpriteHeight.Value := SpriteHeight;
+      CtlSpriteHeight.StepSize := 16;
+      CtlSpriteHeight.OnChange := @DoSpriteHeightChange;
+      CtlSpriteWidth.Min := 16;
+      CtlSpriteWidth.Max := 2048;
+      CtlSpriteWidth.Value := SpriteWidth;
+      CtlSpriteWidth.StepSize := 16;
+      CtlSpriteWidth.OnChange := @DoSpriteWidthChange;
     end;
 end;
 
@@ -423,7 +553,7 @@ var
 begin
   with Parent as TCastleApp do
     begin
-      UseModelSpots := CtlLocalLightsChk.Checked;
+      UseModelSpots := BChk.Checked;
 
       WorkingModel.BaseRotation.X := WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount);
       if not(WorkingModel = nil) then
@@ -450,7 +580,7 @@ procedure TSpriteControlPanel.DoSpriteWidthChange(Sender: TObject);
 begin
   with Parent as TCastleApp do
     begin
-      SpriteWidth := CtlSpriteWidthISE.Value;
+      SpriteWidth := CtlSpriteWidth.Value;
       Resize;
     end;
 end;
@@ -459,7 +589,7 @@ procedure TSpriteControlPanel.DoSpriteHeightChange(Sender: TObject);
 begin
   with Parent as TCastleApp do
     begin
-      SpriteHeight := CtlSpriteHeightISE.Value;
+      SpriteHeight := CtlSpriteHeight.Value;
       Resize;
     end;
 end;
@@ -467,20 +597,20 @@ end;
 procedure TSpriteControlPanel.DoDirectionsChange(Sender: TObject);
 begin
   with Parent as TCastleApp do
-    DirectionCount := CtlDirectionsISE.Value;
+    DirectionCount := CtlDirections.Value;
 end;
 
 procedure TSpriteControlPanel.DoFramesChange(Sender: TObject);
 begin
   with Parent as TCastleApp do
-    FrameCount := CtlFramesISE.Value;
+    FrameCount := CtlFrames.Value;
 end;
 
 procedure TSpriteControlPanel.UseTransparencyChange(Sender: TObject);
 begin
   with Parent as TCastleApp do
     begin
-      UseTransparency := CtlTransparencyChk.Checked;
+      UseTransparency := AChk.Checked;
 
       if UseTransparency then
         Stage.ShowGround(False)

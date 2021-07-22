@@ -128,7 +128,7 @@ begin
 {$ifdef remotefile}
   ModelFile := 'https://spritely.co.uk/3DModels/Quaternius/RPG Characters - Nov 2020/Cleric.glb';
 {$else}
-  ModelFile := 'castle-data:/oblique.glb';
+//  ModelFile := 'castle-data:/oblique.glb';
 //  ModelFile := 'castle-data:/up.glb';
 //  ModelFile := 'castle-data:/up131.glb';
 //  ModelFile := 'castle-data:/Quaternius/Cute Animated Monsters - Aug 2020/Demon.glb';
@@ -141,7 +141,7 @@ begin
 //  ModelFile := 'castle-data:/Quaternius/Mechs/Stan.glb';
 //  ModelFile := 'castle-data:/isoroom/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'simple_classic_crate' + PathDelim + 'scene.gltf';
-//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cave' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
+  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cavewoman' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'generic_cliff_2_mobile_rhe' + PathDelim + 'scene.gltf';

@@ -66,6 +66,7 @@ type
     fTransform: TTransformNode;
     fDebug: TDebugTransformBox;
     fBaseRotation: TVector3;
+    fBaseQuaternion: TQuaternion;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -87,6 +88,7 @@ type
     property  LockedScale: Single read fLockedScale write fLockedScale;
     property  ModelName: String read fModelName write fModelName;
     property  BaseRotation: TVector3 read fBaseRotation write fBaseRotation;
+    property  BaseQuaternion: TQuaternion read fBaseQuaternion write fBaseQuaternion;
     property  RootNode: TX3DRootNode read fRootNode write fRootNode;
     property  Scene: TCastleScene read fScene write fScene;
     property  Transform: TTransformNode read fTransform write fTransform;
@@ -436,6 +438,7 @@ begin
   fLockedScale := 1.0;
   fModelName := EmptyStr;
   fBaseRotation := Vector3(0, 0, 0);
+  fBaseQuaternion := QuatFromAxisAngle(Vector4(0, 1, 0, 0));
   fRootNode := nil;
   fTransform := nil;
   fSceneNode := nil;

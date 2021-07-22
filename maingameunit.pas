@@ -530,104 +530,107 @@ begin
 
   if AppLogLevel then
     WriteLnLog('Start Update');
-  if ModelRotationCheck or not ModelRotationDone then
+  if not(WorkingModel = nil) then
     begin
-      UpdateModelRotation;
-    end
-  else
-    begin
-    if ViewMode = 0 then
-      begin
-        StretchMultiplier := 1;
-        Viewport.Camera.Orthographic.Stretch := False;
-        ViewFromRadius(2, 0, 2 * pi * (6/8));
-      end
-    else if ViewMode = 1 then
-      begin
-        StretchMultiplier := 1;
-        Viewport.Camera.Orthographic.Stretch := False;
-        CameraElevation :=  -0.81625;
-        ViewFromRadius(2, CameraElevation, CameraRotation);
-      end
-    else if ViewMode = 2 then
-      begin
-        StretchMultiplier := 1;
-        Viewport.Camera.Orthographic.Stretch := False;
-        CameraElevation :=  -1;
-        ViewFromRadius(2, CameraElevation, CameraRotation);
-      end
-    else if ViewMode = 3 then
-      begin
-        StretchMultiplier := 1;
-        Viewport.Camera.Orthographic.Stretch := False;
-        CameraElevation :=  -2;
-        ViewFromRadius(2, CameraElevation, CameraRotation);
-      end
-    else if ViewMode = 4 then
-      begin
-        StretchMultiplier := 0.81625;
-        Viewport.Camera.Orthographic.Stretch := True;
-        CameraElevation :=  -2;
-        ViewFromRadius(2, CameraElevation, CameraRotation);
-      end
-    else if ViewMode = 5 then
-      begin
-        StretchMultiplier := 1;
-        Viewport.Camera.Orthographic.Stretch := False;
-        CameraElevation :=  -sqrt(2.0);
-        ViewFromRadius(2, CameraElevation, CameraRotation);
-      end
-    else if ViewMode = 6 then
-      begin
-        StretchMultiplier := 1;
-        Viewport.Camera.Orthographic.Stretch := False;
-        CameraElevation :=  -999999;
-        ViewFromRadius(2, CameraElevation,  2 * pi * (6/8));
-      end
-    else
-      begin
-        StretchMultiplier := 1;
-        Viewport.Camera.Orthographic.Stretch := False;
-        ViewMode := 0;
-        CameraElevation :=  0;
-        ViewFromRadius(2, CameraElevation, CameraRotation);
-      end;
-
-    if not(WorkingModel = nil) then
-      begin
-        if not(WorkingModel.IsLocked) then
+      if ModelRotationCheck or not ModelRotationDone then
+        begin
+          UpdateModelRotation;
+        end
+      else
+        begin
+        if ViewMode = 0 then
           begin
-            sc := Vector3(0, 0, 0);
-            sr := 0;
-            WorkingModel.Scene.BoundingBox.BoundingSphere(sc, sr);
-            if not(sr = 0) then
-              BoundRadius := sqrt(sr)
-            else
-              BoundRadius := 1.0;
-
-            iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
-            iScaleMultiplier := 1.0;
-            WorkingModel.LockedScale := iScale;
-            WorkingModel.IsLocked := True;
+            StretchMultiplier := 1;
+            Viewport.Camera.Orthographic.Stretch := False;
+            ViewFromRadius(2, 0, 2 * pi * (6/8));
+          end
+        else if ViewMode = 1 then
+          begin
+            StretchMultiplier := 1;
+            Viewport.Camera.Orthographic.Stretch := False;
+            CameraElevation :=  -0.81625;
+            ViewFromRadius(2, CameraElevation, CameraRotation);
+          end
+        else if ViewMode = 2 then
+          begin
+            StretchMultiplier := 1;
+            Viewport.Camera.Orthographic.Stretch := False;
+            CameraElevation :=  -1;
+            ViewFromRadius(2, CameraElevation, CameraRotation);
+          end
+        else if ViewMode = 3 then
+          begin
+            StretchMultiplier := 1;
+            Viewport.Camera.Orthographic.Stretch := False;
+            CameraElevation :=  -2;
+            ViewFromRadius(2, CameraElevation, CameraRotation);
+          end
+        else if ViewMode = 4 then
+          begin
+            StretchMultiplier := 0.81625;
+            Viewport.Camera.Orthographic.Stretch := True;
+            CameraElevation :=  -2;
+            ViewFromRadius(2, CameraElevation, CameraRotation);
+          end
+        else if ViewMode = 5 then
+          begin
+            StretchMultiplier := 1;
+            Viewport.Camera.Orthographic.Stretch := False;
+            CameraElevation :=  -sqrt(2.0);
+            ViewFromRadius(2, CameraElevation, CameraRotation);
+          end
+        else if ViewMode = 6 then
+          begin
+            StretchMultiplier := 1;
+            Viewport.Camera.Orthographic.Stretch := False;
+            CameraElevation :=  -999999;
+            ViewFromRadius(2, CameraElevation,  2 * pi * (6/8));
+          end
+        else
+          begin
+            StretchMultiplier := 1;
+            Viewport.Camera.Orthographic.Stretch := False;
+            ViewMode := 0;
+            CameraElevation :=  0;
+            ViewFromRadius(2, CameraElevation, CameraRotation);
           end;
 
-        if not(iScale = 0) then
-          Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / (iScale * iScaleMultiplier);
-
-        if(WorkingModel.CurrentAnimation >= 0) and (WorkingModel.CurrentAnimation < WorkingModel.Actions.Count) then
+        if not(WorkingModel = nil) then
           begin
-            if WorkingModel.IsPaused then
-              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames) + ' (Paused)'
-            else
-              LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames);
-          end;
+            if not(WorkingModel.IsLocked) then
+              begin
+                sc := Vector3(0, 0, 0);
+                sr := 0;
+                WorkingModel.Scene.BoundingBox.BoundingSphere(sc, sr);
+                if not(sr = 0) then
+                  BoundRadius := sqrt(sr)
+                else
+                  BoundRadius := 1.0;
 
-      end;
+                iScale := Min(Viewport.EffectiveWidth, Viewport.EffectiveHeight);
+                iScaleMultiplier := 1.0;
+                WorkingModel.LockedScale := iScale;
+                WorkingModel.IsLocked := True;
+              end;
+
+            if not(iScale = 0) then
+              Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / (iScale * iScaleMultiplier);
+
+            if(WorkingModel.CurrentAnimation >= 0) and (WorkingModel.CurrentAnimation < WorkingModel.Actions.Count) then
+              begin
+                if WorkingModel.IsPaused then
+                  LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames) + ' (Paused)'
+                else
+                  LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames);
+              end;
+
+          end;
+        end;
+
+      LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
+       + ' : ' + FormatFloat('#0.00000', iScaleMultiplier);
+      LabelSpare.Caption := 'Rotation : ' + WorkingModel.BaseRotation.ToString;
     end;
-
-  LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
-   + ' : ' + FormatFloat('#0.00000', iScaleMultiplier);
-
 end;
 
 procedure ShowAppMessage(const AMsg: String);
@@ -823,12 +826,12 @@ begin
           for i := Low(corners) to High(corners) do
             begin
               OutputPoint3D := (Viewport.Camera.ProjectionMatrix * Viewport.Camera.Matrix).MultPoint(corners[i]);
-//              WriteLnLog('Corner #' + IntToStr(i) + ' : ' + corners[i].ToString + ' => ' + OutputPoint3D.ToString);
-              WriteLnLog(FormatFloat('0.00000000', OutputPoint3D.X) + ', ' + FormatFloat('0.00000000', OutputPoint3D.Y));
+              WriteLnLog('Corner #' + IntToStr(i) + ' : ' + corners[i].ToString + ' => ' + FormatFloat('0.00000000', OutputPoint3D.X) + ', ' + FormatFloat('0.00000000', OutputPoint3D.Y));
+//              WriteLnLog(FormatFloat('0.00000000', OutputPoint3D.X) + ', ' + FormatFloat('0.00000000', OutputPoint3D.Y));
             end;
         end;
     end;
-
+  WriteLnLog('2:1 = ' + FormatFloat('0.0000', ArcTan(0.5)));
 end;
 
 end.
