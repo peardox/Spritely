@@ -1,4 +1,4 @@
-unit SpriteControls;
+unit ControlPanelControls;
 
 {$mode objfpc}{$H+}
 

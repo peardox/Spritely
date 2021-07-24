@@ -137,11 +137,11 @@ begin
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Ranger.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Rogue.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Warrior.glb';
-//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/Quaternius/Mechs/Stan.glb';
 //  ModelFile := 'castle-data:/isoroom/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'simple_classic_crate' + PathDelim + 'scene.gltf';
-  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cavewoman' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
+//  ModelFile := FSPrefix + 'Assets' + PathDelim + 'JoseDiaz' + PathDelim + 'cavewoman' + PathDelim + 'cavewoman.gltf' + PathDelim + 'scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + '3drt' + PathDelim + 'paid' + PathDelim + '3DRT-Medieval-Houses' + PathDelim + 'gltf' + PathDelim + 'house-02-01.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'crocodile_with_animation' + PathDelim + 'crock-up.glb';
 //  ModelFile := FSPrefix  + 'Assets' + PathDelim + 'Sketchfab' + PathDelim + 'generic_cliff_2_mobile_rhe' + PathDelim + 'scene.gltf';
@@ -578,7 +578,6 @@ begin
       if not (WorkingModel.Scene = nil) then
         begin
           Sprite := CastleApp.CreateSpriteImage(CastleApp.WorkingModel.Scene, SpriteWidth * OverSample, SpriteHeight * OverSample, CastleApp.UseTransparency);
-    //      Sprite := CastleApp.CreateSpriteImageAlt(Stage, SpriteWidth * OverSample, SpriteHeight * OverSample, CastleApp.UseTransparency);
           if not(Sprite = nil) then
             begin
               if (OverSample > 1) then

@@ -116,6 +116,7 @@ type
     procedure Start;
     procedure Stop;
     procedure SelectAnimation(const AName: String; const StartPlaying: Boolean = False);
+    procedure SetAllSpots(const AUseSpots: Boolean);
   end;
   TCastleModelArray = Array of TCastleModel;
 
@@ -418,8 +419,12 @@ begin
                              2 / fScene.BoundingBox.MaxSize,
                              2 / fScene.BoundingBox.MaxSize);
             fScene.Translation := -fScene.Center;
+
             if not(fTransform = nil) then
-              fTransform.Center := fScene.Center;
+              begin
+//                fTransform.Translation := -fScene.Center;
+//                fTransform.Center := fScene.Center;
+              end;
 
           end;
       end;
@@ -694,6 +699,14 @@ begin
       ANode := TAnimationInfo(fActions.Objects[fCurrentAnimation]);
       Result := ANode.IsPaused;
     end;
+end;
+
+procedure TCastleModel.SetAllSpots(const AUseSpots: Boolean);
+var
+  i: Integer;
+begin
+  for i := 0 to High(SpotNode) do
+    SpotNode[i].IsOn := AUseSpots;
 end;
 
 end.

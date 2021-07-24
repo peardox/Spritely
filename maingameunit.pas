@@ -16,12 +16,12 @@ uses
   CastleTriangles, CastleShapes, CastleVectors,
   CastleSceneCore, CastleScene, CastleTransform,
   CastleViewport, CastleCameras, CastleProjection,
-  X3DNodes, X3DFields, X3DTIme,
+  X3DNodes, X3DFields, X3DTIme, CastleURIUtils,
   CastleImages, CastleGLImages, CastleRectangles,
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, Overlays, MiscFunctions,
-  CastleBoxes, ControlPanel,
+  CastleBoxes, ControlPanel, SpriteControlPanel,
   {$ifndef VER3_0} OpenSSLSockets, {$endif} CastleDownload;
 
 type
@@ -58,7 +58,7 @@ type
 
   public
     VPMax: TVector2Integer;
-    ControlPanel: TSpriteControlPanel;
+    SpriteCP: TSpriteControlPanel;
     FileToLoadList: TStringList;
     VPBackImage: TCastleImageControl;
     Viewport: TCastleViewport;
@@ -304,12 +304,14 @@ end;
 
 procedure TCastleApp.BootStrap;
 begin
-  SpriteWidth := 1024;
-  SpriteHeight := 1024;
+  FileToLoadList.Add(URIToFilenameSafe('castle-data:/Quaternius/RPGCharacters/Wizard.glb'));
+  WaitForRenderAndCall(@LoadModel);
+{
   LoadModel('castle-data:/Quaternius/RPGCharacters/Wizard.glb');
   ShowModel(WorkingModel);
   if WorkingModel.HasAnimations then
     WorkingModel.SelectAnimation(WorkingModel.Actions[0]);
+}
 end;
 
 procedure TCastleApp.ViewFromRadius(const ARadius: Single; const AElevation: Single; const ATheta: Single);
@@ -354,8 +356,9 @@ begin
 
   InsertFront(Viewport);
 
-  ControlPanel := TSpriteControlPanel.Create(Self, ControlWidth);
-  ControlPanel.LoadOrentationLayout;
+  SpriteCP := TSpriteControlPanel.Create(Self, ControlWidth);
+  SpriteCP.LoadOrentationLayout;
+//  SpriteCP.Exists:=False;
 
   UpdateScale; // SB
 
@@ -416,6 +419,7 @@ begin
     ModelArray[Length(ModelArray) - 1] := WorkingModel;
 
     WorkingModel.Load(FileName);
+    WorkingModel.SetAllSpots(UseModelSpots);
 
     if (Stage = nil) then
       begin
@@ -629,7 +633,10 @@ begin
 
       LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
        + ' : ' + FormatFloat('#0.00000', iScaleMultiplier);
-      LabelSpare.Caption := 'Rotation : ' + WorkingModel.BaseRotation.ToString;
+//      LabelSpare.Caption := 'Rotation : ' + WorkingModel.BaseRotation.ToString;
+      LabelSpare.Caption := 'Translation : ' + WorkingModel.Scene.Translation.ToString + ' / ' +
+      WorkingModel.Transform.Translation.ToString;
+
     end;
 end;
 

@@ -14,7 +14,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, GUIInitialization, castle_components, castle_base, Staging,
   MiscFunctions, anitakeutils, SpritelyLog, Overlays,
-  RGBAlphaImageHelp, SheetView, ControlPanel, SpriteControls;
+  RGBAlphaImageHelp, SheetView, ControlPanel, ControlPanelControls, SpriteControlPanel;
 
 {$R *.res}
 
