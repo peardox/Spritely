@@ -418,12 +418,12 @@ begin
             fScene.Scale := Vector3(2 / fScene.BoundingBox.MaxSize,
                              2 / fScene.BoundingBox.MaxSize,
                              2 / fScene.BoundingBox.MaxSize);
+
             fScene.Translation := -fScene.Center;
 
             if not(fTransform = nil) then
               begin
-//                fTransform.Translation := -fScene.Center;
-//                fTransform.Center := fScene.Center;
+                fTransform.Center := fScene.Center;
               end;
 
           end;

@@ -31,11 +31,24 @@ type
   protected
     TopSectionHeight: Single;
     TopSection: TCastleUserInterface;
+    TabSectionHeight: Single;
+    TabSection: TCastleUserInterface;
+    TabGroup: TCastleHorizontalGroup;
+    TabVGroup: TCastleVerticalGroup;
+    Tabs: Array [0..9] of TCastleRectangleControl;
+    TabImages: Array [0..9] of TCastleImageControl;
+    TabCurrent: TCastleRectangleControl;
+    TabCaption: TCastleLabel;
+    TabCaptionHeight : Single;
     BottomSection: TCastleUserInterface;
     CtlGrabSCreenBtn: TCastleButton;
     CtlViewModeBtn: TCastleButton;
-    procedure DoGrabSCreen(Sender: TObject);
+    CtlCenterBtn: TCastleButton;
+    CtlResetBtn: TCastleButton;
+    procedure DoGrabScreen(Sender: TObject);
     procedure DoChangeViewMode(Sender: TObject);
+    procedure DoCenter(Sender: TObject);
+    procedure DoReset(Sender: TObject);
   end;
 
 implementation
@@ -57,6 +70,7 @@ var
   BtnImageScale: Single;
   BtnMargin: Single;
   BtnRow: Cardinal;
+  ImgMargin: Single;
 
   procedure PlaceButton(var obj: TCastleButton; const BtnCol: Integer);
   begin
@@ -67,8 +81,31 @@ var
     obj.FontScale := BtnFontScale;
     obj.ImageScale := BtnImageScale;
   end;
+
+  procedure CreateTab(ObjTab: TCastleRectangleControl;
+    ObjTabImage: TCastleImageControl; TabColor: TCastleColor; AURL: String);
+  begin
+    ObjTab := TCastleRectangleControl.Create(TabGroup);
+    ObjTab.Color := TabColor;
+    ObjTab.Height := TabSectionHeight;
+    ObjTab.Width := TabSectionHeight;
+    TabGroup.InsertFront(ObjTab);
+
+    ObjTabImage := TCastleImageControl.Create(ObjTab);
+    ObjTabImage.Height := TabSectionHeight - ImgMargin;
+    ObjTabImage.Width := TabSectionHeight - ImgMargin;
+    ObjTabImage.Left := (ImgMargin / 2) - ObjTab.Border.AllSides;
+    ObjTabImage.Bottom := (ImgMargin / 2) - ObjTab.Border.AllSides;
+    ObjTabImage.URL := AURL;
+    ObjTabImage.Stretch := True;
+    ObjTab.InsertFront(ObjTabImage);
+
+  end;
+
 begin
   Create(AOwner);
+
+  ImgMargin := 8;
 
   BtnRow := 0;
   BtnMargin := 10;
@@ -85,6 +122,8 @@ begin
   BtnWidth := BtnHeight;
   BtnImageScale := (BtnHeight / 512) * BtnFontScale;
   TopSectionHeight := BtnHeight + (2 * BtnMargin);
+  TabSectionHeight := 40;
+  TabCaptionHeight := 24;
 
   Width := AWidth;
   Height := ParentRect.Height;
@@ -101,15 +140,51 @@ begin
   TopSection.Width := Width;
   Self.InsertFront(TopSection);
 
+  TabSection := TCastleUserInterface.Create(Self);
+  TabSection.Height := TabSectionHeight;
+  TabSection.Width := Width;
+  Self.InsertFront(TabSection);
+
+  TabVGroup := TCastleVerticalGroup.Create(TabSection);
+  TabVGroup.Height := TabSectionHeight + TabCaptionHeight;
+  TabVGroup.Width := Width;
+  TabSection.InsertFront(TabVGroup);
+
+  TabGroup := TCastleHorizontalGroup.Create(TabVGroup);
+  TabGroup.Height := TabSectionHeight;
+  TabGroup.Width := Width;
+  TabVGroup.InsertFront(TabGroup);
+
+  TabCurrent := TCastleRectangleControl.Create(TabVGroup);
+  TabCurrent.Color := White;
+  TabCurrent.Height := TabCaptionHeight;
+  TabCurrent.Width := Width;
+  TabVGroup.InsertFront(TabCurrent);
+
+
   BottomSection := TCastleUserInterface.Create(Self);
-  BottomSection.Height := Height - TopSectionHeight;
+  BottomSection.Height := Height - TopSectionHeight - TabSectionHeight - TabCaptionHeight;
   BottomSection.Width := Width;
   Self.InsertFront(BottomSection);
 
-  TopSection.CreateButton(CtlGrabSCreenBtn, '', @DoGrabSCreen, 'castle-data:/icons/camera.png');
-  PlaceButton(CtlGrabSCreenBtn, 0);
+  TopSection.CreateButton(CtlGrabSCreenBtn, '', @DoGrabScreen, 'castle-data:/icons/camera.png');
+  PlaceButton(CtlGrabScreenBtn, 0);
   TopSection.CreateButton(CtlViewModeBtn, '', @DoChangeViewMode, 'castle-data:/icons/pencil.png');
   PlaceButton(CtlViewModeBtn, 1);
+  TopSection.CreateButton(CtlCenterBtn, '', @DoCenter, 'castle-data:/icons/plus.png');
+  PlaceButton(CtlCenterBtn, 2);
+  TopSection.CreateButton(CtlResetBtn, '', @DoReset, 'castle-data:/icons/minus.png');
+  PlaceButton(CtlResetBtn, 3);
+
+  CreateTab(Tabs[0], TabImages[0], White, 'castle-data:/flaticon/orientation.png');
+  CreateTab(Tabs[1], TabImages[1], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/flaticon/position.png');
+  CreateTab(Tabs[2], TabImages[2], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/flaticon/play.png');
+
+  TabCaption := TCastleLabel.Create(TabCurrent);
+  TabCaption.Caption := 'Orientation';
+  TabCaption.Color := Black;
+  TabCaption.PaddingHorizontal := 4;
+  TabCurrent.InsertFront(TabCaption);
 
 end;
 
@@ -121,19 +196,25 @@ begin
 
   TopSection.Height := TopSectionHeight;
   TopSection.Width := Width;
-  TopSection.BorderColor := Red;
-  TopSection.Border.AllSides :=1;
+//  TopSection.BorderColor := Red;
+//  TopSection.Border.AllSides :=1;
   TopSection.Bottom := Height - TopSectionHeight;
 
-  BottomSection.Height := Height - TopSectionHeight;
+  TabSection.Height := TabSectionHeight + TabCaptionHeight;
+  TabSection.Width := Width;
+//  TabSection.BorderColor := Blue;
+//  TabSection.Border.AllSides :=1;
+  TabSection.Bottom := Height - TopSectionHeight - TabSectionHeight - TabCaptionHeight;
+
+  BottomSection.Height := Height - TopSectionHeight - TabSectionHeight - TabCaptionHeight;
   BottomSection.Width := Width;
-  BottomSection.BorderColor := Green;
-  BottomSection.Border.AllSides :=1;
+//  BottomSection.BorderColor := Green;
+//  BottomSection.Border.AllSides :=1;
 
   WriteLnLog('BottomSection.Height = ' + FloatTOStr(BottomSection.Height));
 end;
 
-procedure TControlPanel.DoGrabSCreen(Sender: TObject);
+procedure TControlPanel.DoGrabScreen(Sender: TObject);
 var
   Sprite: TCastleImage;
   SName: String;
@@ -160,10 +241,20 @@ end;
 procedure TControlPanel.DoChangeViewMode(Sender: TObject);
 begin
   with Parent as TCastleApp do
-    begin
       ViewMode := ViewMode + 1;
-    end;
+end;
+
+procedure TControlPanel.DoCenter(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    WorkingModel.Transform.Center := WorkingModel.Transform.Center + Vector3(0, -0.1, 0);
+end;
+
+procedure TControlPanel.DoReset(Sender: TObject);
+begin
+  with Parent as TCastleApp do
+    WorkingModel.Normalize;
 end;
 
 end.
-
+                                                                               *

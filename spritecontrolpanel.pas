@@ -340,12 +340,11 @@ var
 begin
   with Parent as TCastleApp do
     begin
-    Q := QuatFromAxisAngle(Vector4(0, 0, 0, 0));
-    Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, WorkingModel.BaseRotation.X));
-    Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, WorkingModel.BaseRotation.Y));
-    Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, WorkingModel.BaseRotation.Z));
-
-    WorkingModel.Transform.Rotation := Q.ToAxisAngle;
+      Q := QuatFromAxisAngle(Vector4(0, 1, 0, 0), True);
+      Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, WorkingModel.BaseRotation.X));
+      Q := Q * QuatFromAxisAngle(Vector4(0, 1, 0, WorkingModel.BaseRotation.Y));
+      Q := Q * QuatFromAxisAngle(Vector4(0, 0, 1, WorkingModel.BaseRotation.Z));
+      WorkingModel.Transform.Rotation := Q.ToAxisAngle;
     end;
 end;
 
@@ -366,7 +365,7 @@ end;
 procedure TSpriteControlPanel.DoRotateYPlus(Sender: TObject);
 begin
   with Parent as TCastleApp do
-    WorkingModel.BaseRotation.Y := WrapRadians(WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount));
+      WorkingModel.BaseRotation.Y := WrapRadians(WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 
@@ -380,7 +379,7 @@ end;
 procedure TSpriteControlPanel.DoRotateZPlus(Sender: TObject);
 begin
   with Parent as TCastleApp do
-    WorkingModel.BaseRotation.Z := WrapRadians(WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount));
+      WorkingModel.BaseRotation.Z := WrapRadians(WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 

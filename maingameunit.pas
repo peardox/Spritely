@@ -54,8 +54,10 @@ type
     fStretchMultiplier: Single;
     LabelFPS: TCastleLabel;
     LabelRender: TCastleLabel;
-    LabelSpare: TCastleLabel;
-
+    LabelSpare1: TCastleLabel;
+    LabelSpare2: TCastleLabel;
+    LabelSpare3: TCastleLabel;
+    LabelSpare4: TCastleLabel;
   public
     VPMax: TVector2Integer;
     SpriteCP: TSpriteControlPanel;
@@ -175,11 +177,11 @@ begin
   ViewMode := 0;
   OverSample := 8;
   {$if defined(ANDROID)}
-  ControlWidth := 600;
+  ControlWidth := 720;
   {$elseif defined(CASTLE_IOS)}
-  ControlWidth := 600;
+  ControlWidth := 720;
   {$else}
-  ControlWidth := 300;
+  ControlWidth := 360;
   {$endif}
   MinSpritePanelWidth := 32;
   UseModelSpots := True;
@@ -364,7 +366,10 @@ begin
 
   CreateLabel(LabelMode, 0, False);
 
-  CreateLabel(LabelSpare, 2);
+  CreateLabel(LabelSpare4, 5);
+  CreateLabel(LabelSpare3, 4);
+  CreateLabel(LabelSpare2, 3);
+  CreateLabel(LabelSpare1, 2);
   CreateLabel(LabelFPS, 1);
   CreateLabel(LabelRender, 0);
 end;
@@ -623,9 +628,9 @@ begin
             if(WorkingModel.CurrentAnimation >= 0) and (WorkingModel.CurrentAnimation < WorkingModel.Actions.Count) then
               begin
                 if WorkingModel.IsPaused then
-                  LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames) + ' (Paused)'
+                  LabelSpare3.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames) + ' (Paused)'
                 else
-                  LabelSpare.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames);
+                  LabelSpare3.Caption := 'Frame : ' + FormatFloat('####0.0000', WorkingModel.CurrentFrame) + ' / ' + FormatFloat('####0.0000', WorkingModel.TotalFrames);
               end;
 
           end;
@@ -633,10 +638,17 @@ begin
 
       LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
        + ' : ' + FormatFloat('#0.00000', iScaleMultiplier);
-//      LabelSpare.Caption := 'Rotation : ' + WorkingModel.BaseRotation.ToString;
-      LabelSpare.Caption := 'Translation : ' + WorkingModel.Scene.Translation.ToString + ' / ' +
-      WorkingModel.Transform.Translation.ToString;
-
+{
+      LabelSpare4.Caption := 'BBox : ' + WorkingModel.Scene.BoundingBox.Data[0].ToString  + ' -> ' +
+                       WorkingModel.Scene.BoundingBox.Data[1].ToString + ' (' +
+                       WorkingModel.Scene.BoundingBox.Size.ToString + ')';
+      LabelSpare3.Caption := 'Center : ' + WorkingModel.Scene.Center.ToString  + ' / ' +
+                             WorkingModel.Transform.Center.ToString;
+      LabelSpare2.Caption := 'Rotation : ' + WorkingModel.Scene.Rotation.ToString  + ' / ' +
+                             WorkingModel.Transform.Rotation.ToString;
+      LabelSpare1.Caption := 'Translation : ' + WorkingModel.Scene.Translation.ToString + ' / ' +
+                             WorkingModel.Transform.Translation.ToString;
+}
     end;
 end;
 
