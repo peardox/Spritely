@@ -28,15 +28,20 @@ type
     constructor Create(AOwner: TComponent); override;
     constructor Create(AOwner: TComponent; const AWidth: Single);
     procedure Resize; override;
+  private
   protected
     TopSectionHeight: Single;
     TopSection: TCastleUserInterface;
     TabSectionHeight: Single;
     TabSection: TCastleUserInterface;
-    TabGroup: TCastleHorizontalGroup;
+    TabHGroup: TCastleHorizontalGroup;
     TabVGroup: TCastleVerticalGroup;
     Tabs: Array [0..9] of TCastleRectangleControl;
     TabImages: Array [0..9] of TCastleImageControl;
+    TabIndex: Array [0..9] of Integer;
+    TabActiveColor: TCastleColor;
+    TabHoverColor: TCastleColor;
+    TabInActiveColor: TCastleColor;
     TabCurrent: TCastleRectangleControl;
     TabActive: TCastleRectangleControl;
     TabCaption: TCastleLabel;
@@ -52,6 +57,8 @@ type
     procedure DoReset(Sender: TObject);
     procedure DoMouseEnterTab(const Sender: TCastleUserInterface);
     procedure DoMouseLeaveTab(const Sender: TCastleUserInterface);
+  public
+    ImgMargin: Single;
   end;
 
 implementation
@@ -69,9 +76,12 @@ procedure TControlPanel.DoMouseEnterTab(const Sender: TCastleUserInterface);
 begin
   if not(TabActive = Sender) then
     begin
-      TCastleRectangleControl(Sender).BorderColor := Red;
-      TCastleRectangleControl(Sender).Border.AllSides := 1;
-      WriteLnLog(Sender.ClassName);
+      with Sender as TCastleRectangleControl do
+        begin
+          TCastleRectangleControl(Sender).Color := Vector4(0.9, 0.9, 0.9, 1.0);
+          TCastleRectangleControl(Sender).Left := (TControlPanel(Parent).ImgMargin / 2) - Sender.Border.AllSides + 1;
+          TCastleRectangleControl(Sender).Bottom := (TControlPanel(Parent).ImgMargin / 2) - Sender.Border.AllSides + 1;
+        end;
     end;
 end;
 
@@ -79,8 +89,15 @@ procedure TControlPanel.DoMouseLeaveTab(const Sender: TCastleUserInterface);
 begin
   if not(TabActive = Sender) then
     begin
-      TCastleRectangleControl(Sender).BorderColor := Vector4(0.8,0.8,0.8,1.0);
-      TCastleRectangleControl(Sender).Border.AllSides := 0;
+      TCastleRectangleControl(Sender).Color := Vector4(0.8, 0.8, 0.8, 1.0);
+      TCastleRectangleControl(Sender).Left := (TControlPanel(Parent).ImgMargin / 2) - Sender.Border.AllSides;
+      TCastleRectangleControl(Sender).Bottom := (TControlPanel(Parent).ImgMargin / 2) - Sender.Border.AllSides;
+    end
+  else
+    begin
+      TCastleRectangleControl(Sender).Color := Vector4(1.0, 1.0, 1.0, 1.0);
+      TCastleRectangleControl(Sender).Left := (TControlPanel(Parent).ImgMargin / 2) - Sender.Border.AllSides;
+      TCastleRectangleControl(Sender).Bottom := (TControlPanel(Parent).ImgMargin / 2) - Sender.Border.AllSides;
     end;
 end;
 
@@ -92,8 +109,6 @@ var
   BtnImageScale: Single;
   BtnMargin: Single;
   BtnRow: Cardinal;
-  ImgMargin: Single;
-  TagID: Integer;
 
   procedure PlaceButton(var obj: TCastleButton; const BtnCol: Integer);
   begin
@@ -108,13 +123,13 @@ var
   procedure CreateTab(var ObjTab: TCastleRectangleControl;
     var ObjTabImage: TCastleImageControl; TabColor: TCastleColor; AURL: String);
   begin
-    ObjTab := TCastleRectangleControl.Create(TabGroup);
+    ObjTab := TCastleRectangleControl.Create(TabHGroup);
     ObjTab.Color := TabColor;
     ObjTab.Height := TabSectionHeight;
     ObjTab.Width := TabSectionHeight;
     ObjTab.OnInternalMouseEnter := @DoMouseEnterTab;
     ObjTab.OnInternalMouseLeave := @DoMouseLeaveTab;
-    TabGroup.InsertFront(ObjTab);
+    TabHGroup.InsertFront(ObjTab);
 
     ObjTabImage := TCastleImageControl.Create(ObjTab);
     ObjTabImage.Height := TabSectionHeight - ImgMargin;
@@ -131,7 +146,8 @@ begin
   Create(AOwner);
 
   ImgMargin := 8;
-  TagID := 0;
+  TabActiveColor := Vector4(1.0, 1.0, 1.0, 1.0);
+  TabInActiveColor := Vector4(0.8, 0.8, 0.8, 1.0);
 
   BtnRow := 0;
   BtnMargin := 10;
@@ -157,7 +173,7 @@ begin
   Anchor(hpRight);
   Anchor(vpTop);
   BorderColor := White;
-  Border.AllSides :=1;
+  Border.AllSides := 1;
 
   TUIState(AOwner).InsertFront(Self);
 
@@ -167,7 +183,7 @@ begin
   Self.InsertFront(TopSection);
 
   TabSection := TCastleUserInterface.Create(Self);
-  TabSection.Height := TabSectionHeight;
+  TabSection.Height := TabSectionHeight + TabCaptionHeight;
   TabSection.Width := Width;
   Self.InsertFront(TabSection);
 
@@ -176,13 +192,13 @@ begin
   TabVGroup.Width := Width;
   TabSection.InsertFront(TabVGroup);
 
-  TabGroup := TCastleHorizontalGroup.Create(TabVGroup);
-  TabGroup.Height := TabSectionHeight;
-  TabGroup.Width := Width;
-  TabVGroup.InsertFront(TabGroup);
+  TabHGroup := TCastleHorizontalGroup.Create(TabVGroup);
+  TabHGroup.Height := TabSectionHeight;
+  TabHGroup.Width := Width;
+  TabVGroup.InsertFront(TabHGroup);
 
   TabCurrent := TCastleRectangleControl.Create(TabVGroup);
-  TabCurrent.Color := White;
+  TabCurrent.Color := TabActiveColor;
   TabCurrent.Height := TabCaptionHeight;
   TabCurrent.Width := Width;
   TabVGroup.InsertFront(TabCurrent);
@@ -202,9 +218,9 @@ begin
   TopSection.CreateButton(CtlResetBtn, '', @DoReset, 'castle-data:/icons/minus.png');
   PlaceButton(CtlResetBtn, 3);
 
-  CreateTab(Tabs[0], TabImages[0], White, 'castle-data:/icons/orientation.png');
-  CreateTab(Tabs[1], TabImages[1], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/icons/position.png');
-  CreateTab(Tabs[2], TabImages[2], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/icons/play.png');
+  CreateTab(Tabs[0], TabImages[0], TabActiveColor, 'castle-data:/icons/orientation.png');
+  CreateTab(Tabs[1], TabImages[1], TabInActiveColor, 'castle-data:/icons/position.png');
+  CreateTab(Tabs[2], TabImages[2], TabInActiveColor, 'castle-data:/icons/record.png');
 
   TabCaption := TCastleLabel.Create(TabCurrent);
   TabCaption.Caption := 'Orientation';
