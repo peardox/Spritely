@@ -186,8 +186,8 @@ begin
   MinSpritePanelWidth := 32;
   UseModelSpots := True;
   UseTransparency := True;
-  SpriteWidth := 512;
-  SpriteHeight := 512;
+  SpriteWidth := 144;
+  SpriteHeight := 166;
   StretchMultiplier := 1;
   BoundRadius := 1.0;
   IsTransparent := True;

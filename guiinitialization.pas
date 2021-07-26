@@ -136,8 +136,8 @@ begin
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Monk.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Ranger.glb';
 //  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Rogue.glb';
-//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Warrior.glb';
-  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
+  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Warrior.glb';
+//  ModelFile := 'castle-data:/Quaternius/RPGCharacters/Wizard.glb';
 //  ModelFile := 'castle-data:/Quaternius/Mechs/Stan.glb';
 //  ModelFile := 'castle-data:/isoroom/scene.gltf';
 //  ModelFile := FSPrefix + 'Assets' + PathDelim + 'simple_classic_crate' + PathDelim + 'scene.gltf';

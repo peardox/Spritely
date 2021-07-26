@@ -38,6 +38,7 @@ type
     Tabs: Array [0..9] of TCastleRectangleControl;
     TabImages: Array [0..9] of TCastleImageControl;
     TabCurrent: TCastleRectangleControl;
+    TabActive: TCastleRectangleControl;
     TabCaption: TCastleLabel;
     TabCaptionHeight : Single;
     BottomSection: TCastleUserInterface;
@@ -49,6 +50,8 @@ type
     procedure DoChangeViewMode(Sender: TObject);
     procedure DoCenter(Sender: TObject);
     procedure DoReset(Sender: TObject);
+    procedure DoMouseEnterTab(const Sender: TCastleUserInterface);
+    procedure DoMouseLeaveTab(const Sender: TCastleUserInterface);
   end;
 
 implementation
@@ -62,6 +65,25 @@ begin
   inherited Create(AOwner);
 end;
 
+procedure TControlPanel.DoMouseEnterTab(const Sender: TCastleUserInterface);
+begin
+  if not(TabActive = Sender) then
+    begin
+      TCastleRectangleControl(Sender).BorderColor := Red;
+      TCastleRectangleControl(Sender).Border.AllSides := 1;
+      WriteLnLog(Sender.ClassName);
+    end;
+end;
+
+procedure TControlPanel.DoMouseLeaveTab(const Sender: TCastleUserInterface);
+begin
+  if not(TabActive = Sender) then
+    begin
+      TCastleRectangleControl(Sender).BorderColor := Vector4(0.8,0.8,0.8,1.0);
+      TCastleRectangleControl(Sender).Border.AllSides := 0;
+    end;
+end;
+
 constructor TControlPanel.Create(AOwner: TComponent; const AWidth: Single);
 var
   BtnWidth: Single;
@@ -71,6 +93,7 @@ var
   BtnMargin: Single;
   BtnRow: Cardinal;
   ImgMargin: Single;
+  TagID: Integer;
 
   procedure PlaceButton(var obj: TCastleButton; const BtnCol: Integer);
   begin
@@ -82,13 +105,15 @@ var
     obj.ImageScale := BtnImageScale;
   end;
 
-  procedure CreateTab(ObjTab: TCastleRectangleControl;
-    ObjTabImage: TCastleImageControl; TabColor: TCastleColor; AURL: String);
+  procedure CreateTab(var ObjTab: TCastleRectangleControl;
+    var ObjTabImage: TCastleImageControl; TabColor: TCastleColor; AURL: String);
   begin
     ObjTab := TCastleRectangleControl.Create(TabGroup);
     ObjTab.Color := TabColor;
     ObjTab.Height := TabSectionHeight;
     ObjTab.Width := TabSectionHeight;
+    ObjTab.OnInternalMouseEnter := @DoMouseEnterTab;
+    ObjTab.OnInternalMouseLeave := @DoMouseLeaveTab;
     TabGroup.InsertFront(ObjTab);
 
     ObjTabImage := TCastleImageControl.Create(ObjTab);
@@ -106,6 +131,7 @@ begin
   Create(AOwner);
 
   ImgMargin := 8;
+  TagID := 0;
 
   BtnRow := 0;
   BtnMargin := 10;
@@ -176,9 +202,9 @@ begin
   TopSection.CreateButton(CtlResetBtn, '', @DoReset, 'castle-data:/icons/minus.png');
   PlaceButton(CtlResetBtn, 3);
 
-  CreateTab(Tabs[0], TabImages[0], White, 'castle-data:/flaticon/orientation.png');
-  CreateTab(Tabs[1], TabImages[1], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/flaticon/position.png');
-  CreateTab(Tabs[2], TabImages[2], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/flaticon/play.png');
+  CreateTab(Tabs[0], TabImages[0], White, 'castle-data:/icons/orientation.png');
+  CreateTab(Tabs[1], TabImages[1], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/icons/position.png');
+  CreateTab(Tabs[2], TabImages[2], Vector4(0.8,0.8,0.8,1.0), 'castle-data:/icons/play.png');
 
   TabCaption := TCastleLabel.Create(TabCurrent);
   TabCaption.Caption := 'Orientation';
@@ -186,6 +212,7 @@ begin
   TabCaption.PaddingHorizontal := 4;
   TabCurrent.InsertFront(TabCaption);
 
+  TabActive := Tabs[0];
 end;
 
 procedure TControlPanel.Resize;
@@ -196,22 +223,14 @@ begin
 
   TopSection.Height := TopSectionHeight;
   TopSection.Width := Width;
-//  TopSection.BorderColor := Red;
-//  TopSection.Border.AllSides :=1;
   TopSection.Bottom := Height - TopSectionHeight;
 
   TabSection.Height := TabSectionHeight + TabCaptionHeight;
   TabSection.Width := Width;
-//  TabSection.BorderColor := Blue;
-//  TabSection.Border.AllSides :=1;
   TabSection.Bottom := Height - TopSectionHeight - TabSectionHeight - TabCaptionHeight;
 
   BottomSection.Height := Height - TopSectionHeight - TabSectionHeight - TabCaptionHeight;
   BottomSection.Width := Width;
-//  BottomSection.BorderColor := Green;
-//  BottomSection.Border.AllSides :=1;
-
-  WriteLnLog('BottomSection.Height = ' + FloatTOStr(BottomSection.Height));
 end;
 
 procedure TControlPanel.DoGrabScreen(Sender: TObject);
