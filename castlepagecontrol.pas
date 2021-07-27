@@ -6,8 +6,8 @@ interface
 
 uses
   Classes, SysUtils,
-  CastleLog,
-  CastleVectors, CastleControl, CastleControls, CastleColors,
+  CastleLog, { CastleControl, }
+  CastleVectors, CastleControls, CastleColors,
   CastleKeysMouse, CastleUIControls;
 
 type
