@@ -25,7 +25,8 @@ uses
 type
   { TSpriteControlPanel }
 
-  TSpriteControlPanel = class(TControlPanel)
+  TSpriteControlPanel = class(TCastleUserInterface)
+    constructor Create(AOwner: TComponent); override;
   private
     CtlRotZMinusBtn: TCastleButton;
     CtlRotZPlusBtn: TCastleButton;
@@ -140,85 +141,85 @@ begin
   {$endif}
   BtnImageScale := (BtnHeight / 512) * BtnFontScale;
 
-  BottomSection.CreateButton(CtlRotZMinusBtn, 'Rot Z-', @DoRotateZMinus, 'castle-data:/icons/zminus.png');
+  CreateButton(CtlRotZMinusBtn, 'Rot Z-', @DoRotateZMinus, 'castle-data:/icons/zminus.png');
   PlaceButton(CtlRotZMinusBtn, 0);
-  BottomSection.CreateButton(CtlRotZPlusBtn, 'Rot Z+', @DoRotateZPlus, 'castle-data:/icons/zplus.png');
+  CreateButton(CtlRotZPlusBtn, 'Rot Z+', @DoRotateZPlus, 'castle-data:/icons/zplus.png');
   PlaceButton(CtlRotZPlusBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlRotYMinusBtn, 'Rot Y-', @DoRotateYMinus, 'castle-data:/icons/yminus.png');
+  CreateButton(CtlRotYMinusBtn, 'Rot Y-', @DoRotateYMinus, 'castle-data:/icons/yminus.png');
   PlaceButton(CtlRotYMinusBtn, 0);
-  BottomSection.CreateButton(CtlRotYPlusBtn, 'Rot Y+', @DoRotateYPlus, 'castle-data:/icons/yplus.png');
+  CreateButton(CtlRotYPlusBtn, 'Rot Y+', @DoRotateYPlus, 'castle-data:/icons/yplus.png');
   PlaceButton(CtlRotYPlusBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlRotXMinusBtn, 'Rot X-', @DoRotateXMinus, 'castle-data:/icons/xminus.png');
+  CreateButton(CtlRotXMinusBtn, 'Rot X-', @DoRotateXMinus, 'castle-data:/icons/xminus.png');
   PlaceButton(CtlRotXMinusBtn, 0);
-  BottomSection.CreateButton(CtlRotXPlusBtn, 'Rot X+', @DoRotateXPlus, 'castle-data:/icons/xplus.png');
+  CreateButton(CtlRotXPlusBtn, 'Rot X+', @DoRotateXPlus, 'castle-data:/icons/xplus.png');
   PlaceButton(CtlRotXPlusBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlZoomOutBtn, 'Zoom Out', @DoZoomOut, 'castle-data:/icons/zoomout.png');
+  CreateButton(CtlZoomOutBtn, 'Zoom Out', @DoZoomOut, 'castle-data:/icons/zoomout.png');
   PlaceButton(CtlZoomOutBtn, 0);
-  BottomSection.CreateButton(CtlZoomInBtn, 'Zoom In', @DoZoomIn, 'castle-data:/icons/zoomin.png');
+  CreateButton(CtlZoomInBtn, 'Zoom In', @DoZoomIn, 'castle-data:/icons/zoomin.png');
   PlaceButton(CtlZoomInBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlMoveUpBtn, 'Move Up', @DoMoveUp, 'castle-data:/icons/up.png');
+  CreateButton(CtlMoveUpBtn, 'Move Up', @DoMoveUp, 'castle-data:/icons/up.png');
   PlaceButton(CtlMoveUpBtn, 0);
-  BottomSection.CreateButton(CtlMoveDownBtn, 'Move Down', @DoMoveDown, 'castle-data:/icons/down.png');
+  CreateButton(CtlMoveDownBtn, 'Move Down', @DoMoveDown, 'castle-data:/icons/down.png');
   PlaceButton(CtlMoveDownBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlMoveLeftBtn, 'Move Left', @DoMoveLeft, 'castle-data:/icons/left.png');
+  CreateButton(CtlMoveLeftBtn, 'Move Left', @DoMoveLeft, 'castle-data:/icons/left.png');
   PlaceButton(CtlMoveLeftBtn, 0);
-  BottomSection.CreateButton(CtlMoveRightBtn, 'Move Right', @DoMoveRight, 'castle-data:/icons/right.png');
+  CreateButton(CtlMoveRightBtn, 'Move Right', @DoMoveRight, 'castle-data:/icons/right.png');
   PlaceButton(CtlMoveRightBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlMoveFwdBtn, 'Move Fwd', @DoMoveFwd, 'castle-data:/icons/forward.png');
+  CreateButton(CtlMoveFwdBtn, 'Move Fwd', @DoMoveFwd, 'castle-data:/icons/forward.png');
   PlaceButton(CtlMoveFwdBtn, 0);
-  BottomSection.CreateButton(CtlMoveBackBtn, 'Move Back', @DoMoveBack, 'castle-data:/icons/back.png');
+  CreateButton(CtlMoveBackBtn, 'Move Back', @DoMoveBack, 'castle-data:/icons/back.png');
   PlaceButton(CtlMoveBackBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateButton(CtlCameraLeftBtn, 'Cam Rot-', @DoCamLeft, 'castle-data:/icons/camera.png');
+  CreateButton(CtlCameraLeftBtn, 'Cam Rot-', @DoCamLeft, 'castle-data:/icons/camera.png');
   PlaceButton(CtlCameraLeftBtn, 0);
-  BottomSection.CreateButton(CtlCameraRightBtn, 'Cam Rot+', @DoCamRight, 'castle-data:/icons/camera.png');
+  CreateButton(CtlCameraRightBtn, 'Cam Rot+', @DoCamRight, 'castle-data:/icons/camera.png');
   PlaceButton(CtlCameraRightBtn, 1);
   Inc(BtnRow);
 
-  BottomSection.CreateCheckbox(CtlTransparencyChk, 'Transparent', @UseTransparencyChange);
+  CreateCheckbox(CtlTransparencyChk, 'Transparent', @UseTransparencyChange);
   PlaceCheckbox(CtlTransparencyChk);
   Inc(BtnRow);
 
-  BottomSection.CreateCheckbox(CtlLocalLightsChk, 'Local Lights', @UseModelSpotsClick);
+  CreateCheckbox(CtlLocalLightsChk, 'Local Lights', @UseModelSpotsClick);
   PlaceCheckbox(CtlLocalLightsChk);
   Inc(BtnRow);
 
-  CtlDirectionsISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Directions', (BtnWidth * 2) + 10, BtnHeight);
+  CtlDirectionsISE := TCastleIntegerSpinEdit.Create(Self, 'Directions', (BtnWidth * 2) + 10, BtnHeight);
   PlaceISE(CtlDirectionsISE);
   Inc(BtnRow);
 
-  CtlFramesISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Frames', (BtnWidth * 2) + 10, BtnHeight);
+  CtlFramesISE := TCastleIntegerSpinEdit.Create(Self, 'Frames', (BtnWidth * 2) + 10, BtnHeight);
   PlaceISE(CtlFramesISE);
   Inc(BtnRow);
 
-  CtlSpriteHeightISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Height', (BtnWidth * 2) + 10, BtnHeight);
+  CtlSpriteHeightISE := TCastleIntegerSpinEdit.Create(Self, 'Height', (BtnWidth * 2) + 10, BtnHeight);
   PlaceISE(CtlSpriteHeightISE);
   Inc(BtnRow);
 
-  CtlSpriteWidthISE := TCastleIntegerSpinEdit.Create(BottomSection, 'Width', (BtnWidth * 2) + 10, BtnHeight);
+  CtlSpriteWidthISE := TCastleIntegerSpinEdit.Create(Self, 'Width', (BtnWidth * 2) + 10, BtnHeight);
   PlaceISE(CtlSpriteWidthISE);
   Inc(BtnRow);
 
-  with Parent as TCastleApp do
-    begin
-      WriteLnLog('Setting CP Defaults');
-      CtlTransparencyChk.Checked := UseTransparency;
-      CtlLocalLightsChk.Checked := UseModelSpots;
+      WriteLnLog('Setting CP Defaults on ' + Owner.ClassName);
+      CtlTransparencyChk.Checked := TCastleApp(Owner).UseTransparency;
+      CtlLocalLightsChk.Checked := TCastleApp(Owner).UseModelSpots;
       CtlDirectionsISE.Min := 1;
       CtlDirectionsISE.Max := 64;
+    with Owner as TCastleApp do
+      begin
       CtlDirectionsISE.Value := DirectionCount;
       CtlDirectionsISE.OnChange := @DoDirectionsChange;
       CtlFramesISE.Min := 1;
@@ -442,6 +443,14 @@ begin
       else
         Stage.ShowGround(True);
     end;
+end;
+
+constructor TSpriteControlPanel.Create(AOwner: TComponent);
+begin
+  inherited;
+
+  FullSize := True;
+  LoadOrentationLayout;
 end;
 
 end.

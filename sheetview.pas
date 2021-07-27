@@ -173,7 +173,7 @@ begin
 
   InsertFront(VPBackImage);
 
-  ControlPanel := TControlPanel.Create(Self, ControlWidth);
+//  ControlPanel := TControlPanel.Create(Self, ControlWidth);
 end;
 
 end.

@@ -6,37 +6,49 @@ interface
 
 uses
   Classes, SysUtils,
-  CastleVectors,
-  CastleControl, CastleControls, CastleColors, CastleUIControls;
+  CastleLog,
+  CastleVectors, CastleControl, CastleControls, CastleColors,
+  CastleKeysMouse, CastleUIControls;
 
 type
   { TCastleTabSheet }
+  TCastlePageControl = class; // Forward declaration
 
-  TCastleTabSheet = class(TCastleControl)
+  TCastleTabSheet = class(TCastleRectangleControl)
     constructor Create(AOwner: TComponent); override;
     constructor Create(AOwner: TComponent; ACaption: String; AURL: String);
   private
-    fRect: TCastleRectangleControl;
+    fPageControl: TCastlePageControl;
     fImage: TCastleImageControl;
+    fContent: TCastleUserInterface;
     fCaption: String;
+    procedure SetContent(const AContent: TCastleUserInterface);
     procedure DoMouseEnterTab(const Sender: TCastleUserInterface);
     procedure DoMouseLeaveTab(const Sender: TCastleUserInterface);
+    procedure DoMousePressTab(const Sender: TInputListener; const Event: TInputPressRelease; var Handled: Boolean);
+    procedure Resize; override;
+  public
+    property Image: TCastleImageControl read fImage write fImage;
+    property Content: TCastleUserInterface read fContent write SetContent;
+    property Caption: String read fCaption write fCaption;
+    property PageControl: TCastlePageControl read fPageControl write fPageControl;
   end;
   TCastleTabSheetArray = Array of TCastleTabSheet;
 
   { TCastlePageControl }
   TCastlePageControl = class(TCastleUserInterface)
     constructor Create(AOwner: TComponent); override;
-    procedure Resize; override;
   private
     fTabSection: TCastleUserInterface;
     fTabHGroup: TCastleHorizontalGroup;
     fTabVGroup: TCastleVerticalGroup;
+    fContainer: TCastleUserInterface;
     fTabs: TCastleTabSheetArray;
     fTabCurrent: TCastleRectangleControl;
     fTabActive: TCastleTabSheet;
     fImgMargin: Single;
     fTabCaption: TCastleLabel;
+    fPaddingTop: Single;
     fTabSectionHeight: Single;
     fTabCaptionHeight: Single;
     fTabActiveColor: TCastleColor;
@@ -48,6 +60,10 @@ type
     procedure SetTabInActiveColor(const Value: TCastleColor);
   public
     procedure AddTab(const ACaption: String; const AURL: String);
+    procedure ExtResize;
+    property Container: TCastleUserInterface read fContainer write fContainer;
+    property PaddingTop: Single read fPaddingTop write fPaddingTop;
+    property Tabs: TCastleTabSheetArray read fTabs write fTabs;
     property TabHGroup: TCastleHorizontalGroup read fTabHGroup write fTabHGroup;
     property TabActive: TCastleTabSheet read fTabActive write SetTabActive;
     property TabActiveColor: TCastleColor read fTabActiveColor write SetTabActiveColor;
@@ -55,84 +71,124 @@ type
     property TabInActiveColor: TCastleColor read fTabInActiveColor write SetTabInActiveColor;
   published
     property ImgMargin: Single read fImgMargin write fImgMargin;
+    property TabSection: TCastleUserInterface read fTabSection write fTabSection;
     property TabSectionHeight: Single read fTabSectionHeight write fTabSectionHeight;
     property TabCaptionHeight: Single read fTabCaptionHeight write fTabCaptionHeight;
   end;
 
 implementation
 
+uses ControlPanel;
+
 { TCastleTabSheet }
 constructor TCastleTabSheet.Create(AOwner: TComponent);
 begin
-  inherited Create(AOwner);
+  inherited;
 end;
 
 constructor TCastleTabSheet.Create(AOwner: TComponent; ACaption: String; AURL: String);
 begin
   Create(AOwner);
 
+  fPageControl := TCastlePageControl(AOwner);
   fCaption := ACaption;
 
-  with AOwner as TCastlePageControl do
-    begin
-      fRect := TCastleRectangleControl.Create(TabHGroup);
-      fRect.Color := TabActiveColor;
-      fRect.Height := TabSectionHeight;
-      fRect.Width := TabSectionHeight;
-      fRect.OnInternalMouseEnter := @DoMouseEnterTab;
-      fRect.OnInternalMouseLeave := @DoMouseLeaveTab;
-      TabHGroup.InsertFront(fRect);
+  Color := TCastlePageControl(Owner).TabInActiveColor;
+  Height := TCastlePageControl(Owner).TabSectionHeight;
+  Width := TCastlePageControl(Owner).TabSectionHeight;
+  OnInternalMouseEnter := @DoMouseEnterTab;
+  OnInternalMouseLeave := @DoMouseLeaveTab;
+  OnPress := @DoMousePressTab;
 
-      fImage := TCastleImageControl.Create(fRect);
-      fImage.Height := TabSectionHeight - ImgMargin;
-      fImage.Width := TabSectionHeight - ImgMargin;
-      fImage.Left := (ImgMargin / 2) - fRect.Border.AllSides;
-      fImage.Bottom := (ImgMargin / 2) - fRect.Border.AllSides;
-      fImage.URL := AURL;
-      fImage.Stretch := True;
-      fRect.InsertFront(fImage);
+  TCastlePageControl(AOwner).TabHGroup.InsertFront(Self);
 
-    end;
+  fImage := TCastleImageControl.Create(Self);
+  fImage.Height := TCastlePageControl(AOwner).TabSectionHeight - TCastlePageControl(AOwner).ImgMargin;
+  fImage.Width := TCastlePageControl(AOwner).TabSectionHeight - TCastlePageControl(AOwner).ImgMargin;
+  fImage.Left := (TCastlePageControl(AOwner).ImgMargin / 2) - Self.Border.AllSides;
+  fImage.Bottom := (TCastlePageControl(AOwner).ImgMargin / 2) - Self.Border.AllSides;
+  fImage.URL := AURL;
+  fImage.Stretch := True;
+  Self.InsertFront(fImage);
 
+end;
+
+procedure TCastleTabSheet.SetContent(const AContent: TCastleUserInterface);
+begin
+  if not(fContent = AContent) then
+    fContent := AContent;
+end;
+
+procedure TCastleTabSheet.Resize;
+begin
+  inherited;
+  WriteLnLog('TCastleTabSheet.Resize');
+end;
+
+procedure TCastleTabSheet.DoMousePressTab(const Sender: TInputListener; const Event: TInputPressRelease; var Handled: Boolean);
+begin
+  if not(TCastleTabSheet(Sender).PageControl.TabActive = Sender) then
+    TCastleTabSheet(Sender).PageControl.TabActive := TCastleTabSheet(Sender);
 end;
 
 procedure TCastleTabSheet.DoMouseEnterTab(const Sender: TCastleUserInterface);
 begin
-//  if not(TCastlePageControl(Parent).TabActive = Sender) then
+  if not(TCastleTabSheet(Sender).PageControl.TabActive = Sender) then
     begin
-      TCastleRectangleControl(Sender).BorderColor := Red;
-      TCastleRectangleControl(Sender).Border.AllSides := 1;
+      TCastleRectangleControl(Sender).Color := TCastleTabSheet(Sender).PageControl.TabHoverColor;
+      TCastleTabSheet(Sender).Image.Left := (TCastleTabSheet(Sender).PageControl.ImgMargin / 2) - Self.Border.AllSides + 1;
+      TCastleTabSheet(Sender).Image.Bottom := (TCastleTabSheet(Sender).PageControl.ImgMargin / 2) - Self.Border.AllSides + 1;
     end;
 end;
 
 procedure TCastleTabSheet.DoMouseLeaveTab(const Sender: TCastleUserInterface);
 begin
-//  if not(TCastlePageControl(Parent).TabActive = Sender) then
-    begin
-      TCastleRectangleControl(Sender).BorderColor := Vector4(0.8,0.8,0.8,1.0);
-      TCastleRectangleControl(Sender).Border.AllSides := 0;
-    end;
+  if not(TCastleTabSheet(Sender).PageControl.TabActive = Sender) then
+    TCastleRectangleControl(Sender).Color := TCastleTabSheet(Sender).PageControl.TabInActiveColor
+  else
+    TCastleRectangleControl(Sender).Color := TCastleTabSheet(Sender).PageControl.TabActiveColor;
+
+  TCastleTabSheet(Sender).Image.Left := (TCastleTabSheet(Sender).PageControl.ImgMargin / 2) - Self.Border.AllSides;
+  TCastleTabSheet(Sender).Image.Bottom := (TCastleTabSheet(Sender).PageControl.ImgMargin / 2) - Self.Border.AllSides;
 end;
 
 { TCastlePageControl }
 constructor TCastlePageControl.Create(AOwner: TComponent);
 begin
-  inherited Create(AOwner);
-
-  Width := TCastleUserInterface(AOwner).Width;
-  Height := TCastleUserInterface(AOwner).Height;
+  inherited;
 
   fTabSectionHeight := 40;
   fTabCaptionHeight := 24;
+  fImgMargin := 8;
+
+  fTabActive := nil;
+  fTabActiveColor := Vector4(1.0, 1.0, 1.0, 1.0);
+  fTabHoverColor := Vector4(0.9, 0.9, 0.9, 1.0);
+  fTabInActiveColor := Vector4(0.8, 0.8, 0.8, 1.0);
+
+  Width := TControlPanel(Owner).Width;
+  Height := TControlPanel(Owner).Height;
 
   fTabSection := TCastleUserInterface.Create(Self);
   fTabSection.Height := fTabSectionHeight + fTabCaptionHeight;
   fTabSection.Width := Width;
+
+  fTabSection.HorizontalAnchorParent := hpLeft;
+  fTabSection.HorizontalAnchorSelf := hpLeft;
+  fTabSection.HorizontalAnchorDelta := 0;
+  fTabSection.VerticalAnchorParent := vpTop;
+  fTabSection.VerticalAnchorSelf := vpTop;
+  fTabSection.VerticalAnchorDelta := 0;
+
   Self.InsertFront(fTabSection);
 
   fTabVGroup := TCastleVerticalGroup.Create(fTabSection);
   fTabVGroup.Height := fTabSectionHeight + fTabCaptionHeight;
   fTabVGroup.Width := Width;
+
+  fTabVGroup.Border.AllSides := 1;
+  fTabVGroup.BorderColor := Maroon;
+
   fTabSection.InsertFront(fTabVGroup);
 
   fTabHGroup := TCastleHorizontalGroup.Create(fTabVGroup);
@@ -152,23 +208,71 @@ begin
   fTabCaption.PaddingHorizontal := 4;
   fTabCurrent.InsertFront(fTabCaption);
 
-  fTabActive := nil;
-  fTabActiveColor := Vector4(1.0, 1.0, 1.0, 1.0);
-  fTabHoverColor := Vector4(0.9, 0.9, 0.9, 1.0);
-  fTabInActiveColor := Vector4(0.8, 0.8, 0.8, 1.0);
+  fContainer := TCastleUserInterface.Create(Self);
+
+  fContainer.Width := Width;
+  fContainer.Height := 400; // Height;
+  fContainer.Border.AllSides := 1;
+  fContainer.BorderColor := Green;
+
+  fContainer.HorizontalAnchorParent := hpLeft;
+  fContainer.HorizontalAnchorSelf := hpLeft;
+  fContainer.HorizontalAnchorDelta := 0;
+  fContainer.VerticalAnchorParent := vpTop;
+  fContainer.VerticalAnchorSelf := vpTop;
+  fContainer.VerticalAnchorDelta := -(TabSectionHeight + TabCaptionHeight);
+//  fContainer.Exists := False;
+
+  Self.InsertFront(fContainer);
+
+  WriteLnLog('TTWidth : ' + FloatToStr(Width) + ' / ' + 'Height : ' + FloatToStr(Height));
+  WriteLnLog('TabWidth : ' + FloatToStr(fTabSection.Width) + ' / ' + 'TabHeight : ' + FloatToStr(fTabSection.Height));
+  WriteLnLog('TabBottom : ' + FloatToStr(fTabSection.Bottom));
 end;
 
 procedure TCastlePageControl.AddTab(const ACaption: String; const AURL: String);
 var
   TabIndex: Integer;
+  ThisTab: TCastleTabSheet;
+  ThisContent: TCastleUserInterface;
+  ALabel: TCastleLabel;
 begin
   TabIndex := Length(fTabs);
   SetLength(fTabs, TabIndex + 1);
 
-  fTabs[TabIndex] := TCastleTabSheet.Create(Self, ACaption, AURL);
+  ThisTab := TCastleTabSheet.Create(Self, ACaption, AURL);
+
+  ThisContent := TCastleUserInterface.Create(ThisTab);
+  ThisContent.Width := Width;
+  ThisContent.Height := Height;
+  ThisContent.Border.AllSides := 1;
+  ThisContent.BorderColor := White;
+  ThisContent.HorizontalAnchorParent := hpMiddle;
+  ThisContent.HorizontalAnchorSelf := hpMiddle;
+  ThisContent.HorizontalAnchorDelta := 0;
+  ThisContent.VerticalAnchorParent := vpMiddle;
+  ThisContent.VerticalAnchorSelf := vpMiddle;
+  ThisContent.VerticalAnchorDelta := 0; //(TabSectionHeight + TabCaptionHeight);
+
+  ALabel := TCastleLabel.Create(ThisContent);
+  ALabel.Color := White;
+  ALabel.Caption := ACaption;
+  ALabel.HorizontalAnchorParent := hpMiddle;
+  ALabel.HorizontalAnchorSelf := hpMiddle;
+  ALabel.HorizontalAnchorDelta := 0;
+  ALabel.VerticalAnchorParent := vpMiddle;
+  ALabel.VerticalAnchorSelf := vpMiddle;
+  ALabel.VerticalAnchorDelta := 0; // (TabSectionHeight + TabCaptionHeight);
+  ALabel.Border.AllSides := 1;
+  ALabel.BorderColor := White;
+  ThisContent.InsertFront(ALabel);
+
+  ThisTab.Content := ThisContent;
+
+  fTabs[TabIndex] := ThisTab;
 
   if fTabActive = nil then
-    TabActive := fTabs[TabIndex];
+    TabActive := ThisTab;
 end;
 
 procedure TCastlePageControl.SetTabActiveColor(const Value: TCastleColor);
@@ -201,18 +305,31 @@ end;
 procedure TCastlePageControl.SetTabActive(const AValue: TCastleTabSheet);
 begin
   if not(fTabActive = AValue) then
-    fTabActive := AValue;
+    begin
+      if not(fTabActive = nil) then
+        begin
+          fTabActive.Color := fTabInActiveColor;
+          fContainer.ClearControls;
+        end;
+      fTabActive := AValue;
+      fTabCaption.Caption := fTabActive.fCaption;
+      fTabActive.Color := fTabActiveColor;
+
+      fContainer.InsertFront(TabActive.Content);
+    end;
 end;
 
-procedure TCastlePageControl.Resize;
+procedure TCastlePageControl.ExtResize;
 begin
-  inherited;
-
-  Height := TCastleUserInterface(Parent).Height;
-  Width := TCastleUserInterface(Parent).Width;
-
-  fTabSection.Height := TabSectionHeight + TabCaptionHeight;
+  fTabSection.Height := fTabSectionHeight + fTabCaptionHeight;
   fTabSection.Width := Width;
+
+  fContainer.Height := Height - fTabSection.Height;
+  fContainer.Width := Width;
+
+  WriteLnLog('TCastlePageControl.ExtResize');
+  WriteLnLog('TTWidth : ' + FloatToStr(Width) + ' / ' + 'Height : ' + FloatToStr(Height));
+  WriteLnLog('TabWidth : ' + FloatToStr(fTabSection.Width) + ' / ' + 'TabHeight : ' + FloatToStr(fTabSection.Height));
 end;
 
 end.

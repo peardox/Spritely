@@ -1,7 +1,7 @@
 unit MainGameUnit;
 
 {$mode objfpc}{$H+}
-{$define multimodel}
+{$define controlpanel}
 
 interface
 
@@ -60,7 +60,12 @@ type
     LabelSpare4: TCastleLabel;
   public
     VPMax: TVector2Integer;
+    {$ifdef controlpanel}
+    SpriteCP: TControlPanel;
+    SpriteCPContent: TSpriteControlPanel;
+    {$else}
     SpriteCP: TSpriteControlPanel;
+    {$endif}
     FileToLoadList: TStringList;
     VPBackImage: TCastleImageControl;
     Viewport: TCastleViewport;
@@ -298,10 +303,10 @@ begin
     end;
 
   LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
-   + ' : ' + FloatToStr(iScaleMultiplier);
+   + ' : ' + FloatToStr(iScaleMultiplier) + ' : ' + FloatToStr(1 / Viewport.Camera.Orthographic.Scale);
 
   UpdateScale;
-  WriteLnLog('End State Resize : LeftTop = ' + FloatToStr(Viewport.Left) + ' ' + FloatToStr(Viewport.Height) + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height));
+  WriteLnLog('End State Resize : LeftTop = ' + FloatToStr(Viewport.Left) + ' ' + FloatToStr(Viewport.Height) + ' : Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)+ ' : ' + FormatFloat('#0.00000', iScaleMultiplier) + ' : ' + FloatToStr(1 / Viewport.Camera.Orthographic.Scale));
 end;
 
 procedure TCastleApp.BootStrap;
@@ -358,9 +363,18 @@ begin
 
   InsertFront(Viewport);
 
+  {$ifdef controlpanel}
+  SpriteCP := TControlPanel.Create(Self, ControlWidth);
+{
+  SpriteCPContent := TSpriteControlPanel.Create(Self);
+  SpriteCP.TabTest.Tabs[0].Content := SpriteCPContent;
+  SpriteCP.TabTest.Tabs[0].InsertFront(SpriteCPContent);
+}
+  {$else}
   SpriteCP := TSpriteControlPanel.Create(Self, ControlWidth);
   SpriteCP.LoadOrentationLayout;
 //  SpriteCP.Exists:=False;
+  {$endif}
 
   UpdateScale; // SB
 
@@ -405,10 +419,6 @@ begin
     if not(WorkingModel = nil) then
       begin
         Stage.Remove(WorkingModel.Scene);
-        {$ifdef multimodel}
-        {$else}
-        FreeAndNil(WorkingModel);
-        {$endif}
       end;
 
     CameraRotation := 2 * Pi * (5/8);
@@ -434,7 +444,7 @@ begin
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/seamless-wood-planks-4.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/myfreetextures/tilesf2.jpg', -1);
 //      Stage.LoadStage('castle-data:/ground/grid16.png', 0, 1000, 1000);
-      Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
+        Stage.LoadStage('castle-data:/ground/myfreetextures/pavers1b2.jpg', -1);
 //        Stage.LoadStage('castle-data:/ground/White_Texture.png', -1);
         Stage.Add(WorkingModel.Scene);
 
@@ -624,6 +634,7 @@ begin
 
             if not(iScale = 0) then
               Viewport.Camera.Orthographic.Scale := (2 * BoundRadius) / (iScale * iScaleMultiplier);
+//              Viewport.Camera.Orthographic.Scale := 1 / SpriteHeight;
 
             if(WorkingModel.CurrentAnimation >= 0) and (WorkingModel.CurrentAnimation < WorkingModel.Actions.Count) then
               begin
@@ -637,7 +648,7 @@ begin
         end;
 
       LabelMode.Caption := 'Viewport = ' + FloatToStr(Viewport.Width) + ' x ' + FloatToStr(Viewport.Height)
-       + ' : ' + FormatFloat('#0.00000', iScaleMultiplier);
+       + ' : ' + FormatFloat('#0.00000', iScaleMultiplier) + ' : ' + FloatToStr(1 / Viewport.Camera.Orthographic.Scale);
 {
       LabelSpare4.Caption := 'BBox : ' + WorkingModel.Scene.BoundingBox.Data[0].ToString  + ' -> ' +
                        WorkingModel.Scene.BoundingBox.Data[1].ToString + ' (' +
