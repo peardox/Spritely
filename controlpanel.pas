@@ -121,7 +121,7 @@ begin
   Self.InsertFront(TopSection);
 
   TabTest := TCastlePageControl.Create(Self);
-  TabTest.PaddingTop := TopSectionHeight;
+
   TabTest.Height := Height - TopSectionHeight;
   TabTest.Width := Width;
   TabTest.HorizontalAnchorParent := hpLeft;
@@ -129,9 +129,10 @@ begin
   TabTest.HorizontalAnchorDelta := 0;
   TabTest.VerticalAnchorParent := vpTop;
   TabTest.VerticalAnchorSelf := vpTop;
-  TabTest.VerticalAnchorDelta := -TopSectionHeight;
+  TabTest.VerticalAnchorDelta :=  -TopSectionHeight;
 //  TabTest.Border.AllSides := 1;
 //  TabTest.BorderColor := Blue;
+
   Self.InsertFront(TabTest);
 
   SpritePanel := TSpriteControlPanel.Create(AOwner, AWidth, TabTest);
@@ -158,12 +159,12 @@ begin
   Height := ParentRect.Height - 2;
 
   TopSection.Height := TopSectionHeight;
-  TopSection.Width := PanelWidth;
+  TopSection.Width := PanelWidth - Border.Left - Border.Right;
 //  TopSection.Border.AllSides := 1;
 //  TopSection.BorderColor := Red;
 
   TabTest.Height := Height - TopSectionHeight;
-  TabTest.Width := PanelWidth;
+  TabTest.Width := PanelWidth - Border.Left - Border.Right;
 
   TabTest.ExtResize;
   SpritePanel.ExtResize;

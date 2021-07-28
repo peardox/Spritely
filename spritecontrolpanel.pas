@@ -24,7 +24,7 @@ uses
 type
   { TSpriteControlPanel }
 
-  TSpriteControlPanel = class(TCastleUserInterface)
+  TSpriteControlPanel = class(TCastleRectangleControl)
     constructor Create(AOwner: TComponent); override;
     constructor Create(AOwner: TComponent; AWidth: Single; APageControl: TCastlePageControl);
     procedure Resize; override;
@@ -55,6 +55,12 @@ type
     CtlSpriteHeightISE: TCastleIntegerSpinEdit;
     CtlSpriteWidthISE: TCastleIntegerSpinEdit;
 
+    BtnWidth: Single;
+    BtnHeight: Single;
+    BtnFontScale: Single;
+    BtnImageScale: Single;
+    BtnMargin: Single;
+
     procedure UseModelSpotsClick(Sender: TObject);
     procedure UseTransparencyChange(Sender: TObject);
     procedure UpdateView;
@@ -78,8 +84,9 @@ type
     procedure DoSpriteWidthChange(Sender: TObject);
     procedure DoDirectionsChange(Sender: TObject);
     procedure DoFramesChange(Sender: TObject);
+    procedure ResizePanel;
   public
-    procedure LoadOrentationLayout;
+    procedure LoadPanel;
     procedure ExtResize;
   end;
 
@@ -89,19 +96,15 @@ uses MainGameUnit;
 
 { TSpriteControlPanel }
 
-procedure TSpriteControlPanel.LoadOrentationLayout;
+procedure TSpriteControlPanel.LoadPanel;
 var
-  BtnWidth: Single;
-  BtnHeight: Single;
-  BtnFontScale: Single;
-  BtnImageScale: Single;
-  BtnMargin: Single;
   BtnRow: Cardinal;
+  TopMargin: Single;
 
   procedure PlaceButton(var obj: TCastleButton; const BtnCol: Integer);
   begin
     obj.Left := (BtnCol * (BtnWidth  + BtnMargin)) + BtnMargin;
-    obj.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+    obj.Bottom := Height - TopMargin - (BtnRow * (BtnHeight + BtnMargin)) - BtnMargin;
     obj.Width := BtnWidth;
     obj.Height := BtnHeight;
     obj.FontScale := BtnFontScale;
@@ -111,7 +114,7 @@ var
   procedure PlaceCheckbox(var obj: TCastleCheckbox);
   begin
     obj.Left := BtnMargin;
-    obj.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+    obj.Bottom := Height - TopMargin - (BtnRow * (BtnHeight + BtnMargin)) - BtnMargin;
     obj.Width := BtnWidth;
     obj.Height := BtnHeight;
     obj.CheckboxColor := White;
@@ -121,13 +124,12 @@ var
   procedure PlaceISE(var obj: TCastleIntegerSpinEdit);
   begin
     obj.Left := BtnMargin;
-    obj.Bottom := (BtnRow * (BtnHeight + BtnMargin)) + BtnMargin;
+    obj.Bottom := Height - TopMargin - (BtnRow * (BtnHeight + BtnMargin)) - BtnMargin;
     obj.Width := BtnWidth;
     obj.Height := BtnHeight;
   end;
 
 begin
-  BtnRow := 0;
   BtnMargin := 10;
   BtnWidth := (Width - (3 * BtnMargin)) / 2;
   {$if defined(ANDROID)}
@@ -141,6 +143,9 @@ begin
   BtnFontScale := 0.8;
   {$endif}
   BtnImageScale := (BtnHeight / 512) * BtnFontScale;
+
+  BtnRow := 0;
+  TopMargin := BtnHeight;
 
   CreateButton(CtlRotZMinusBtn, 'Rot Z-', @DoRotateZMinus, 'castle-data:/icons/zminus.png');
   PlaceButton(CtlRotZMinusBtn, 0);
@@ -453,7 +458,8 @@ begin
 
   Width := AWidth;
   PageControl := APageControl;
-  LoadOrentationLayout;
+  LoadPanel;
+  WriteLnLog('TSpriteControlPanel.Create');
 end;
 
 procedure TSpriteControlPanel.Resize;
@@ -464,8 +470,103 @@ end;
 
 procedure TSpriteControlPanel.ExtResize;
 begin
-  Height := PageControl.Height;
-  Width := PageControl.Width;
+  Color := Vector4(0.0, 0.1, 0.3, 1.0);
+  Border.AllSides := 1;
+  BorderColor := Green;
+  Height := ParentRect.Height - Border.Top - Border.Bottom;
+  Width := ParentRect.Width - Border.Left - Border.Right;
+
+  ResizePanel;
+
+  WriteLnLog('TSpriteControlPanel.ExtResize : ' + FloatToStr(Width) + ' x ' + FloatToStr(Height));
+end;
+
+procedure TSpriteControlPanel.ResizePanel;
+var
+  BtnRow: Cardinal;
+  TopMargin: Single;
+
+  procedure PlaceButton(var obj: TCastleButton; const BtnCol: Integer);
+  begin
+    obj.Left := (BtnCol * (BtnWidth  + BtnMargin)) + BtnMargin;
+    obj.Bottom := Height - TopMargin - (BtnRow * (BtnHeight + BtnMargin)) - BtnMargin;
+    obj.Width := BtnWidth;
+    obj.Height := BtnHeight;
+    obj.FontScale := BtnFontScale;
+    obj.ImageScale := BtnImageScale;
+  end;
+
+  procedure PlaceCheckbox(var obj: TCastleCheckbox);
+  begin
+    obj.Left := BtnMargin;
+    obj.Bottom := Height - TopMargin - (BtnRow * (BtnHeight + BtnMargin)) - BtnMargin;
+    obj.Width := BtnWidth;
+    obj.Height := BtnHeight;
+    obj.CheckboxColor := White;
+    obj.TextColor := White;
+  end;
+
+  procedure PlaceISE(var obj: TCastleIntegerSpinEdit);
+  begin
+    obj.Left := BtnMargin;
+    obj.Bottom := Height - TopMargin - (BtnRow * (BtnHeight + BtnMargin)) - BtnMargin;
+    obj.Width := BtnWidth;
+    obj.Height := BtnHeight;
+  end;
+
+begin
+  BtnRow := 0;
+  TopMargin := BtnHeight;
+
+  PlaceButton(CtlRotZMinusBtn, 0);
+  PlaceButton(CtlRotZPlusBtn, 1);
+  Inc(BtnRow);
+
+  PlaceButton(CtlRotYMinusBtn, 0);
+  PlaceButton(CtlRotYPlusBtn, 1);
+  Inc(BtnRow);
+
+  PlaceButton(CtlRotXMinusBtn, 0);
+  PlaceButton(CtlRotXPlusBtn, 1);
+  Inc(BtnRow);
+
+  PlaceButton(CtlZoomOutBtn, 0);
+  PlaceButton(CtlZoomInBtn, 1);
+  Inc(BtnRow);
+
+  PlaceButton(CtlMoveUpBtn, 0);
+  PlaceButton(CtlMoveDownBtn, 1);
+  Inc(BtnRow);
+
+  PlaceButton(CtlMoveLeftBtn, 0);
+  PlaceButton(CtlMoveRightBtn, 1);
+  Inc(BtnRow);
+
+  PlaceButton(CtlMoveFwdBtn, 0);
+  PlaceButton(CtlMoveBackBtn, 1);
+  Inc(BtnRow);
+
+  PlaceButton(CtlCameraLeftBtn, 0);
+  PlaceButton(CtlCameraRightBtn, 1);
+  Inc(BtnRow);
+
+  PlaceCheckbox(CtlTransparencyChk);
+  Inc(BtnRow);
+
+  PlaceCheckbox(CtlLocalLightsChk);
+  Inc(BtnRow);
+
+  PlaceISE(CtlDirectionsISE);
+  Inc(BtnRow);
+
+  PlaceISE(CtlFramesISE);
+  Inc(BtnRow);
+
+  PlaceISE(CtlSpriteHeightISE);
+  Inc(BtnRow);
+
+  PlaceISE(CtlSpriteWidthISE);
+  Inc(BtnRow);
 end;
 
 end.

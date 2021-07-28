@@ -26,8 +26,8 @@ type
     procedure DoMouseEnterTab(const Sender: TCastleUserInterface);
     procedure DoMouseLeaveTab(const Sender: TCastleUserInterface);
     procedure DoMousePressTab(const Sender: TInputListener; const Event: TInputPressRelease; var Handled: Boolean);
-    procedure Resize; override;
   public
+    procedure Resize; override;
     property Image: TCastleImageControl read fImage write fImage;
     property Content: TCastleUserInterface read fContent write SetContent;
     property Caption: String read fCaption write fCaption;
@@ -211,9 +211,7 @@ begin
   fContainer := TCastleUserInterface.Create(Self);
 
   fContainer.Width := Width;
-  fContainer.Height := 400; // Height;
-//  fContainer.Border.AllSides := 1;
-//  fContainer.BorderColor := Green;
+  fContainer.Height := Height;
 
   fContainer.HorizontalAnchorParent := hpLeft;
   fContainer.HorizontalAnchorSelf := hpLeft;
@@ -221,7 +219,6 @@ begin
   fContainer.VerticalAnchorParent := vpTop;
   fContainer.VerticalAnchorSelf := vpTop;
   fContainer.VerticalAnchorDelta := -(TabSectionHeight + TabCaptionHeight);
-//  fContainer.Exists := False;
 
   Self.InsertFront(fContainer);
 
