@@ -21,7 +21,7 @@ uses
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, Overlays, MiscFunctions,
-  CastleBoxes, ControlPanel, SpriteControlPanel,
+  CastleBoxes, ControlPanel,
   {$ifndef VER3_0} OpenSSLSockets, {$endif} CastleDownload;
 
 type
@@ -62,7 +62,6 @@ type
     VPMax: TVector2Integer;
     {$ifdef controlpanel}
     SpriteCP: TControlPanel;
-    SpriteCPContent: TSpriteControlPanel;
     {$else}
     SpriteCP: TSpriteControlPanel;
     {$endif}
@@ -366,7 +365,7 @@ begin
   {$ifdef controlpanel}
   SpriteCP := TControlPanel.Create(Self, ControlWidth);
 {
-  SpriteCPContent := TSpriteControlPanel.Create(Self);
+  SpritePanel := TSpriteControlPanel.Create(Self);
   SpriteCP.TabTest.Tabs[0].Content := SpriteCPContent;
   SpriteCP.TabTest.Tabs[0].InsertFront(SpriteCPContent);
 }

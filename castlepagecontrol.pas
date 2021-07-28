@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  CastleLog, { CastleControl, }
+  CastleLog,
   CastleVectors, CastleControls, CastleColors,
   CastleKeysMouse, CastleUIControls;
 
@@ -59,7 +59,7 @@ type
     procedure SetTabHoverColor(const Value: TCastleColor);
     procedure SetTabInActiveColor(const Value: TCastleColor);
   public
-    procedure AddTab(const ACaption: String; const AURL: String);
+    procedure AddTab(const ACaption: String; const AURL: String; const AControlSet: TCastleUserInterface = nil);
     procedure ExtResize;
     property Container: TCastleUserInterface read fContainer write fContainer;
     property PaddingTop: Single read fPaddingTop write fPaddingTop;
@@ -186,8 +186,8 @@ begin
   fTabVGroup.Height := fTabSectionHeight + fTabCaptionHeight;
   fTabVGroup.Width := Width;
 
-  fTabVGroup.Border.AllSides := 1;
-  fTabVGroup.BorderColor := Maroon;
+//  fTabVGroup.Border.AllSides := 1;
+//  fTabVGroup.BorderColor := Maroon;
 
   fTabSection.InsertFront(fTabVGroup);
 
@@ -212,8 +212,8 @@ begin
 
   fContainer.Width := Width;
   fContainer.Height := 400; // Height;
-  fContainer.Border.AllSides := 1;
-  fContainer.BorderColor := Green;
+//  fContainer.Border.AllSides := 1;
+//  fContainer.BorderColor := Green;
 
   fContainer.HorizontalAnchorParent := hpLeft;
   fContainer.HorizontalAnchorSelf := hpLeft;
@@ -230,7 +230,7 @@ begin
   WriteLnLog('TabBottom : ' + FloatToStr(fTabSection.Bottom));
 end;
 
-procedure TCastlePageControl.AddTab(const ACaption: String; const AURL: String);
+procedure TCastlePageControl.AddTab(const ACaption: String; const AURL: String; const AControlSet: TCastleUserInterface = nil);
 var
   TabIndex: Integer;
   ThisTab: TCastleTabSheet;
@@ -242,32 +242,32 @@ begin
 
   ThisTab := TCastleTabSheet.Create(Self, ACaption, AURL);
 
-  ThisContent := TCastleUserInterface.Create(ThisTab);
-  ThisContent.Width := Width;
-  ThisContent.Height := Height;
-  ThisContent.Border.AllSides := 1;
-  ThisContent.BorderColor := White;
-  ThisContent.HorizontalAnchorParent := hpMiddle;
-  ThisContent.HorizontalAnchorSelf := hpMiddle;
-  ThisContent.HorizontalAnchorDelta := 0;
-  ThisContent.VerticalAnchorParent := vpMiddle;
-  ThisContent.VerticalAnchorSelf := vpMiddle;
-  ThisContent.VerticalAnchorDelta := 0; //(TabSectionHeight + TabCaptionHeight);
+  if AControlSet = nil then
+    begin
+      ThisContent := TCastleUserInterface.Create(ThisTab);
+      ThisContent.Width := Width;
+      ThisContent.Height := Height;
+      ThisContent.HorizontalAnchorParent := hpMiddle;
+      ThisContent.HorizontalAnchorSelf := hpMiddle;
+      ThisContent.HorizontalAnchorDelta := 0;
+      ThisContent.VerticalAnchorParent := vpMiddle;
+      ThisContent.VerticalAnchorSelf := vpMiddle;
+      ThisContent.VerticalAnchorDelta := 0;
 
-  ALabel := TCastleLabel.Create(ThisContent);
-  ALabel.Color := White;
-  ALabel.Caption := ACaption;
-  ALabel.HorizontalAnchorParent := hpMiddle;
-  ALabel.HorizontalAnchorSelf := hpMiddle;
-  ALabel.HorizontalAnchorDelta := 0;
-  ALabel.VerticalAnchorParent := vpMiddle;
-  ALabel.VerticalAnchorSelf := vpMiddle;
-  ALabel.VerticalAnchorDelta := 0; // (TabSectionHeight + TabCaptionHeight);
-  ALabel.Border.AllSides := 1;
-  ALabel.BorderColor := White;
-  ThisContent.InsertFront(ALabel);
-
-  ThisTab.Content := ThisContent;
+      ALabel := TCastleLabel.Create(ThisContent);
+      ALabel.Color := White;
+      ALabel.Caption := ACaption;
+      ALabel.HorizontalAnchorParent := hpMiddle;
+      ALabel.HorizontalAnchorSelf := hpMiddle;
+      ALabel.HorizontalAnchorDelta := 0;
+      ALabel.VerticalAnchorParent := vpMiddle;
+      ALabel.VerticalAnchorSelf := vpMiddle;
+      ALabel.VerticalAnchorDelta := 0;
+      ThisContent.InsertFront(ALabel);
+      ThisTab.Content := ThisContent;
+    end
+  else
+    ThisTab.Content := AControlSet;
 
   fTabs[TabIndex] := ThisTab;
 

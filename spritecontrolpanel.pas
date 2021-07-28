@@ -17,17 +17,19 @@ uses
   CastleViewport, CastleCameras, CastleProjection,
   X3DNodes, X3DFields, X3DTIme, CastleNotifications,
   CastleImages, CastleGLImages, CastleRectangles, CastleQuaternions,
-  CastleTextureImages, CastleCompositeImage, CastleLog,
+  CastleTextureImages, CastleCompositeImage, CastleLog, CastlePageControl,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
-  CastleGLUtils, multimodel, staging, MiscFunctions, ControlPanelControls,
-  ControlPanel;
+  CastleGLUtils, multimodel, staging, MiscFunctions, ControlPanelControls;
 
 type
   { TSpriteControlPanel }
 
   TSpriteControlPanel = class(TCastleUserInterface)
     constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; AWidth: Single; APageControl: TCastlePageControl);
+    procedure Resize; override;
   private
+    PageControl: TCastlePageControl;
     CtlRotZMinusBtn: TCastleButton;
     CtlRotZPlusBtn: TCastleButton;
     CtlRotYMinusBtn: TCastleButton;
@@ -78,6 +80,7 @@ type
     procedure DoFramesChange(Sender: TObject);
   public
     procedure LoadOrentationLayout;
+    procedure ExtResize;
   end;
 
 implementation
@@ -124,8 +127,6 @@ var
   end;
 
 begin
-  WriteLnLog('Start LoadOrentationLayout');
-
   BtnRow := 0;
   BtnMargin := 10;
   BtnWidth := (Width - (3 * BtnMargin)) / 2;
@@ -213,37 +214,33 @@ begin
   PlaceISE(CtlSpriteWidthISE);
   Inc(BtnRow);
 
-      WriteLnLog('Setting CP Defaults on ' + Owner.ClassName);
-      CtlTransparencyChk.Checked := TCastleApp(Owner).UseTransparency;
-      CtlLocalLightsChk.Checked := TCastleApp(Owner).UseModelSpots;
-      CtlDirectionsISE.Min := 1;
-      CtlDirectionsISE.Max := 64;
-    with Owner as TCastleApp do
-      begin
-      CtlDirectionsISE.Value := DirectionCount;
-      CtlDirectionsISE.OnChange := @DoDirectionsChange;
-      CtlFramesISE.Min := 1;
-      CtlFramesISE.Max := 64;
-      CtlFramesISE.Value := FrameCount;
-      CtlFramesISE.OnChange := @DoFramesChange;
-      CtlSpriteHeightISE.Min := 16;
-      CtlSpriteHeightISE.Max := 2048;
-      CtlSpriteHeightISE.Value := SpriteHeight;
-      CtlSpriteHeightISE.StepSize := 16;
-      CtlSpriteHeightISE.OnChange := @DoSpriteHeightChange;
-      CtlSpriteWidthISE.Min := 16;
-      CtlSpriteWidthISE.Max := 2048;
-      CtlSpriteWidthISE.Value := SpriteWidth;
-      CtlSpriteWidthISE.StepSize := 16;
-      CtlSpriteWidthISE.OnChange := @DoSpriteWidthChange;
-    end;
+  CtlTransparencyChk.Checked := TCastleApp(Owner).UseTransparency;
+  CtlLocalLightsChk.Checked := TCastleApp(Owner).UseModelSpots;
+  CtlDirectionsISE.Min := 1;
+  CtlDirectionsISE.Max := 64;
+  CtlDirectionsISE.Value := TCastleApp(Owner).DirectionCount;
+  CtlDirectionsISE.OnChange := @DoDirectionsChange;
+  CtlFramesISE.Min := 1;
+  CtlFramesISE.Max := 64;
+  CtlFramesISE.Value := TCastleApp(Owner).FrameCount;
+  CtlFramesISE.OnChange := @DoFramesChange;
+  CtlSpriteHeightISE.Min := 16;
+  CtlSpriteHeightISE.Max := 2048;
+  CtlSpriteHeightISE.Value := TCastleApp(Owner).SpriteHeight;
+  CtlSpriteHeightISE.StepSize := 16;
+  CtlSpriteHeightISE.OnChange := @DoSpriteHeightChange;
+  CtlSpriteWidthISE.Min := 16;
+  CtlSpriteWidthISE.Max := 2048;
+  CtlSpriteWidthISE.Value := TCastleApp(Owner).SpriteWidth;
+  CtlSpriteWidthISE.StepSize := 16;
+  CtlSpriteWidthISE.OnChange := @DoSpriteWidthChange;
 end;
 
 procedure TSpriteControlPanel.DoMoveUp(Sender: TObject);
 var
   V: TVector3;
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       V := WorkingModel.Transform.Translation;
       V.Y := V.Y + 0.1;
@@ -255,7 +252,7 @@ procedure TSpriteControlPanel.DoMoveDown(Sender: TObject);
 var
   V: TVector3;
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       V := WorkingModel.Transform.Translation;
       V.Y := V.Y - 0.1;
@@ -267,7 +264,7 @@ procedure TSpriteControlPanel.DoMoveRight(Sender: TObject);
 var
   V: TVector3;
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       V := WorkingModel.Transform.Translation;
       V.X := V.X + 0.1;
@@ -279,7 +276,7 @@ procedure TSpriteControlPanel.DoMoveLeft(Sender: TObject);
 var
   V: TVector3;
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       V := WorkingModel.Transform.Translation;
       V.X := V.X - 0.1;
@@ -291,7 +288,7 @@ procedure TSpriteControlPanel.DoMoveFwd(Sender: TObject);
 var
   V: TVector3;
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       V := WorkingModel.Transform.Translation;
       V.Z := V.Z + 0.1;
@@ -303,7 +300,7 @@ procedure TSpriteControlPanel.DoMoveBack(Sender: TObject);
 var
   V: TVector3;
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       V := WorkingModel.Transform.Translation;
       V.Z := V.Z - 0.1;
@@ -313,25 +310,25 @@ end;
 
 procedure TSpriteControlPanel.DoZoomIn(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     iScaleMultiplier := iScaleMultiplier + (iScaleMultiplier * 0.1);
 end;
 
 procedure TSpriteControlPanel.DoZoomOut(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     iScaleMultiplier := iScaleMultiplier - (iScaleMultiplier * 0.1);
 end;
 
 procedure TSpriteControlPanel.DoCamLeft(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     CameraRotation := CameraRotation - (Pi / 8);
 end;
 
 procedure TSpriteControlPanel.DoCamRight(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     CameraRotation := CameraRotation + (Pi / 8);
 end;
 
@@ -339,7 +336,7 @@ procedure TSpriteControlPanel.UpdateView;
 var
   Q: TQuaternion;
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       Q := QuatFromAxisAngle(Vector4(0, 1, 0, 0), True);
       Q := Q * QuatFromAxisAngle(Vector4(1, 0, 0, WorkingModel.BaseRotation.X));
@@ -351,49 +348,49 @@ end;
 
 procedure TSpriteControlPanel.DoRotateXPlus(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     WorkingModel.BaseRotation.X := WrapRadians(WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateXMinus(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     WorkingModel.BaseRotation.X := WrapRadians(WorkingModel.BaseRotation.X - ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateYPlus(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
       WorkingModel.BaseRotation.Y := WrapRadians(WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateYMinus(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     WorkingModel.BaseRotation.Y := WrapRadians(WorkingModel.BaseRotation.Y - ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateZPlus(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
       WorkingModel.BaseRotation.Z := WrapRadians(WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateZMinus(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     WorkingModel.BaseRotation.Z := WrapRadians(WorkingModel.BaseRotation.Z - ((2 * Pi) / DirectionCount));
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.UseModelSpotsClick(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       UseModelSpots := CtlLocalLightsChk.Checked;
 
@@ -404,7 +401,7 @@ end;
 
 procedure TSpriteControlPanel.DoSpriteWidthChange(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       SpriteWidth := CtlSpriteWidthISE.Value;
       Resize;
@@ -413,7 +410,7 @@ end;
 
 procedure TSpriteControlPanel.DoSpriteHeightChange(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       SpriteHeight := CtlSpriteHeightISE.Value;
       Resize;
@@ -422,19 +419,19 @@ end;
 
 procedure TSpriteControlPanel.DoDirectionsChange(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     DirectionCount := CtlDirectionsISE.Value;
 end;
 
 procedure TSpriteControlPanel.DoFramesChange(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     FrameCount := CtlFramesISE.Value;
 end;
 
 procedure TSpriteControlPanel.UseTransparencyChange(Sender: TObject);
 begin
-  with Parent as TCastleApp do
+  with Owner as TCastleApp do
     begin
       UseTransparency := CtlTransparencyChk.Checked;
 
@@ -448,9 +445,27 @@ end;
 constructor TSpriteControlPanel.Create(AOwner: TComponent);
 begin
   inherited;
+end;
 
-  FullSize := True;
+constructor TSpriteControlPanel.Create(AOwner: TComponent; AWidth: Single; APageControl: TCastlePageControl);
+begin
+  Create(AOwner);
+
+  Width := AWidth;
+  PageControl := APageControl;
   LoadOrentationLayout;
+end;
+
+procedure TSpriteControlPanel.Resize;
+begin
+  inherited;
+  ExtResize;
+end;
+
+procedure TSpriteControlPanel.ExtResize;
+begin
+  Height := PageControl.Height;
+  Width := PageControl.Width;
 end;
 
 end.

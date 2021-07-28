@@ -20,7 +20,7 @@ uses
   CastleTextureImages, CastleCompositeImage, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, MiscFunctions, ControlPanelControls,
-  CastlePageControl;
+  CastlePageControl, SpriteControlPanel;
 
 type
   { TControlPanel }
@@ -30,6 +30,7 @@ type
     constructor Create(AOwner: TComponent; const AWidth: Single);
     procedure Resize; override;
   private
+    SpritePanel: TSpriteControlPanel;
     TopSectionHeight: Single;
     TopSection: TCastleUserInterface;
     CtlGrabSCreenBtn: TCastleButton;
@@ -97,10 +98,10 @@ begin
   BtnImageScale := (BtnHeight / 64) * BtnFontScale;
   TopSectionHeight := BtnHeight + (2 * BtnMargin);
 
-  Width := AWidth;
-  Height := ParentRect.Height;
+  Width := AWidth - 2;
+  Height := ParentRect.Height - 2;
 
-  PanelWidth := AWidth;
+  PanelWidth := AWidth - 2;
   Anchor(hpRight);
   Anchor(vpTop);
   BorderColor := White;
@@ -129,11 +130,13 @@ begin
   TabTest.VerticalAnchorParent := vpTop;
   TabTest.VerticalAnchorSelf := vpTop;
   TabTest.VerticalAnchorDelta := -TopSectionHeight;
-  TabTest.Border.AllSides := 1;
-  TabTest.BorderColor := Blue;
+//  TabTest.Border.AllSides := 1;
+//  TabTest.BorderColor := Blue;
   Self.InsertFront(TabTest);
 
-  TabTest.AddTab('Orientation', 'castle-data:/icons/orientation.png');
+  SpritePanel := TSpriteControlPanel.Create(AOwner, AWidth, TabTest);
+
+  TabTest.AddTab('Orientation', 'castle-data:/icons/orientation.png', SpritePanel);
   TabTest.AddTab('Position', 'castle-data:/icons/position.png');
   TabTest.AddTab('Define Frames', 'castle-data:/icons/record.png');
 
@@ -152,16 +155,18 @@ procedure TControlPanel.Resize;
 begin
   inherited;
 
-  Height := ParentRect.Height;
+  Height := ParentRect.Height - 2;
 
   TopSection.Height := TopSectionHeight;
   TopSection.Width := PanelWidth;
-  TopSection.Border.AllSides := 1;
-  TopSection.BorderColor := Red;
+//  TopSection.Border.AllSides := 1;
+//  TopSection.BorderColor := Red;
 
   TabTest.Height := Height - TopSectionHeight;
   TabTest.Width := PanelWidth;
+
   TabTest.ExtResize;
+  SpritePanel.ExtResize;
 
   WriteLnLog('Height : ' + FloatToStr(Height));
   WriteLnLog('TopSection.Height : ' + FloatToStr(TopSection.Height));
