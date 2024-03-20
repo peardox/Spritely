@@ -18,7 +18,7 @@ uses
   CastleViewport, CastleCameras, CastleProjection,
   X3DNodes, X3DFields, X3DTIme, CastleURIUtils,
   CastleImages, CastleGLImages, CastleRectangles,
-  CastleTextureImages, CastleCompositeImage, CastleLog,
+  CastleTextureImages, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, Overlays, MiscFunctions,
   CastleBoxes, ControlPanel,
@@ -350,7 +350,7 @@ begin
     Viewport.Transparent := True
   else
     Viewport.BackgroundColor := Vector4(1,1,1,1);
-  Viewport.NavigationType := ntNone;
+//  Viewport.NavigationType := ntNone;
   Viewport.AssignDefaultCamera;
   Viewport.Width := StateContainer.Width;
   Viewport.Height := StateContainer.Height;
@@ -679,6 +679,7 @@ var
   ViewportRect: TRectangle;
   Image: TDrawableImage;
   BackImage: TRGBAlphaImage;
+  fCamera: TCastleCamera;
 begin
   SourceViewport := nil;
 
@@ -712,29 +713,33 @@ begin
             end;
 
           SourceViewport.Setup2D;
-          SourceViewport.Camera.ProjectionType := Viewport.Camera.ProjectionType;
-          SourceViewport.Camera.Orthographic.Origin := Viewport.Camera.Orthographic.Origin;
-          SourceViewport.Camera.Up := Viewport.Camera.Up;
-          SourceViewport.Camera.Direction := Viewport.Camera.Direction;
-          SourceViewport.Camera.Position  := Viewport.Camera.Position;
+          fCamera := TCastleCamera.Create(Self);
 
-          if Viewport.Camera.Orthographic.Stretch then
+          fCamera.ProjectionType := Viewport.Camera.ProjectionType;
+          fCamera.Orthographic.Origin := Viewport.Camera.Orthographic.Origin;
+          fCamera.Up := Viewport.Camera.Up;
+          fCamera.Direction := Viewport.Camera.Direction;
+          fCamera.Position  := Viewport.Camera.Position;
+
+          if fCamera.Orthographic.Stretch then
             begin
-              SourceViewport.Camera.Orthographic.Stretch := True;
-              SourceViewport.Camera.Orthographic.Width := SourceViewport.EffectiveWidth / StretchMultiplier;
-              SourceViewport.Camera.Orthographic.Height := SourceViewport.EffectiveHeight;
+              fCamera.Orthographic.Stretch := True;
+              fCamera.Orthographic.Width := SourceViewport.EffectiveWidth / StretchMultiplier;
+              fCamera.Orthographic.Height := SourceViewport.EffectiveHeight;
             end;
 
 
-          SourceViewport.Camera.Orthographic.Scale := (2 * BoundRadius) /
+          fCamera.Orthographic.Scale := (2 * BoundRadius) /
           (Min(SourceViewport.EffectiveWidth, SourceViewport.EffectiveHeight) * iScaleMultiplier);
 
 //          SourceViewport.Camera.Orthographic.Scale := Viewport.Camera.Orthographic.Scale;
 
           WriteLnLog(FloatToStr(iScale) + ' vs ' + FloatToStr(WorkingModel.LockedScale));
 
-          SourceViewport.Items := ViewPort.Items;
-//          GrabStage.Add(GrabScene);
+//          SourceViewport.Items := ViewPort.Items;
+          SourceViewport.Items.Add(fCamera);
+          GrabStage.Add(GrabScene);
+          SourceViewport.Items.Add(GrabStage);
 //          SourceViewport.Items.MainScene := GrabStage;
 
           ViewportRect := Rectangle(0, 0, TextureWidth, TextureHeight);

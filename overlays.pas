@@ -17,7 +17,7 @@ uses
   CastleViewport, CastleCameras, CastleProjection,
   X3DNodes, X3DFields, X3DTIme, CastleNotifications,
   CastleImages, CastleGLImages, CastleRectangles, CastleQuaternions,
-  CastleTextureImages, CastleCompositeImage, CastleLog,
+  CastleTextureImages, CastleLog,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, MiscFunctions;
 

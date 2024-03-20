@@ -12,7 +12,7 @@ uses
   CastleViewport, CastleCameras, CastleProjection,
   X3DNodes, X3DFields, X3DTIme, X3DLoad, CastleBoxes,
   CastleImages, CastleGLImages, CastleDebugTransform,
-  CastleTextureImages, CastleCompositeImage, CastleClassUtils,
+  CastleTextureImages, CastleClassUtils,
   CastleLog, CastleTimeUtils, CastleRectangles, CastleRenderOptions,
   CastleQuaternions, AniTakeUtils, MiscFunctions;
 
@@ -35,8 +35,8 @@ type
       IsHidden: Boolean;
       fParentAnim: TAnimationInfo;
       fIsMapped: Boolean;
-      procedure ReceivedIsActive(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
-      procedure ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
+      procedure ReceivedIsActive(const Event: TX3DEvent; const Value: TX3DField; const Time: TX3DTime);
+      procedure ReceivedElapsedTime(const Event: TX3DEvent; const Value: TX3DField; const Time: TX3DTime);
     public
       constructor Create(AOwner: TComponent); override;
       constructor Create(AOwner: TComponent; const AName: String; const ASensor: TTimeSensorNode; const AIsLooped: Boolean = True);
@@ -170,7 +170,7 @@ begin
   WriteLnLog(AnimName + ' - ' + FloatToStr(AnimStart) + ' - ' + FloatToStr(AnimStop));
 end;
 
-procedure TAnimationInfo.ReceivedIsActive(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
+procedure TAnimationInfo.ReceivedIsActive(const Event: TX3DEvent; const Value: TX3DField; const Time: TX3DTime);
 var
   Val: Boolean;
 begin
@@ -196,7 +196,7 @@ begin
   {$endif}
 end;
 
-procedure TAnimationInfo.ReceivedElapsedTime(Event: TX3DEvent; Value: TX3DField; const Time: TX3DTime);
+procedure TAnimationInfo.ReceivedElapsedTime(const Event: TX3DEvent; const Value: TX3DField; const Time: TX3DTime);
 var
   Val: Double;
 begin

@@ -17,7 +17,7 @@ uses
   CastleViewport, CastleCameras, CastleProjection,
   X3DNodes, X3DFields, X3DTIme, CastleNotifications,
   CastleImages, CastleGLImages, CastleRectangles, CastleQuaternions,
-  CastleTextureImages, CastleCompositeImage, CastleLog, CastlePageControl,
+  CastleTextureImages, CastleLog, CastlePageControl,
   CastleApplicationProperties, CastleTimeUtils, CastleKeysMouse,
   CastleGLUtils, multimodel, staging, MiscFunctions, ControlPanelControls;
 
@@ -354,42 +354,42 @@ end;
 procedure TSpriteControlPanel.DoRotateXPlus(Sender: TObject);
 begin
   with Owner as TCastleApp do
-    WorkingModel.BaseRotation.X := WrapRadians(WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount));
+    WorkingModel.BaseRotation := Vector3(WrapRadians(WorkingModel.BaseRotation.X + ((2 * Pi) / DirectionCount)), WorkingModel.BaseRotation.Y, WorkingModel.BaseRotation.Z);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateXMinus(Sender: TObject);
 begin
   with Owner as TCastleApp do
-    WorkingModel.BaseRotation.X := WrapRadians(WorkingModel.BaseRotation.X - ((2 * Pi) / DirectionCount));
+    WorkingModel.BaseRotation := Vector3(WrapRadians(WorkingModel.BaseRotation.X - ((2 * Pi) / DirectionCount)), WorkingModel.BaseRotation.Y, WorkingModel.BaseRotation.Z);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateYPlus(Sender: TObject);
 begin
   with Owner as TCastleApp do
-      WorkingModel.BaseRotation.Y := WrapRadians(WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount));
+    WorkingModel.BaseRotation := Vector3(WorkingModel.BaseRotation.X, WrapRadians(WorkingModel.BaseRotation.Y + ((2 * Pi) / DirectionCount)), WorkingModel.BaseRotation.Z);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateYMinus(Sender: TObject);
 begin
   with Owner as TCastleApp do
-    WorkingModel.BaseRotation.Y := WrapRadians(WorkingModel.BaseRotation.Y - ((2 * Pi) / DirectionCount));
+    WorkingModel.BaseRotation := Vector3(WorkingModel.BaseRotation.X, WrapRadians(WorkingModel.BaseRotation.Y - ((2 * Pi) / DirectionCount)), WorkingModel.BaseRotation.Z);
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateZPlus(Sender: TObject);
 begin
   with Owner as TCastleApp do
-      WorkingModel.BaseRotation.Z := WrapRadians(WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount));
+    WorkingModel.BaseRotation := Vector3(WorkingModel.BaseRotation.X, WorkingModel.BaseRotation.Y, WrapRadians(WorkingModel.BaseRotation.Z + ((2 * Pi) / DirectionCount)));
   UpdateView;
 end;
 
 procedure TSpriteControlPanel.DoRotateZMinus(Sender: TObject);
 begin
   with Owner as TCastleApp do
-    WorkingModel.BaseRotation.Z := WrapRadians(WorkingModel.BaseRotation.Z - ((2 * Pi) / DirectionCount));
+    WorkingModel.BaseRotation := Vector3(WorkingModel.BaseRotation.X, WorkingModel.BaseRotation.Y, WrapRadians(WorkingModel.BaseRotation.Z - ((2 * Pi) / DirectionCount)));
   UpdateView;
 end;
 

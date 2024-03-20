@@ -126,7 +126,7 @@ begin
     ProcessEvents := True;
     RenderOptions.PhongShading := true;
     RenderOptions.ShadowSampling := ssSimple;
-    RenderOptions.BlendingSort := bs2D;
+//    RenderOptions.BlendingSort := sort2D;
 
   except
     on E : Exception do
